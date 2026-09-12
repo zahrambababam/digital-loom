@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Loom — a carpet-weaving sketchpad by region</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Karla:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #201a1c;
+    --bg-deep: #171213;
+    --panel: #2a2224;
+    --panel-line: #3c3235;
+    --wool: #e4d6b8;
+    --wool-dim: #a89a7c;
+    --ink: #f3ead9;
+    --ink-dim: #b8a892;
+    --gold: #c9a24b;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Karla', sans-serif;
+    min-height:100vh;
+  }
+  .wrap{
+    max-width:1180px;
+    margin:0 auto;
+    padding:36px 24px 60px;
+  }
+  header{
+    margin-bottom:28px;
+    border-bottom:1px solid var(--panel-line);
+    padding-bottom:22px;
+  }
+  h1{
+    font-family:'Cormorant Garamond', serif;
+    font-weight:600;
+    font-size:44px;
+    margin:0 0 8px;
+    letter-spacing:0.3px;
+  }
+  header p{
+    margin:0;
+    color:var(--ink-dim);
+    font-size:15px;
+    max-width:62ch;
+    line-height:1.55;
+  }
+  .layout{
+    display:grid;
+    grid-template-columns:220px 1fr;
+    gap:28px;
+    align-items:start;
+  }
+  @media (max-width:820px){
+    .layout{grid-template-columns:1fr;}
+  }
+
+  /* region rail */
+  .rail{position:sticky; top:20px;}
+  .zone{margin-bottom:18px;}
+  .zone h3{
+    font-size:11px;
+    letter-spacing:0.06em;
+    color:var(--wool-dim);
+    margin:0 0 6px;
+    font-weight:700;
+    text-transform:lowercase;
+  }
+  .region-btn{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    width:100%;
+    text-align:left;
+    background:none;
+    border:none;
+    border-left:2px solid transparent;
+    color:var(--ink-dim);
+    font-family:'Karla',sans-serif;
+    font-size:14.5px;
+    padding:6px 0 6px 10px;
+    cursor:pointer;
+    transition:color .15s, border-color .15s;
+  }
+  .region-btn:hover{color:var(--ink);}
+  .region-btn.active{
+    color:var(--ink);
+    border-left-color:var(--gold);
+    font-weight:700;
+  }
+  .dot{
+    width:9px;height:9px;border-radius:50%;
+    flex:none;
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,0.25);
+  }
+  .region-btn .sub{
+    display:block;
+    font-size:11px;
+    color:var(--wool-dim);
+    font-weight:400;
+  }
+
+  /* toolbar */
+  .toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:18px;
+    align-items:center;
+    background:var(--panel);
+    border:1px solid var(--panel-line);
+    border-radius:6px;
+    padding:14px 16px;
+    margin-bottom:0;
+  }
+  .tool-group{display:flex; align-items:center; gap:8px;}
+  .tool-label{font-size:11px; color:var(--wool-dim); letter-spacing:.04em; margin-right:2px;}
+  .mode-btn{
+    background:transparent;
+    border:1px solid var(--panel-line);
+    color:var(--ink-dim);
+    padding:6px 12px;
+    border-radius:4px;
+    font-family:'Karla',sans-serif;
+    font-size:13px;
+    cursor:pointer;
+  }
+  .mode-btn.active{
+    background:var(--gold);
+    color:#231a0e;
+    border-color:var(--gold);
+    font-weight:700;
+  }
+  .swatch{
+    width:24px;height:24px;
+    border-radius:50%;
+    border:2px solid rgba(255,255,255,0.15);
+    cursor:pointer;
+    padding:0;
+  }
+  .swatch.active{border-color:var(--ink);}
+  .motif-btn{
+    background:var(--bg-deep);
+    border:1px solid var(--panel-line);
+    border-radius:4px;
+    padding:3px;
+    cursor:pointer;
+  }
+  .motif-btn.active{border-color:var(--gold);}
+  .motif-btn canvas{display:block;}
+  .ghost-btn{
+    margin-left:auto;
+    background:none;
+    border:1px solid var(--panel-line);
+    color:var(--ink-dim);
+    padding:7px 12px;
+    border-radius:4px;
+    font-family:'Karla',sans-serif;
+    font-size:13px;
+    cursor:pointer;
+  }
+  .ghost-btn:hover{color:var(--ink); border-color:var(--wool-dim);}
+  .beat-panel{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-top:14px;
+  }
+  .beat-btn{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:var(--gold);
+    color:#231a0e;
+    border:none;
+    border-radius:5px;
+    padding:9px 16px;
+    font-family:'Karla',sans-serif;
+    font-size:13.5px;
+    font-weight:700;
+    cursor:pointer;
+    transition:transform .08s;
+  }
+  .beat-btn:active{transform:scale(0.94);}
+  .beat-status{font-size:12px; color:var(--wool-dim);}
+
+  /* loom */
+  .loom-frame{
+    margin-top:16px;
+    background:var(--bg-deep);
+    border-radius:6px;
+    padding:0 18px;
+  }
+  .fringe{
+    height:13px;
+    background-image:repeating-linear-gradient(90deg, var(--wool) 0 2px, transparent 2px 6px);
+    opacity:0.55;
+  }
+  #loomWrap{
+    width:100%;
+    overflow:hidden;
+    touch-action:none;
+    cursor:crosshair;
+  }
+  #loom{display:block; width:100%;}
+
+  .caption{
+    font-size:12px;
+    color:var(--wool-dim);
+    padding:10px 2px 6px;
+    line-height:1.5;
+  }
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:18px;
+    padding:4px 2px 16px;
+    border-bottom:1px solid var(--panel-line);
+    margin-bottom:4px;
+  }
+  .legend-item{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:12px;
+    color:var(--ink-dim);
+  }
+  .legend-item strong{color:var(--ink); font-weight:700;}
+
+  /* info card */
+  .spec{
+    margin-top:22px;
+    background:var(--panel);
+    border:1px solid var(--panel-line);
+    border-radius:6px;
+    padding:20px 22px;
+  }
+  .spec h2{
+    font-family:'Cormorant Garamond', serif;
+    font-size:26px;
+    font-weight:600;
+    margin:0 0 3px;
+  }
+  .spec .zone-tag{
+    font-size:12px;
+    color:var(--gold);
+    margin-bottom:14px;
+    display:block;
+  }
+  .spec p.blurb{
+    font-size:14.5px;
+    line-height:1.6;
+    color:var(--ink);
+    margin:0 0 16px;
+    max-width:66ch;
+  }
+  .ref-link{
+    display:inline-block;
+    font-size:12.5px;
+    color:var(--gold);
+    text-decoration:none;
+    border-bottom:1px solid rgba(201,162,75,0.4);
+    margin-bottom:16px;
+  }
+  .ref-link:hover{border-bottom-color:var(--gold);}
+  .sources{
+    border-top:1px solid var(--panel-line);
+    padding-top:14px;
+    margin-top:16px;
+  }
+  .sources h3{
+    font-size:11px;
+    letter-spacing:.04em;
+    color:var(--wool-dim);
+    margin:0 0 8px;
+    font-weight:700;
+    text-transform:lowercase;
+  }
+  .sources ul{margin:0; padding:0; list-style:none;}
+  .sources li{
+    font-size:12.5px;
+    line-height:1.7;
+  }
+  .sources li a{color:var(--gold); text-decoration:none; border-bottom:1px solid rgba(201,162,75,0.35);}
+  .sources li a:hover{border-bottom-color:var(--gold);}
+  .sources li.unlinked{color:var(--wool-dim); font-style:italic;}
+  .fields{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+    gap:14px 22px;
+    border-top:1px solid var(--panel-line);
+    padding-top:14px;
+  }
+  .field dt{
+    font-size:10.5px;
+    color:var(--wool-dim);
+    letter-spacing:.04em;
+    margin-bottom:3px;
+  }
+  .field dd{
+    margin:0;
+    font-size:13.5px;
+    color:var(--ink);
+    line-height:1.4;
+  }
+  .note{
+    margin-top:14px;
+    font-size:11.5px;
+    color:var(--wool-dim);
+    border-top:1px solid var(--panel-line);
+    padding-top:10px;
+    line-height:1.5;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>The Loom</h1>
+    <p>Pick a region of Iran, load its documented palette and motif vocabulary, and start setting knots. Each region carries its own colors, knot structure and layout — drawn from a handful of rug-history sources as a starting scaffold, not a finished dataset.</p>
+  </header>
+
+  <div class="layout">
+    <nav class="rail" id="rail"></nav>
+
+    <main>
+      <div class="toolbar">
+        <div class="tool-group">
+          <span class="tool-label">mode</span>
+          <button class="mode-btn" data-mode="knot">Knot</button>
+          <button class="mode-btn" data-mode="stamp">Stamp</button>
+          <button class="mode-btn" data-mode="erase">Erase</button>
+        </div>
+        <div class="tool-group" id="paletteGroup">
+          <span class="tool-label">color</span>
+        </div>
+        <div class="tool-group" id="motifGroup" style="display:none;">
+          <span class="tool-label">motif</span>
+        </div>
+        <button class="ghost-btn" id="clearBtn">Clear</button>
+        <button class="ghost-btn" id="saveBtn">Save PNG</button>
+      </div>
+
+      <div class="loom-frame">
+        <div class="fringe"></div>
+        <div id="loomWrap"><canvas id="loom"></canvas></div>
+        <div class="fringe"></div>
+      </div>
+
+      <div class="beat-panel">
+        <button class="beat-btn" id="beatBtn">
+          <svg width="20" height="20" viewBox="0 0 20 20"><path d="M4 2v16M8 2v16M12 2v16M16 2v16" stroke="#231a0e" stroke-width="1.6"/><rect x="2" y="1" width="16" height="4" rx="1" fill="#231a0e"/></svg>
+          <span id="beatLabel">Beat with comb</span>
+        </button>
+        <span class="beat-status" id="beatStatus"></span>
+      </div>
+      <p class="caption">Drag in Knot mode to lay a run of knots; in Stamp mode, click to set a whole motif — a motif is still just a cluster of individually tied knots. The small mark on each knot (a bar vs. an offset tick) shows symmetric vs. asymmetric structure for whichever region was active when it was tied. The stamp set changes per region and per style family: curvilinear court regions get rounded, lobed shapes; geometric village and nomadic regions get hard-stepped ones built from the same knot grid at a coarser scale — that stepping is how real curves get approximated in a hand-knotted rug too, not a simplification unique to this tool. Newly tied knots sit loose with visible gaps until you beat that row — the Beat button uses whichever tool the selected region actually uses to pack a row tight before the next one starts.</p>
+      <div class="legend">
+        <div class="legend-item">
+          <svg width="34" height="22" viewBox="0 0 34 22"><g stroke="#e4d6b8" stroke-width="1.4" opacity="0.7"><line x1="7" y1="0" x2="7" y2="22"/><line x1="17" y1="0" x2="17" y2="22"/><line x1="27" y1="0" x2="27" y2="22"/></g></svg>
+          <span><strong>Warp</strong> — the loom's bare threads, never colored</span>
+        </div>
+        <div class="legend-item">
+          <svg width="34" height="22" viewBox="0 0 34 22"><polyline points="1,7 7,15 13,7 19,15 25,7 31,15" fill="none" stroke="#e4d6b8" stroke-width="2"/></svg>
+          <span><strong>Weft</strong> — the over-under pass that locks a finished row</span>
+        </div>
+        <div class="legend-item">
+          <svg width="34" height="22" viewBox="0 0 34 22"><rect x="6" y="3" width="16" height="16" rx="2" fill="#c9a24b"/><rect x="16" y="4" width="2.5" height="12" fill="rgba(0,0,0,0.3)"/></svg>
+          <span><strong>Knot</strong> — one hand-tied loop; this is the entire pattern</span>
+        </div>
+      </div>
+
+      <section class="spec" id="spec"></section>
+    </main>
+  </div>
+</div>
+
+<script>
+/* ---------- data ---------- */
+const REGIONS = [
+  { id:'tabriz', name:'Tabriz', zone:'Northwest — Azerbaijan', kind:'City workshop',
+    knot:'Symmetric (Turkish/Ghiordes) — see note below', raj:'~45–55 raj (fine, indicative)',
+    material:'Wool pile on cotton foundation, often double-wefted; fine pieces in silk',
+    dye:'Historically natural (madder, walnut); some 19th-c. aniline synthetics',
+    layout:'Lechak-Toranj and Mihrabi medallions, but also pictorial Shikargah (hunting scene) and Chahar-Bagh (four seasons) designs thick with animals and figures',
+    loom:'Fixed vertical workshop loom',
+    family:'Curvilinear court style, with a pictorial/narrative streak',
+    motifs:['toranj_fine','lechak','animal_fine'],
+    palette:['#7A2E28','#C9A24B','#A3352B','#EDE0C4','#2E3B49'],
+    blurb:'Tabriz has an unusually wide range for a single city — curvilinear medallion florals alongside hunting scenes and four-seasons pictorials full of animals and figures — tied with the tight, upright Turkish knot rather than the Persian knot most other Persian cities use.',
+    beatTool:'comb',
+    sources:[
+      {label:'Knot type — symmetric/Turkish (majority view)', url:'https://losangeleshomeofrugs.com/blog/the-art-of-tabriz-rugs-a-masterpiece-of-persian-weaving/'},
+      {label:'Knot type — asymmetric/Persian (minority view)', url:'https://alrug.com/blogs/rug-digest/how-to-identify-tabriz-rugs'},
+      {label:'Pictorial hunting-scene rugs — image-verified, no single article source', url:''}
+    ],
+  },
+  { id:'heriz', name:'Heriz', zone:'Northwest — Azerbaijan', kind:'Village',
+    knot:'Asymmetric (Persian)', raj:'~24–30 raj (village, indicative)',
+    material:'Wool pile, cotton foundation',
+    dye:'Mixed natural and early synthetic, depending on age',
+    layout:'Toranj — single large angular medallion',
+    loom:'Fixed vertical village loom',
+    family:'Bold geometric, large-block style',
+    motifs:['toranj_geo'],
+    palette:['#8C2E22','#1F3A5C','#EDE0C4','#B5622F','#3A2A1E'],
+    blurb:'Heriz weavers favor one oversized medallion drawn in bold, angular lines on a brick-red field, with navy and ivory carrying the border.',
+    beatTool:'comb',
+    sources:[
+      {label:'Regional style guide — Heriz medallion drawing', url:'https://rugtherock.com/blogs/magazine/types-of-persian-rugs'},
+      {label:'Regional style guide — Heriz construction', url:'https://www.mattcamron.com/rug-guides/persian-rugs'}
+    ],
+  },
+  { id:'zanjan', name:'Zanjan', zone:'Northwest', kind:'Village, tribal-influenced',
+    knot:'Mixed — both Turkish and Persian knots by tribe', raj:'~26–32 raj (indicative)',
+    material:'Wool or cotton foundation, single-wefted at center',
+    dye:'Natural base tones with gray, green, brown, camel and blue accents',
+    layout:'Afshan-style allover field with a central and secondary medallion',
+    loom:'Fixed vertical village loom',
+    family:'Bold geometric, village style',
+    motifs:['toranj_geo','star_geo','herati_geo'],
+    palette:['#8C2A2A','#243A5E','#EDE0C4','#5C6E4A','#8A6A3A'],
+    blurb:'Zanjan designs pair a central medallion with a smaller inner one, surrounded by star and flower-head motifs, birds, fish and paisley, in red and dark blue on ivory.',
+    beatTool:'comb',
+    sources:[
+      {label:'Zanjan motifs, palette and knot mix', url:'https://www.catalinarug.com/rug-encyclopedia/origins-of-rugs/part-2-types-of-persian-rugs/'}
+    ],
+  },
+  { id:'kerman', name:'Kerman', zone:'South-Central', kind:'City workshop',
+    knot:'Asymmetric (Persian)', raj:'~50–65 raj (fine, indicative)',
+    material:'Fine kork wool pile on cotton; some silk-and-wool',
+    dye:'Distinct master-dye recipes specific to Kerman workshops',
+    layout:'Mihrabi — curvilinear floral, vase and garden scenes',
+    loom:'Fixed vertical workshop loom',
+    family:'Curvilinear court style',
+    motifs:['gol_fine','toranj_fine'],
+    palette:['#C0546B','#4A6B8A','#EDE0C4','#7C8A5A','#3A2A2E'],
+    blurb:'Kerman is known for an unusually wide range of designs and color combinations, built on fine local kork wool and dye recipes specific to its master weavers.',
+    beatTool:'saber',
+    sources:[
+      {label:'Kerman design range and kork wool', url:'https://www.catalinarug.com/rug-encyclopedia/origins-of-rugs/part-2-types-of-persian-rugs/'},
+      {label:'Kerman’s saber-blade beating tool', url:'https://www.catalinarug.com/blog/persian-rugs-anatomy/'},
+      {label:'Saber-blade tool, second source', url:'https://mjrug.com/tools-used-in-weaving-a-persian-rug/'}
+    ],
+  },
+  { id:'esfahan', name:'Esfahan', zone:'Central', kind:'City workshop',
+    knot:'Asymmetric (Persian)', raj:'~55–70 raj (fine, indicative)',
+    material:'Wool and silk on cotton foundation',
+    dye:'Signature terracotta-crimson, historically from cochineal insect dye',
+    layout:'Lechak-Toranj / Mihrabi — refined curvilinear florals',
+    loom:'Fixed vertical workshop loom',
+    family:'Curvilinear court style',
+    motifs:['toranj_fine','lechak','gol_fine'],
+    palette:['#B5432C','#243A5E','#EDE0C4','#C9A24B','#5C2E28'],
+    blurb:'Esfahan work is defined by a distinctive terracotta-crimson accent historically drawn from cochineal dye, set into finely drawn medallion and floral fields.',
+    beatTool:'comb',
+    sources:[
+      {label:'Esfahan cochineal red and medallion florals', url:'https://www.mattcamron.com/rug-guides/persian-rugs'}
+    ],
+  },
+  { id:'bakshayesh', name:'Bakshayesh', zone:'Northwest — Azerbaijan', kind:'Village (among Iran\u2019s oldest weaving villages)',
+    knot:'Asymmetric (Persian)', raj:'~18–24 raj (coarser, large-format, indicative)',
+    material:'Wool',
+    dye:'Natural, muted and aged in tone',
+    layout:'Rustic, asymmetrical folk motifs rather than strict medallion symmetry',
+    loom:'Fixed vertical village loom',
+    family:'Bold geometric / folk style',
+    motifs:['boteh_geo','animal_geo'],
+    palette:['#E4D6B8','#CFC3A0','#8C7A52','#9E8A5A','#6B5A3A'],
+    blurb:'Bakshayesh produces oversized rugs in muted ivory, beige and warm metallic tones, with folkloric figures and loose, asymmetrical drawing rather than formal medallion symmetry.',
+    beatTool:'comb',
+    sources:[
+      {label:'Bakshayesh village weaving and palette', url:'https://therugdecor.com/blogs/blog/an-insight-into-types-of-persian-rugs'}
+    ],
+  },
+  { id:'mashhad', name:'Mashhad', zone:'Khorasan — Northeast', kind:'City workshop',
+    knot:'Asymmetric (Persian)', raj:'~40–50 raj (large format, indicative)',
+    material:'Wool pile on cotton foundation',
+    dye:'Mixed natural and synthetic depending on era',
+    layout:'Mihrabi — one oversized medallion on an elaborate floral field',
+    loom:'Fixed vertical workshop loom',
+    family:'Curvilinear court style',
+    motifs:['toranj_fine'],
+    palette:['#7A2530','#1F3A5C','#C9A24B','#EDE0C4','#3A2A2E'],
+    blurb:'Mashhad rugs are usually large, built around a single oversized medallion set into a dense, curvilinear floral field.',
+    beatTool:'comb',
+    sources:[
+      {label:'Mashhad medallion scale and knot range', url:'https://www.catalinarug.com/blog/beginners-guide-to-traditional-persian-rugs/'}
+    ],
+  },
+  { id:'qashqai', name:'Qashqai', zone:'Fars — South', kind:'Nomadic / tribal (also traded as "Shiraz")',
+    knot:'Symmetric (Turkish), varies by clan', raj:'~14–22 raj (hand-spun, indicative)',
+    material:'All-wool — pile, warp and weft',
+    dye:'Natural dyes historically: madder, indigo, safflower',
+    layout:'Afshan — allover geometric lattice, stacked diamond medallions, and scattered stylized animals (birds, goats, camels) rather than one formal medallion',
+    loom:'Portable horizontal ground loom',
+    family:'Bold geometric, nomadic style',
+    motifs:['toranj_geo','animal_geo','boteh_geo'],
+    palette:['#8C2A2A','#243A5E','#B5622F','#EDE0C4','#3A2A1E'],
+    blurb:'Qashqai weaving is nomadic: the weaver designs from memory rather than a workshop pattern, producing geometric diamond medallions and stylized animal silhouettes scattered across an allover field.',
+    beatTool:'comb',
+    sources:[
+      {label:'Tribal/nomadic geometric weaving overview', url:'https://stylebyemilyhenderson.com/the-ultimate-guide-to-persian-rugs-what-makes-them-so-dang-good-desirable-valuable'},
+      {label:'Stacked-diamond medallion — image-verified, no single article source', url:''}
+    ],
+  },
+  { id:'kashan', name:'Kashan', zone:'Central', kind:'City workshop (royal tradition)',
+    knot:'Asymmetric (Persian)', raj:'~45–70 raj (fine, indicative)',
+    material:'Wool or silk pile on cotton foundation',
+    dye:'Historically natural dyes; Kashan has a centuries-old dyeing tradition tied to the city',
+    layout:'Lechak-Toranj — quarter-medallions framing each corner around a central medallion; dense allover florals and weeping-willow motifs',
+    loom:'Fixed vertical workshop loom',
+    family:'Curvilinear court style',
+    motifs:['lechak','toranj_fine','willow'],
+    palette:['#7A1E22','#EDE0C4','#16213A','#C9A24B','#3A2A1E'],
+    blurb:'Kashan work is built on dense, all-over floral fields — weeping willows, teardrop medallions, quarter-medallions framing each corner — usually on a deep red field against ivory or midnight-blue borders.',
+    beatTool:'comb',
+    sources:[
+      {label:'Kashan red-field medallion and knot range', url:'https://www.catalinarug.com/blog/beginners-guide-to-traditional-persian-rugs/'},
+      {label:'Kashan grouped among core regional styles', url:'https://rugtherock.com/blogs/magazine/persian-rugs-vs-oriental-rugs'}
+    ],
+  },
+  { id:'qom', name:'Qom', zone:'Central', kind:'City workshop (silk)',
+    knot:'Asymmetric (Persian)', raj:'~60–90 raj (very fine silk, indicative)',
+    material:'Silk pile, sometimes wool-silk blend, on silk or cotton foundation',
+    dye:'Fine dyes chosen for how they catch light in silk',
+    layout:'Highly varied — tree-of-life, Shah-Abbasi florals, hunting scenes, vase designs, mehrabi arches and pictorial portraits, often borrowing from Isfahan, Tabriz and Kerman',
+    loom:'Fixed vertical workshop loom',
+    family:'Pictorial / narrative style',
+    motifs:['animal_fine','gol_fine','toranj_fine'],
+    palette:['#0E7C86','#8C1F3B','#C9A24B','#EDE0C4','#1F3A5C'],
+    blurb:'Qom weavers work almost entirely in silk and draw on a wide range of borrowed designs — tree-of-life scenes, hunting tableaux, vase and arch motifs — in saturated jewel tones that read differently in silk than in wool.',
+    beatTool:'spike',
+    sources:[
+      {label:'Qom silk designs — tree of life, hunting, vase, mehrabi', url:'https://www.rugman.com/carpet-design/qum-rugs/'},
+      {label:'Qom silk, jewel-tone palette', url:'https://jewelrugs.com/collections/persian-qum-rugs'},
+      {label:'Qom’s nail-tool compacting method', url:'https://mjrug.com/tools-used-in-weaving-a-persian-rug/'}
+    ],
+  },
+  { id:'turkmen', name:'Turkmen', zone:'Northeast — Turkmen Sahra', kind:'Nomadic / tribal',
+    knot:'Asymmetric (Persian/Senneh) for most groups', raj:'~16–24 raj (hand-spun, indicative)',
+    material:'Wool, largely on a wool foundation',
+    dye:'Natural dyes historically; madder-based reds dominate',
+    layout:'Repeating gol — an octagonal tribal emblem stamped in rows across the whole field, with no central medallion or floral border. Each Turkmen tribe has its own named gul (the Tekke gul is the best known: a quartered octagon with small hooked elements); this tool models one generic version, not the tribal variants',
+    loom:'Portable horizontal ground loom',
+    family:'Monochrome, red-dominated style',
+    motifs:['octagon'],
+    palette:['#6E1A1A','#8C2A2A','#1A1418','#EDE0C4','#2E2A2A'],
+    blurb:'Turkmen weaving is dominated almost entirely by shades of deep red, patterned with rows of a repeating gol — an octagonal tribal emblem — instead of a bordered medallion field. Every tribe (Tekke, Ersari, Salor, Saryk, Yomut) has its own named gul, so "Turkmen" here is a composite, not one specific tribal style.',
+    beatTool:'comb',
+    sources:[
+      {label:'Gul/gol motif — definition and tribal variation', url:'https://en.wikipedia.org/wiki/Gul_(design)'},
+      {label:'Turkoman red field and gul construction', url:'https://www.catalinarug.com/product-category/persian-rugs/turkoman/'},
+      {label:'Tekke gul — quartered, hooked design', url:'https://jewelrugs.com/collections/turkoman-rugs'}
+    ],
+  },
+  { id:'bidjar', name:'Bidjar', zone:'Kurdistan — Northwest', kind:'Village ("Iron Rugs of Persia")',
+    knot:'Asymmetric (Persian/Senneh), per most sources', raj:'~28–36 raj (very dense, indicative)',
+    material:'Wool pile on wool or cotton foundation, wet-woven',
+    dye:'Natural dyes historically; deep saturated tones typical of Kurdish weaving',
+    layout:'Herati and Mina Khani allover florals, or a single bold medallion — design varies, but the construction is the constant signature',
+    loom:'Fixed vertical village loom',
+    family:'Bold geometric / extreme-density village style',
+    motifs:['toranj_geo','herati_geo'],
+    palette:['#7A2020','#1F3550','#C9A24B','#EDE0C4','#3A2A1E'],
+    blurb:'Bidjar rugs are woven wet — the warp, weft and yarn are dampened through the whole process — then packed with a heavy nail-like spike instead of a comb, which is why finished Bidjars are so rigid they\u2019re nicknamed the "iron rugs of Persia."',
+    beatTool:'spike',
+    sources:[
+      {label:'Bidjar wet-weaving and nail-tool compacting', url:'https://www.catalinarug.com/blog/persian-rugs-anatomy/'},
+      {label:'Bidjar nail-shaped compacting tool, second source', url:'https://eramrugs.co.uk/blogs/news/process-and-weaving-techniques-of-persian-rugs'}
+    ],
+  },
+];
+
+const MOTIFS = [
+  { id:'toranj_fine', name:'Toranj — rounded medallion', rows:[
+    '....212....','..2111112..','.211111112.','.211111112.',
+    '21111111112','21111111112','21111111112','.211111112.',
+    '.211111112.','..2111112..','....212....' ]},
+  { id:'toranj_geo', name:'Toranj — stepped medallion', rows:[
+    '....2....','...212...','..21112..','.2111112.',
+    '211111112','.2111112.','..21112..','...212...','....2....' ]},
+  { id:'boteh_fine', name:'Boteh — curved paisley', rows:[
+    '.......2...','........2..','.......212.','......212..',
+    '.....21112.','....21112..','...2111112.','..2111112..',
+    '.211111112.','.211111112.','.211111112.' ]},
+  { id:'boteh_geo', name:'Boteh — hooked paisley', rows:[
+    '......2','....212','..21112','2111112','.21112.','..212..','...2...' ]},
+  { id:'gol_fine', name:'Gol-e Farang — rounded rosette', rows:[
+    '....2....','...212...','..21112..','.2111112.',
+    '211111112','.2111112.','..21112..','...212...','....2....' ]},
+  { id:'star_geo', name:'Star — Zanjan', rows:[
+    '..2.2..','.2.1.2.','2.111.2','.11111.','2.111.2','.2.1.2.','..2.2..' ]},
+  { id:'herati_geo', name:'Herati — fish/rosette unit', rows:[
+    '...2...','..212..','3.1112.','2111113','3.1112.','..212..','...2...' ]},
+  { id:'lechak', name:'Lechak — corner medallion', rows:[
+    '111111112','111111112','11111112.','1111112..',
+    '111112...','1112.....','112......','12.......','2........' ]},
+  { id:'willow', name:'Willow spray', rows:[
+    '....1....','...111...','..1.1.1..','.2..1..2.',
+    '...111...','..1.1.1..','.2..1..2.','1.......1','.1.....1.' ]},
+  { id:'octagon', name:'Gol — Turkmen emblem (quartered)', rows:[
+    '..222..','.21212.','2112112','2222222','2112112','.21212.','..222..' ]},
+  { id:'animal_fine', name:'Stag — pictorial (fine)', rows:[
+    '1.......1','.1..2..1.','..1.1.1..','...222...',
+    '..21112..','.2111112.','211111112','1.11.11.1','1.1...1.1' ]},
+  { id:'animal_geo', name:'Stag — tribal (block)', rows:[
+    '1.....1','.1...1.','..1.1..','...2...','..111..','.11111.','1111111' ]},
+];
+
+/* ---------- state ---------- */
+const COLS = 40, ROWS = 50;
+let current = REGIONS[0];
+let mode = 'knot';
+let activeColor = current.palette[0];
+let activeMotif = MOTIFS[0];
+let grid = makeGrid();
+let beatenRows = new Array(ROWS).fill(false);
+let beatAnim = null; // {row, start}
+let cell = 14;
+let painting = false;
+
+function makeGrid(){
+  return Array.from({length:ROWS}, () => Array(COLS).fill(null));
+}
+function knotFlag(region){
+  const k = region.knot.toLowerCase();
+  if(k.includes('asymmetric')) return 'asym';
+  if(k.includes('mixed')) return Math.random() < 0.5 ? 'sym' : 'asym';
+  return 'sym';
+}
+
+/* ---------- canvas ---------- */
+const canvas = document.getElementById('loom');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas(){
+  const w = document.getElementById('loomWrap').clientWidth;
+  cell = Math.max(7, Math.floor(w / COLS));
+  canvas.width = cell * COLS;
+  canvas.height = cell * ROWS;
+  canvas.style.height = (cell*ROWS) + 'px';
+  draw();
+}
+
+function roundRect(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+function draw(){
+  const now = performance.now();
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = '#171213';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  // warp: the loom's own vertical threads, always bare/uncolored — the knots
+  // and the weft below are tied and passed onto this fixed foundation.
+  ctx.strokeStyle = 'rgba(228,214,184,0.16)';
+  ctx.lineWidth = 1;
+  for(let c=0;c<=COLS;c++){
+    ctx.beginPath();
+    ctx.moveTo(c*cell+0.5,0);
+    ctx.lineTo(c*cell+0.5,canvas.height);
+    ctx.stroke();
+  }
+
+  // weft: after every row that has at least one knot tied, a weft thread is
+  // passed over-under across the alternated warp. It starts pale and loose;
+  // beating it (with the region's actual tool — comb, saber or spike) is
+  // what locks it tight, which is why it darkens and thickens once beaten.
+  for(let r=0;r<ROWS;r++){
+    if(!grid[r].some(Boolean)) continue;
+    const t = rowTightness(r, now);
+    const y = (r+1)*cell;
+    ctx.strokeStyle = 'rgba(228,214,184,'+(0.30+0.5*Math.min(t,1))+')';
+    ctx.lineWidth = Math.max(1, cell*(0.08+0.16*Math.min(t,1)));
+    ctx.beginPath();
+    for(let c=0;c<COLS;c++){
+      const xMid = c*cell + cell/2;
+      const over = c % 2 === 0;
+      ctx.moveTo(xMid - cell/2, y + (over ? -cell*0.12 : cell*0.12));
+      ctx.lineTo(xMid + cell/2, y + (over ? cell*0.12 : -cell*0.12));
+    }
+    ctx.stroke();
+  }
+
+  // knots: each one hand-tied around a pair of warp threads. Unbeaten knots
+  // sit loose with visible gaps; once the row is beaten they pack edge to edge.
+  for(let r=0;r<ROWS;r++){
+    const t = rowTightness(r, now);
+    for(let c=0;c<COLS;c++){
+      const k = grid[r][c];
+      if(k) drawKnot(c,r,k,t);
+    }
+  }
+}
+
+function rowTightness(r, now){
+  if(beatAnim && beatAnim.row===r){
+    const dur = 280;
+    const elapsed = now - beatAnim.start;
+    if(elapsed>=dur) return 1;
+    const p = elapsed/dur;
+    const overshoot = Math.sin(p*Math.PI) * 0.4 * (1-p);
+    return p + overshoot;
+  }
+  return beatenRows[r] ? 1 : 0;
+}
+
+function drawKnot(c,r,k,t){
+  const tt = Math.max(0, Math.min(1.25, t));
+  const pad = cell * (0.22 - 0.17*Math.min(tt,1)) - (tt>1 ? cell*0.05*(tt-1) : 0);
+  const x=c*cell, y=r*cell;
+  ctx.fillStyle = k.hex;
+  roundRect(x+pad, y+pad, cell-2*pad, cell-2*pad, Math.min(3,cell*(0.3-0.15*Math.min(tt,1))));
+  ctx.fill();
+  ctx.fillStyle = 'rgba(0,0,0,0.28)';
+  if(k.knot==='sym'){
+    ctx.fillRect(x+cell*0.18, y+cell*0.72, cell*0.64, Math.max(1,cell*0.12));
+  } else {
+    ctx.fillRect(x+cell*0.58, y+cell*0.16, Math.max(1,cell*0.16), cell*0.68);
+  }
+}
+
+function beatActiveRow(){
+  let target = -1;
+  for(let r=ROWS-1;r>=0;r--){
+    if(grid[r].some(Boolean) && !beatenRows[r]){ target = r; break; }
+  }
+  if(target===-1) return false;
+  beatAnim = {row:target, start:performance.now()};
+  playThump();
+  requestAnimationFrame(animateBeat);
+  return true;
+}
+
+function animateBeat(){
+  draw();
+  if(!beatAnim) return;
+  const elapsed = performance.now() - beatAnim.start;
+  if(elapsed < 280){
+    requestAnimationFrame(animateBeat);
+  } else {
+    beatenRows[beatAnim.row] = true;
+    beatAnim = null;
+    draw();
+    updateBeatUI();
+  }
+}
+
+function playThump(){
+  try{
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if(!Ctx) return;
+    const actx = new Ctx();
+    const osc = actx.createOscillator();
+    const gain = actx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(130, actx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(38, actx.currentTime+0.11);
+    gain.gain.setValueAtTime(0.16, actx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime+0.15);
+    osc.connect(gain); gain.connect(actx.destination);
+    osc.start(); osc.stop(actx.currentTime+0.16);
+  }catch(e){}
+}
+
+/* motif preview + stamping */
+function renderMotifToCanvas(cnv, motif, palette){
+  const size = motif.rows.length, px = size >= 11 ? 3 : 4;
+  cnv.width = size*px; cnv.height = size*px;
+  const c2 = cnv.getContext('2d');
+  c2.fillStyle = '#171213';
+  c2.fillRect(0,0,cnv.width,cnv.height);
+  for(let r=0;r<size;r++){
+    for(let cIdx=0;cIdx<size;cIdx++){
+      const ch = motif.rows[r][cIdx];
+      if(ch==='.') continue;
+      const colorIdx = ch==='1' ? 0 : ch==='2' ? 1 : 2;
+      c2.fillStyle = palette[colorIdx] || palette[1];
+      c2.fillRect(cIdx*px, r*px, px, px);
+    }
+  }
+}
+
+function stampMotif(rCenter, cCenter){
+  const size = activeMotif.rows.length, half = Math.floor(size/2);
+  const flag = knotFlag(current);
+  for(let r=0;r<size;r++){
+    for(let cIdx=0;cIdx<size;cIdx++){
+      const ch = activeMotif.rows[r][cIdx];
+      if(ch==='.') continue;
+      const gr = rCenter - half + r;
+      const gc = cCenter - half + cIdx;
+      if(gr<0||gr>=ROWS||gc<0||gc>=COLS) continue;
+      const colorIdx = ch==='1' ? 0 : ch==='2' ? 1 : 2;
+      grid[gr][gc] = { hex: current.palette[colorIdx] || current.palette[1], knot: flag };
+    }
+  }
+}
+
+/* ---------- interaction ---------- */
+function getCell(e){
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const x = (e.clientX - rect.left) * scaleX;
+  const y = (e.clientY - rect.top) * scaleY;
+  return { r: Math.floor(y/cell), c: Math.floor(x/cell) };
+}
+
+function paintAt(e){
+  const {r,c} = getCell(e);
+  if(r<0||r>=ROWS||c<0||c>=COLS) return;
+  if(mode==='knot'){
+    grid[r][c] = { hex: activeColor, knot: knotFlag(current) };
+  } else if(mode==='erase'){
+    grid[r][c] = null;
+  } else {
+    stampMotif(r,c);
+  }
+  draw();
+  updateBeatUI();
+}
+
+canvas.addEventListener('pointerdown', e => { painting = true; paintAt(e); });
+canvas.addEventListener('pointermove', e => { if(painting && mode!=='stamp') paintAt(e); });
+window.addEventListener('pointerup', () => painting = false);
+canvas.addEventListener('click', e => { if(mode==='stamp') paintAt(e); });
+
+/* ---------- UI build ---------- */
+const railEl = document.getElementById('rail');
+const zones = {};
+REGIONS.forEach(r => { (zones[r.zone] = zones[r.zone] || []).push(r); });
+Object.keys(zones).forEach(zoneName => {
+  const zoneDiv = document.createElement('div');
+  zoneDiv.className = 'zone';
+  const h = document.createElement('h3');
+  h.textContent = zoneName;
+  zoneDiv.appendChild(h);
+  zones[zoneName].forEach(region => {
+    const btn = document.createElement('button');
+    btn.className = 'region-btn' + (region.id===current.id ? ' active' : '');
+    btn.dataset.id = region.id;
+    btn.innerHTML = '<span class="dot" style="background:'+region.palette[0]+'"></span><span><span>'+region.name+'</span><span class="sub">'+region.kind+'</span></span>';
+    btn.addEventListener('click', () => selectRegion(region.id));
+    zoneDiv.appendChild(btn);
+  });
+  railEl.appendChild(zoneDiv);
+});
+
+const paletteGroup = document.getElementById('paletteGroup');
+const motifGroup = document.getElementById('motifGroup');
+
+function buildPalette(){
+  paletteGroup.querySelectorAll('.swatch').forEach(n=>n.remove());
+  current.palette.forEach((hex,i) => {
+    const b = document.createElement('button');
+    b.className = 'swatch' + (hex===activeColor ? ' active' : '');
+    b.style.background = hex;
+    b.addEventListener('click', () => {
+      activeColor = hex;
+      setMode('knot');
+      buildPalette();
+    });
+    paletteGroup.appendChild(b);
+  });
+}
+
+function buildMotifs(){
+  motifGroup.querySelectorAll('.motif-btn').forEach(n=>n.remove());
+  const available = MOTIFS.filter(m => current.motifs.includes(m.id));
+  if(!available.find(m => m.id===activeMotif.id)) activeMotif = available[0];
+  available.forEach(m => {
+    const b = document.createElement('button');
+    b.className = 'motif-btn' + (m.id===activeMotif.id ? ' active' : '');
+    b.title = m.name;
+    const cnv = document.createElement('canvas');
+    renderMotifToCanvas(cnv, m, current.palette);
+    b.appendChild(cnv);
+    b.addEventListener('click', () => {
+      activeMotif = m;
+      setMode('stamp');
+      buildMotifs();
+    });
+    motifGroup.appendChild(b);
+  });
+}
+
+function setMode(m){
+  mode = m;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode===m));
+  paletteGroup.style.display = m==='knot' ? 'flex' : 'none';
+  motifGroup.style.display = m==='stamp' ? 'flex' : 'none';
+}
+document.querySelectorAll('.mode-btn').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+
+function buildSpec(){
+  const s = document.getElementById('spec');
+  const refUrl = 'https://commons.wikimedia.org/w/index.php?search=' + encodeURIComponent(current.name+' Persian rug') + '&title=Special:MediaSearch&type=image';
+  const srcList = current.sources.map(src => src.url
+    ? '<li><a href="'+src.url+'" target="_blank" rel="noopener">'+src.label+' ↗</a></li>'
+    : '<li class="unlinked">'+src.label+'</li>'
+  ).join('');
+  s.innerHTML =
+    '<h2>'+current.name+'</h2>' +
+    '<span class="zone-tag">'+current.zone+' · '+current.kind+' · '+current.family+'</span>' +
+    '<p class="blurb">'+current.blurb+'</p>' +
+    '<a class="ref-link" href="'+refUrl+'" target="_blank" rel="noopener">See real '+current.name+' rugs on Wikimedia Commons ↗</a>' +
+    '<dl class="fields">' +
+      field('origin_region', current.name+' ('+current.zone+')') +
+      field('knot_type', current.knot) +
+      field('density_raj', current.raj) +
+      field('warp_weft_material', current.material) +
+      field('dye_type', current.dye) +
+      field('primary_motif_layout', current.layout) +
+      field('loom_type', current.loom) +
+    '</dl>' +
+    '<div class="sources"><h3>Where this came from</h3><ul>'+srcList+
+      '<li><a href="https://www.catalinarug.com/blog/how-persian-oriental-rugs-are-made/" target="_blank" rel="noopener">General knot/weft/beating process ↗</a></li>'+
+    '</ul></div>' +
+    '<p class="note">Density (Raj) figures are indicative bands, not per-region counts pulled from a dataset — swap in real numbers from the Kaggle Iranian-carpet dataset if this needs to be rigorous. Motif stamps are stylized pixel abstractions built from the sources above, not redrawn from specific archival pieces — use the Wikimedia link to check what you\u2019re weaving against actual rugs. The four family labels (curvilinear court / pictorial-narrative / bold geometric / monochrome red) are a common way rug literature groups these regions, not one citable taxonomy. Where sources disagree (Tabriz\u2019s knot type is the clearest case), both views are listed above rather than picked silently.</p>';
+}
+function field(label, value){
+  return '<div class="field"><dt>'+label+'</dt><dd>'+value+'</dd></div>';
+}
+
+function selectRegion(id){
+  current = REGIONS.find(r => r.id===id);
+  activeColor = current.palette[0];
+  document.querySelectorAll('.region-btn').forEach(b => b.classList.toggle('active', b.dataset.id===id));
+  buildPalette();
+  buildMotifs();
+  buildSpec();
+  updateBeatUI();
+}
+
+const BEAT_TOOL_NAMES = {
+  comb: 'comb (kirkit/daffeh)',
+  saber: 'saber blade',
+  spike: 'iron spike'
+};
+function updateBeatUI(){
+  const label = document.getElementById('beatLabel');
+  const status = document.getElementById('beatStatus');
+  label.textContent = 'Beat with ' + (BEAT_TOOL_NAMES[current.beatTool] || 'comb');
+  const tiedCount = grid.reduce((n,row) => n + (row.some(Boolean) ? 1 : 0), 0);
+  if(tiedCount === 0){
+    status.textContent = 'Nothing tied yet';
+  } else {
+    const stillLoose = grid.reduce((n,row,r) => n + (row.some(Boolean) && !beatenRows[r] ? 1 : 0), 0);
+    status.textContent = stillLoose > 0 ? stillLoose + ' row' + (stillLoose===1?'':'s') + ' still loose' : 'All tied rows beaten tight';
+  }
+}
+
+document.getElementById('beatBtn').addEventListener('click', () => { beatActiveRow(); });
+
+document.getElementById('clearBtn').addEventListener('click', () => {
+  grid = makeGrid();
+  beatenRows = new Array(ROWS).fill(false);
+  beatAnim = null;
+  draw();
+  updateBeatUI();
+});
+document.getElementById('saveBtn').addEventListener('click', () => {
+  const link = document.createElement('a');
+  link.download = current.id + '-carpet.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+});
+
+/* ---------- init ---------- */
+buildPalette();
+buildMotifs();
+buildSpec();
+setMode('knot');
+updateBeatUI();
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+</script>
+</body>
+</html>
