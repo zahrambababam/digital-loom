@@ -1171,10 +1171,33 @@ document.getElementById('clearBtn').addEventListener('click', () => {
   updateBeatUI();
 });
 document.getElementById('saveBtn').addEventListener('click', () => {
-  const link = document.createElement('a');
-  link.download = current.id + '-carpet.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
+  const filename = current.id + '-carpet.png';
+  canvas.toBlob(async (blob) => {
+    if (!blob) return;
+    // Inside the Claude artifact host, a plain <a download> link is inert
+    // (the sandbox never grants that permission) — use the platform's own
+    // downloads capability there instead. Outside it (a plain file:// open,
+    // or any other browser), window.claude doesn't exist at all, so this
+    // falls straight through to the ordinary anchor-download path below.
+    if (window.claude && window.claude.use) {
+      try {
+        const downloads = await window.claude.use('downloads');
+        if (downloads) {
+          try {
+            await downloads.save({ filename, data: blob });
+          } catch (err) {
+            // viewer declined, rate-limited, etc. — no retry, no fallback prompt
+          }
+          return;
+        }
+      } catch (err) { /* fall through to the plain-browser path below */ }
+    }
+    const link = document.createElement('a');
+    link.download = filename;
+    link.href = URL.createObjectURL(blob);
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }, 'image/png');
 });
 
 /* ---------- init ---------- */
