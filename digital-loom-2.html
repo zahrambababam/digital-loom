@@ -455,61 +455,65 @@ const REGIONS = [
     knot:'Asymmetric (Persian)', raj:'~55–70 raj (fine, indicative)',
     material:'Wool and silk on cotton foundation',
     dye:'Signature terracotta-crimson, historically from cochineal insect dye',
-    layout:'Lechak-Toranj / Mihrabi — refined curvilinear florals',
+    layout:'Lechak-Toranj / Mihrabi — the most rounded medallion of any region in this tool: circular, finely layered concentric rings compressed near the center and widening outward, framed by a broad curvilinear Shah-Abbasi palmette-and-vine border, several thin secondary guard bands, and a smooth quarter-round corner spandrel that mirrors the medallion’s own scrollwork exactly',
     loom:'Fixed vertical workshop loom',
     family:'Curvilinear court style',
-    motifs:['toranj_fine','lechak','gol_fine'],
+    motifs:['esfahan_medallion_fine','esfahan_border_fine','lechak','esfahan_palmette'],
     palette:['#B5432C','#243A5E','#EDE0C4','#C9A24B','#5C2E28'],
-    blurb:'Esfahan work is defined by a distinctive terracotta-crimson accent historically drawn from cochineal dye, set into finely drawn medallion and floral fields.',
+    blurb:'Esfahan work is defined by a distinctive terracotta-crimson accent historically drawn from cochineal dye, set into finely drawn medallion and floral fields. Of every region in this tool, Esfahan is the most purely rounded and polished — no angularity anywhere, down to a corner spandrel that mirrors the medallion’s curves exactly.',
     beatTool:'comb',
     sources:[
-      {label:'Esfahan cochineal red and medallion florals', url:'https://www.mattcamron.com/rug-guides/persian-rugs'}
+      {label:'Esfahan cochineal red and medallion florals', url:'https://www.mattcamron.com/rug-guides/persian-rugs'},
+      {label:'Motif detail (round layered medallion, Shah-Abbasi border, smooth quarter-round spandrel) — web research: 1stDibs listing photos + regional guides, no Kaggle coverage for this region', url:'https://www.1stdibs.com/buy/isfahan-persian-rug/'}
     ],
   },
   { id:'bakshayesh', name:'Bakshayesh', zone:'Northwest — Azerbaijan', kind:'Village (among Iran\u2019s oldest weaving villages)',
     knot:'Asymmetric (Persian)', raj:'~18–24 raj (coarser, large-format, indicative)',
     material:'Wool',
     dye:'Natural, muted and aged in tone',
-    layout:'Rustic, asymmetrical folk motifs rather than strict medallion symmetry',
+    layout:'Rustic, asymmetrical folk motifs rather than strict medallion symmetry — a large, loosely-drawn lozenge medallion is often deliberately placed off-center, since weavers favored dynamic asymmetry over perfect centering. Corner spandrels are frequently omitted entirely, left open to the border with no fill shape at all, which is why this tool doesn’t force one into existence for this region either. Some pieces fill the whole field with a repeating vertical column of stylized cypress trees instead of a medallion',
     loom:'Fixed vertical village loom',
     family:'Bold geometric / folk style',
-    motifs:['boteh_geo','animal_geo'],
+    motifs:['bakshayesh_medallion_geo','bakshayesh_wandering_border','bakshayesh_tree_column'],
     palette:['#E4D6B8','#CFC3A0','#8C7A52','#9E8A5A','#6B5A3A'],
-    blurb:'Bakshayesh produces oversized rugs in muted ivory, beige and warm metallic tones, with folkloric figures and loose, asymmetrical drawing rather than formal medallion symmetry.',
+    blurb:'Bakshayesh produces oversized rugs in muted ivory, beige and warm metallic tones, with folkloric figures and loose, asymmetrical drawing rather than formal medallion symmetry. There’s no corner-spandrel stamp for this region on purpose — many real Bakshayesh carpets simply don’t have one, leaving the field open right to the border.',
     beatTool:'comb',
     sources:[
-      {label:'Bakshayesh village weaving and palette', url:'https://therugdecor.com/blogs/blog/an-insight-into-types-of-persian-rugs'}
+      {label:'Bakshayesh village weaving and palette', url:'https://therugdecor.com/blogs/blog/an-insight-into-types-of-persian-rugs'},
+      {label:'Motif detail (off-center loose medallion, omitted spandrels, tree-column field) — web research: Wikimedia Commons carpet photos + Claremont Rug Co. guide, no Kaggle coverage for this region', url:'https://commons.wikimedia.org/wiki/Category:Bakshaish_carpets'}
     ],
   },
   { id:'mashhad', name:'Mashhad', zone:'Khorasan — Northeast', kind:'City workshop',
     knot:'Asymmetric (Persian)', raj:'~40–50 raj (large format, indicative)',
     material:'Wool pile on cotton foundation',
     dye:'Mixed natural and synthetic depending on era',
-    layout:'Mihrabi — one oversized medallion on an elaborate floral field',
+    layout:'Mihrabi — one oversized round medallion, often with smaller cartouches nested inside it, on a dense field packed with boteh and Herati filler. Mashhad’s real signature is the corner: spandrels are dramatically elongated, stretching so far along the border that they nearly meet at the midpoint of each side — unlike the contained quarter-spandrels of Kerman, Kashan or Esfahan',
     loom:'Fixed vertical workshop loom',
     family:'Curvilinear court style',
-    motifs:['toranj_fine'],
+    motifs:['mashhad_medallion_fine','mashhad_boteh_border','mashhad_spandrel_elongated','mashhad_boteh_fill'],
     palette:['#7A2530','#1F3A5C','#C9A24B','#EDE0C4','#3A2A2E'],
-    blurb:'Mashhad rugs are usually large, built around a single oversized medallion set into a dense, curvilinear floral field.',
+    blurb:'Mashhad rugs are usually large, built around a single oversized medallion set into a dense, curvilinear floral field. What actually sets Mashhad apart from its curvilinear cousins isn’t the medallion — it’s the corner spandrel, stretched so long it nearly reaches the middle of each border.',
     beatTool:'comb',
     sources:[
-      {label:'Mashhad medallion scale and knot range', url:'https://www.catalinarug.com/blog/beginners-guide-to-traditional-persian-rugs/'}
+      {label:'Mashhad medallion scale and knot range', url:'https://www.catalinarug.com/blog/beginners-guide-to-traditional-persian-rugs/'},
+      {label:'Motif detail (nested cartouche medallion, elongated corner spandrel, boteh/Herati filler) — web research: 1stDibs listing photos, no Kaggle coverage for this region', url:'https://www.1stdibs.com/buy/antique-persian-mashhad-rug/'}
     ],
   },
   { id:'qashqai', name:'Qashqai', zone:'Fars — South', kind:'Nomadic / tribal (also traded as "Shiraz")',
     knot:'Symmetric (Turkish), varies by clan', raj:'~14–22 raj (hand-spun, indicative)',
     material:'All-wool — pile, warp and weft',
     dye:'Natural dyes historically: madder, indigo, safflower',
-    layout:'Afshan — allover geometric lattice, stacked diamond medallions, and scattered stylized animals (birds, goats, camels) rather than one formal medallion',
+    layout:'Afshan — an angular diamond medallion (the most authentic Qashqai shape) with a small nested hooked diamond inside it, surrounded by four hook marks; medallion counts run odd by rug size, and larger pieces sometimes render this as three vertically stacked diamonds instead of one. No smooth spandrel — small triangular "mountain/tree" shapes sometimes anchor the field’s short ends instead of a rounded corner treatment',
     loom:'Portable horizontal ground loom',
     family:'Bold geometric, nomadic style',
-    motifs:['toranj_geo','animal_geo','boteh_geo'],
+    motifs:['qashqai_medallion_geo','qashqai_hook_border','qashqai_triple_diamond'],
     palette:['#8C2A2A','#243A5E','#B5622F','#EDE0C4','#3A2A1E'],
-    blurb:'Qashqai weaving is nomadic: the weaver designs from memory rather than a workshop pattern, producing geometric diamond medallions and stylized animal silhouettes scattered across an allover field.',
+    blurb:'Qashqai weaving is nomadic: the weaver designs from memory rather than a workshop pattern, producing geometric diamond medallions and stylized animal silhouettes scattered across an allover field. There’s no corner-spandrel stamp for this region — Qashqai corners aren’t a smooth filled shape, they’re just where the angular field and border meet.',
     beatTool:'comb',
     sources:[
       {label:'Tribal/nomadic geometric weaving overview', url:'https://stylebyemilyhenderson.com/the-ultimate-guide-to-persian-rugs-what-makes-them-so-dang-good-desirable-valuable'},
-      {label:'Stacked-diamond medallion — image-verified, no single article source', url:''}
+      {label:'Stacked-diamond medallion — image-verified, no single article source', url:''},
+      {label:'Motif detail (nested hooked diamond, odd medallion counts, triple-stacked variant, no spandrel) — web research: 1stDibs listing photos + regional guides, no Kaggle coverage for this region', url:'https://www.1stdibs.com/buy/qashqai-rugs/'}
     ],
   },
   { id:'kashan', name:'Kashan', zone:'Central', kind:'City workshop (royal tradition)',
@@ -666,6 +670,34 @@ const MOTIFS = [
   { id:'tabriz_cypress', name:'Cypress tree — garden-panel secondary motif (Tabriz, garden-panel)', rows:[
     '....1....','....1....','...111...','...111...','..11111..',
     '..11111..','.1111111.','....2....','...222...' ]},
+
+  /* --- batch 2: Esfahan, Bakshayesh, Mashhad, Qashqai — see report in conversation history --- */
+  { id:'esfahan_medallion_fine', name:'Toranj — round, layered concentric medallion (Esfahan)', rows:[
+    '....212....','..2111112..','.211111112.','.231111132.','21111111112','21111311112','21111111112','.231111132.','.211111112.','..2111112..','....212....' ]},
+  { id:'esfahan_border_fine', name:'Shah-Abbasi rosette with curling vine tendrils — border unit (Esfahan)', rows:[
+    '....2....','...212...','.3211123.','.2111112.','211111112','.2111112.','.3211123.','...212...','....2....' ]},
+  { id:'esfahan_palmette', name:'Shah-Abbasi palmette on a curling stem — allover vine-fill unit (Esfahan)', rows:[
+    '....1....','...111...','..11111..','...2.2...','....2....','...23....','..2...3..','.2.....3.','2.......3' ]},
+  { id:'bakshayesh_medallion_geo', name:'Lozenge medallion, deliberately off-center and loosely drawn (Bakshayesh)', rows:[
+    '...2.....','..2.2....','.2...2...','2..1..2..','.2...2...','..2.2....','...2.....','.........','.........' ]},
+  { id:'bakshayesh_wandering_border', name:'Wandering, irregular-width guard band (Bakshayesh)', rows:[
+    '1.......1','.2.....2.','..1...1..','...2.2...','....1....','...2.2...','..1...1..','.2.....2.','1.......1' ]},
+  { id:'bakshayesh_tree_column', name:'Tree-column — repeating vertical cypress fill (Bakshayesh)', rows:[
+    '....1....','....1....','...111...','....1....','...111...','....1....','..11111..','....2....','...222...' ]},
+  { id:'mashhad_medallion_fine', name:'Toranj — round medallion with nested inner cartouche (Mashhad)', rows:[
+    '....2....','...212...','..21112..','.2113112.','211313112','.2113112.','..21112..','...212...','....2....' ]},
+  { id:'mashhad_boteh_border', name:'Confronting boteh (paisley) pair — border unit (Mashhad)', rows:[
+    '1.....2','11...21','111.211','1112111','111.211','11...21','1.....2' ]},
+  { id:'mashhad_spandrel_elongated', name:'Spandrel — dramatically elongated, nearly reaching the border midpoint (Mashhad)', rows:[
+    '111111111','111111111','111111111','111111112','11111112.','1111112..','111112...','11112....','1112.....' ]},
+  { id:'mashhad_boteh_fill', name:'Boteh — dense paisley field filler, curled tail (Mashhad)', rows:[
+    '........2','.......21','......211','.....2111','....21111','...211111','..2111111','.21111111','311111111' ]},
+  { id:'qashqai_medallion_geo', name:'Diamond medallion with nested hooked diamond (Qashqai)', rows:[
+    '....2....','...212...','..21112..','.2311132.','213111312','.2311132.','..21112..','...212...','....2....' ]},
+  { id:'qashqai_hook_border', name:'Diagonal hook rosette — tribal guard-stripe unit (Qashqai)', rows:[
+    '3.....3','.21.12.','..212..','.11111.','..212..','.21.12.','3.....3' ]},
+  { id:'qashqai_triple_diamond', name:'Three vertically stacked diamonds (Qashqai)', rows:[
+    '....1....','...111...','....1....','....2....','...111...','....2....','....1....','...111...','....1....' ]},
 ];
 
 /* ---------- state ---------- */
