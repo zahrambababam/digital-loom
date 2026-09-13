@@ -520,89 +520,75 @@ const REGIONS = [
     knot:'Asymmetric (Persian)', raj:'~45–70 raj (fine, indicative)',
     material:'Wool or silk pile on cotton foundation',
     dye:'Historically natural dyes; Kashan has a centuries-old dyeing tradition tied to the city',
-    layout:'Lechak-Toranj — quarter-medallions framing each corner around a central medallion; dense allover florals and weeping-willow motifs',
+    layout:'Lechak-Toranj — a rounded, hooked-star medallion often carrying a single hanging pendant, quarter-medallions framing each corner, dense allover florals and weeping-willow motifs, and — a genuine recurring Kashan trait, not a one-off — an occasional confronting-animal border of paired gazelles or deer flanking a small tree',
     loom:'Fixed vertical workshop loom',
     family:'Curvilinear court style',
-    motifs:['lechak','toranj_fine','willow'],
+    motifs:['kashan_medallion_fine','kashan_gazelle_border','lechak','willow'],
     palette:['#7A1E22','#EDE0C4','#16213A','#C9A24B','#3A2A1E'],
-    blurb:'Kashan work is built on dense, all-over floral fields — weeping willows, teardrop medallions, quarter-medallions framing each corner — usually on a deep red field against ivory or midnight-blue borders.',
+    blurb:'Kashan work is built on dense, all-over floral fields — weeping willows, teardrop medallions, quarter-medallions framing each corner — usually on a deep red field against ivory or midnight-blue borders. Its confronting-gazelle border is a real, recurring trait documented across multiple pieces, not an isolated example.',
     beatTool:'comb',
     sources:[
       {label:'Kashan red-field medallion and knot range', url:'https://www.catalinarug.com/blog/beginners-guide-to-traditional-persian-rugs/'},
-      {label:'Kashan grouped among core regional styles', url:'https://rugtherock.com/blogs/magazine/persian-rugs-vs-oriental-rugs'}
+      {label:'Kashan grouped among core regional styles', url:'https://rugtherock.com/blogs/magazine/persian-rugs-vs-oriental-rugs'},
+      {label:'Motif detail (hooked-star pendant medallion, confronting-gazelle border) — visual survey of the Qajar Dynasty Iranian Carpet Dataset (Kaggle), Kashan-tagged pieces', url:'https://www.kaggle.com/datasets/mahdisarbazi/qajar-dynasty-iranian-carpet-dataset'}
     ],
   },
   { id:'qom', name:'Qom', zone:'Central', kind:'City workshop (silk)',
     knot:'Asymmetric (Persian)', raj:'~60–90 raj (very fine silk, indicative)',
     material:'Silk pile, sometimes wool-silk blend, on silk or cotton foundation',
     dye:'Fine dyes chosen for how they catch light in silk',
-    layout:'Highly varied — tree-of-life, Shah-Abbasi florals, hunting scenes, vase designs, mehrabi arches and pictorial portraits, often borrowing from Isfahan, Tabriz and Kerman',
+    layout:'Highly varied — a curvilinear, multi-layered medallion radiating outward is the closest thing to an original Qom composition, surrounded by unusually dense floral cartouche work (very high knot count). Its strongest and most consistently documented specialty is pictorial: genuine garden-of-paradise animal/bird scenes and tree-of-life designs with birds perched in the canopy, often borrowing from Isfahan, Tabriz and Kerman otherwise',
     loom:'Fixed vertical workshop loom',
     family:'Pictorial / narrative style',
-    motifs:['animal_fine','gol_fine','toranj_fine'],
+    motifs:['qom_medallion_fine','qom_border_fine','lechak','qom_tree_of_life'],
     palette:['#0E7C86','#8C1F3B','#C9A24B','#EDE0C4','#1F3A5C'],
-    blurb:'Qom weavers work almost entirely in silk and draw on a wide range of borrowed designs — tree-of-life scenes, hunting tableaux, vase and arch motifs — in saturated jewel tones that read differently in silk than in wool.',
+    blurb:'Qom weavers work almost entirely in silk and draw on a wide range of borrowed designs — tree-of-life scenes, hunting tableaux, vase and arch motifs — in saturated jewel tones that read differently in silk than in wool. The tree-of-life-with-birds design in particular is a genuine, well-documented Qom specialty, not an occasional borrowing.',
     beatTool:'spike',
     sources:[
       {label:'Qom silk designs — tree of life, hunting, vase, mehrabi', url:'https://www.rugman.com/carpet-design/qum-rugs/'},
       {label:'Qom silk, jewel-tone palette', url:'https://jewelrugs.com/collections/persian-qum-rugs'},
-      {label:'Qom’s nail-tool compacting method', url:'https://mjrug.com/tools-used-in-weaving-a-persian-rug/'}
+      {label:'Qom’s nail-tool compacting method', url:'https://mjrug.com/tools-used-in-weaving-a-persian-rug/'},
+      {label:'Motif detail (radiating medallion, dense cartouche border, tree-of-life-with-birds) — web research: 1stDibs listing photos, no Kaggle coverage for this region', url:'https://www.1stdibs.com/buy/qom-rug/'}
     ],
   },
   { id:'turkmen', name:'Turkmen', zone:'Northeast — Turkmen Sahra', kind:'Nomadic / tribal',
     knot:'Asymmetric (Persian/Senneh) for most groups', raj:'~16–24 raj (hand-spun, indicative)',
     material:'Wool, largely on a wool foundation',
     dye:'Natural dyes historically; madder-based reds dominate',
-    layout:'Repeating gol — an octagonal tribal emblem stamped in rows across the whole field, with no central medallion or floral border. Each Turkmen tribe has its own named gul (the Tekke gul is the best known: a quartered octagon with small hooked elements); this tool models one generic version, not the tribal variants',
+    layout:'Two structurally different formats, kept as separate stamp sets: (1) the main carpet — a tight grid of a repeating octagonal gol (the Tekke gul is the best known: a quartered octagon with small hooked elements) alternating with a smaller "minor gul", framed by a near-universal serrated dog-tooth/diamond-chain guard stripe, with no spandrel concept at all — the grid simply runs to the border and gets cropped at the corner; (2) the "ensi" tent-door rug — a completely different four-quadrant paneled layout, each quadrant its own filler pattern, bordered by chevron/zigzag multi-band stripes. Each Turkmen tribe has its own named gul; this tool models one generic version, not every tribal variant',
     loom:'Portable horizontal ground loom',
     family:'Monochrome, red-dominated style',
-    motifs:['octagon'],
+    motifs:['octagon','turkmen_gul_minor','turkmen_guard_border','turkmen_ensi_panel','turkmen_ensi_border'],
     palette:['#6E1A1A','#8C2A2A','#1A1418','#EDE0C4','#2E2A2A'],
-    blurb:'Turkmen weaving is dominated almost entirely by shades of deep red, patterned with rows of a repeating gol — an octagonal tribal emblem — instead of a bordered medallion field. Every tribe (Tekke, Ersari, Salor, Saryk, Yomut) has its own named gul, so "Turkmen" here is a composite, not one specific tribal style.',
+    blurb:'Turkmen weaving is dominated almost entirely by shades of deep red, patterned with rows of a repeating gol — an octagonal tribal emblem — instead of a bordered medallion field. Every tribe (Tekke, Ersari, Salor, Saryk, Yomut) has its own named gul, so "Turkmen" here is a composite, not one specific tribal style. The stamp set also keeps the "ensi" door-rug format separate — it isn’t a variation on the gul-grid main carpet, it’s a structurally different four-panel layout entirely.',
     beatTool:'comb',
     sources:[
       {label:'Gul/gol motif — definition and tribal variation', url:'https://en.wikipedia.org/wiki/Gul_(design)'},
       {label:'Turkoman red field and gul construction', url:'https://www.catalinarug.com/product-category/persian-rugs/turkoman/'},
-      {label:'Tekke gul — quartered, hooked design', url:'https://jewelrugs.com/collections/turkoman-rugs'}
+      {label:'Tekke gul — quartered, hooked design', url:'https://jewelrugs.com/collections/turkoman-rugs'},
+      {label:'Motif detail (minor gul alternation, dog-tooth guard stripe, ensi four-panel format) — web research: 1stDibs listing photos, no Kaggle coverage for this region', url:'https://www.1stdibs.com/buy/tekke-rug/'}
     ],
   },
   { id:'bidjar', name:'Bidjar', zone:'Kurdistan — Northwest', kind:'Village ("Iron Rugs of Persia")',
     knot:'Asymmetric (Persian/Senneh), per most sources', raj:'~28–36 raj (very dense, indicative)',
     material:'Wool pile on wool or cotton foundation, wet-woven',
     dye:'Natural dyes historically; deep saturated tones typical of Kurdish weaving',
-    layout:'Herati and Mina Khani allover florals, or a single bold medallion — design varies, but the construction is the constant signature',
+    layout:'Two traditions kept as separate stamp entries: (1) an angular hooked-diamond medallion — latch-hook nubs at the tips, never a rounded shape — with a dense micro-floret diaper border, and no corner spandrel at all (the diamond\u2019s point meets the border directly); (2) Herati and Mina Khani allover florals with no medallion whatsoever, which is traditional for this region rather than a simplification. Kaggle\u2019s "Kurdistan" tag is the closest available proxy for Bidjar — the dataset has no Bidjar-specific label, only the broader region',
     loom:'Fixed vertical village loom',
     family:'Bold geometric / extreme-density village style',
-    motifs:['toranj_geo','herati_geo'],
+    motifs:['bidjar_medallion_hooked','bidjar_diaper_border','bidjar_allover_diaper','herati_geo'],
     palette:['#7A2020','#1F3550','#C9A24B','#EDE0C4','#3A2A1E'],
-    blurb:'Bidjar rugs are woven wet — the warp, weft and yarn are dampened through the whole process — then packed with a heavy nail-like spike instead of a comb, which is why finished Bidjars are so rigid they\u2019re nicknamed the "iron rugs of Persia."',
+    blurb:'Bidjar rugs are woven wet — the warp, weft and yarn are dampened through the whole process — then packed with a heavy nail-like spike instead of a comb, which is why finished Bidjars are so rigid they\u2019re nicknamed the "iron rugs of Persia." Design-wise this is the clearest visual opposite of Kerman or Kashan\u2019s curvilinear delicacy in this tool: hooked, angular, and just as often skipping the medallion entirely for a dense allover diaper field.',
     beatTool:'spike',
     sources:[
       {label:'Bidjar wet-weaving and nail-tool compacting', url:'https://www.catalinarug.com/blog/persian-rugs-anatomy/'},
-      {label:'Bidjar nail-shaped compacting tool, second source', url:'https://eramrugs.co.uk/blogs/news/process-and-weaving-techniques-of-persian-rugs'}
+      {label:'Bidjar nail-shaped compacting tool, second source', url:'https://eramrugs.co.uk/blogs/news/process-and-weaving-techniques-of-persian-rugs'},
+      {label:'Motif detail (hooked-diamond medallion, no-spandrel corner, allover-diaper alternative) — visual survey of the Qajar Dynasty Iranian Carpet Dataset (Kaggle), Kurdistan-tagged pieces (closest available proxy for Bidjar — no Bidjar-specific tag exists)', url:'https://www.kaggle.com/datasets/mahdisarbazi/qajar-dynasty-iranian-carpet-dataset'}
     ],
   },
 ];
 
 const MOTIFS = [
-  { id:'toranj_fine', name:'Toranj — rounded medallion', rows:[
-    '....212....','..2111112..','.211111112.','.211111112.',
-    '21111111112','21111111112','21111111112','.211111112.',
-    '.211111112.','..2111112..','....212....' ]},
-  { id:'toranj_geo', name:'Toranj — stepped medallion', rows:[
-    '....2....','...212...','..21112..','.2111112.',
-    '211111112','.2111112.','..21112..','...212...','....2....' ]},
-  { id:'boteh_fine', name:'Boteh — curved paisley', rows:[
-    '.......2...','........2..','.......212.','......212..',
-    '.....21112.','....21112..','...2111112.','..2111112..',
-    '.211111112.','.211111112.','.211111112.' ]},
-  { id:'boteh_geo', name:'Boteh — hooked paisley', rows:[
-    '......2','....212','..21112','2111112','.21112.','..212..','...2...' ]},
-  { id:'gol_fine', name:'Gol-e Farang — rounded rosette', rows:[
-    '....2....','...212...','..21112..','.2111112.',
-    '211111112','.2111112.','..21112..','...212...','....2....' ]},
-  { id:'star_geo', name:'Star — Zanjan', rows:[
-    '..2.2..','.2.1.2.','2.111.2','.11111.','2.111.2','.2.1.2.','..2.2..' ]},
   { id:'herati_geo', name:'Herati — fish/rosette unit', rows:[
     '...2...','..212..','3.1112.','2111113','3.1112.','..212..','...2...' ]},
   { id:'lechak', name:'Lechak — corner medallion', rows:[
@@ -613,11 +599,6 @@ const MOTIFS = [
     '...111...','..1.1.1..','.2..1..2.','1.......1','.1.....1.' ]},
   { id:'octagon', name:'Gol — Turkmen emblem (quartered)', rows:[
     '..222..','.21212.','2112112','2222222','2112112','.21212.','..222..' ]},
-  { id:'animal_fine', name:'Stag — pictorial (fine)', rows:[
-    '1.......1','.1..2..1.','..1.1.1..','...222...',
-    '..21112..','.2111112.','211111112','1.11.11.1','1.1...1.1' ]},
-  { id:'animal_geo', name:'Stag — tribal (block)', rows:[
-    '1.....1','.1...1.','..1.1..','...2...','..111..','.11111.','1111111' ]},
 
   /* --- batch 1: Tabriz, Heriz, Zanjan, Kerman — see report in conversation history --- */
   { id:'heriz_medallion_geo', name:'Toranj — angular pendant medallion (Heriz)', rows:[
@@ -698,6 +679,32 @@ const MOTIFS = [
     '3.....3','.21.12.','..212..','.11111.','..212..','.21.12.','3.....3' ]},
   { id:'qashqai_triple_diamond', name:'Three vertically stacked diamonds (Qashqai)', rows:[
     '....1....','...111...','....1....','....2....','...111...','....2....','....1....','...111...','....1....' ]},
+
+  /* --- batch 3: Kashan, Qom, Turkmen, Bidjar — see report in conversation history --- */
+  { id:'kashan_medallion_fine', name:'Toranj — hooked-star medallion with hanging pendant (Kashan)', rows:[
+    '....2....','...212...','.3211123.','.2111112.','211111112','.2111112.','.3211123.','...212...','....3....' ]},
+  { id:'kashan_gazelle_border', name:'Confronting gazelles flanking a tree — border/panel unit (Kashan)', rows:[
+    '1.......1','.1.....1.','..1...1..','1.1.2.1.1','.111.111.','.1.....1.','.1.....1.','.1.....1.','1.......1' ]},
+  { id:'qom_medallion_fine', name:'Toranj — multi-layered medallion radiating outward (Qom)', rows:[
+    '....2....','...212...','..23132..','.2111112.','211111112','.2111112.','..23132..','...212...','....2....' ]},
+  { id:'qom_border_fine', name:'Dense double-ring floral cartouche — border unit (Qom)', rows:[
+    '....2....','..32123..','.3211123.','.2111112.','211111112','.2111112.','.3211123.','..32123..','....2....' ]},
+  { id:'qom_tree_of_life', name:'Tree of life with birds in the canopy (Qom)', rows:[
+    '3.1.1.1.3','.11.1.11.','..1.1.1..','...212...','...111...','...111...','..21112..','.2111112.','211111112' ]},
+  { id:'turkmen_gul_minor', name:'Minor gul — smaller alternating tribal emblem (Turkmen, main-carpet)', rows:[
+    '...2...','..212..','.21112.','2113112','.21112.','..212..','...2...' ]},
+  { id:'turkmen_guard_border', name:'Dog-tooth diamond-chain guard stripe (Turkmen, main-carpet)', rows:[
+    '1.1.1.1','.2.2.2.','1.1.1.1','.2.2.2.','1.1.1.1','.2.2.2.','1.1.1.1' ]},
+  { id:'turkmen_ensi_panel', name:'Ensi — four-quadrant door-rug panel layout (Turkmen, ensi)', rows:[
+    '....2....','.1..2..3.','..1.2.3..','....2....','222222222','....2....','..3.2.1..','.3..2.1..','....2....' ]},
+  { id:'turkmen_ensi_border', name:'Chevron/zigzag multi-band border (Turkmen, ensi)', rows:[
+    '2.....2','12...21','.12.21.','..121..','...1...','.......','.......' ]},
+  { id:'bidjar_medallion_hooked', name:'Angular hooked-diamond medallion with latch-hook nubs (Bidjar)', rows:[
+    '....2....','..32123..','..21112..','.2111112.','211111112','.2111112.','..21112..','..32123..','....2....' ]},
+  { id:'bidjar_diaper_border', name:'Dense micro-floret diaper — border unit (Bidjar)', rows:[
+    '1.2.1.2','.......','2.1.2.1','.......','1.2.1.2','.......','2.1.2.1' ]},
+  { id:'bidjar_allover_diaper', name:'Allover diaper field — no medallion (Bidjar, allover tradition)', rows:[
+    '1.2.1.2.1','.........','2.1.2.1.2','.........','1.2.1.2.1','.........','2.1.2.1.2','.........','1.2.1.2.1' ]},
 ];
 
 /* ---------- state ---------- */
