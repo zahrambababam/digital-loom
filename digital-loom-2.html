@@ -176,6 +176,22 @@
     border-color:var(--gold);
     font-weight:700;
   }
+  .density-btn{
+    background:transparent;
+    border:1px solid var(--panel-line);
+    color:var(--ink-dim);
+    padding:6px 10px;
+    border-radius:4px;
+    font-family:'Karla',sans-serif;
+    font-size:12px;
+    cursor:pointer;
+  }
+  .density-btn.active{
+    background:var(--gold);
+    color:#231a0e;
+    border-color:var(--gold);
+    font-weight:700;
+  }
   .swatch{
     width:24px;height:24px;
     border-radius:50%;
@@ -465,6 +481,16 @@
           <span class="tool-label">mode</span>
           <button class="mode-btn" data-mode="knot">Knot</button>
           <button class="mode-btn" data-mode="erase">Erase</button>
+        </div>
+        <div class="tool-group">
+          <span class="tool-label">weave</span>
+          <button class="density-btn" data-density="coarse" title="Coarse village weave: fewer, larger knots">Coarse</button>
+          <button class="density-btn active" data-density="medium" title="Medium">Medium</button>
+          <button class="density-btn" data-density="fine" title="Fine city weave: more, smaller knots">Fine</button>
+        </div>
+        <div class="tool-group">
+          <span class="tool-label">material</span>
+          <button class="density-btn" id="materialBtn" title="Toggle a simulated wool/silk texture with organic imperfection">Flat</button>
         </div>
         <div class="tool-group" id="paletteGroup">
           <span class="tool-label">color</span>
@@ -954,7 +980,17 @@ function updateLoomCursor(hex){
 }
 
 /* ---------- state ---------- */
-const COLS = 40, ROWS = 50;
+// Real rugs vary a lot in knot density (KPSI, knots per square inch) --
+// coarse nomadic/village weaves pack far fewer, chunkier knots per inch
+// than a fine city workshop piece. DENSITY_PRESETS models that as three
+// grid resolutions rather than trying to simulate literal inch counts.
+const DENSITY_PRESETS = {
+  coarse: { cols:24, rows:30, label:'Coarse (village)' },
+  medium: { cols:40, rows:50, label:'Medium' },
+  fine:   { cols:60, rows:75, label:'Fine (city)' },
+};
+let density = 'medium';
+let COLS = DENSITY_PRESETS[density].cols, ROWS = DENSITY_PRESETS[density].rows;
 let current = REGIONS[0];
 let mode = 'knot';
 let activeColor = current.palette[0];
@@ -1017,9 +1053,53 @@ function resetLoom(){
   updateBeatUI();
 }
 
+// Changing the weave density changes the grid resolution itself, not just
+// how it's drawn, so (unlike a region switch) it starts the piece over --
+// there's no honest way to keep existing knots lined up on a differently
+// sized grid.
+function setDensity(key){
+  if(!DENSITY_PRESETS[key] || key===density) return;
+  density = key;
+  COLS = DENSITY_PRESETS[key].cols;
+  ROWS = DENSITY_PRESETS[key].rows;
+  document.querySelectorAll('.density-btn').forEach(b => b.classList.toggle('active', b.dataset.density===key));
+  resetLoom();
+  resizeCanvas();
+}
+
 /* ---------- canvas ---------- */
 const canvas = document.getElementById('loom');
 const ctx = canvas.getContext('2d');
+
+// Live material rendering: off by default (flat pixel blocks); toggled on,
+// knots pick up a fine fiber-noise texture, a little per-knot color
+// variance (real hand-spun yarn is never perfectly uniform), and a soft
+// diagonal sheen for silk regions that wool regions don't get.
+let materialMode = false;
+const fiberNoise = (() => {
+  const n = document.createElement('canvas');
+  n.width = 48; n.height = 48;
+  const nctx = n.getContext('2d');
+  const img = nctx.createImageData(48,48);
+  for(let i=0;i<img.data.length;i+=4){
+    const v = 128 + (Math.random()-0.5)*90;
+    img.data[i]=img.data[i+1]=img.data[i+2]=v;
+    img.data[i+3]=255;
+  }
+  nctx.putImageData(img,0,0);
+  return ctx.createPattern(n, 'repeat');
+})();
+function hashUnit(r,c){
+  const h = Math.sin(r*127.1 + c*311.7) * 43758.5453;
+  return h - Math.floor(h);
+}
+function jitterHex(hex, amt){
+  const n = parseInt(hex.slice(1),16);
+  const clamp = v => Math.max(0, Math.min(255, v));
+  const adj = ch => clamp(Math.round(ch + amt*255));
+  const r = adj((n>>16)&255), g = adj((n>>8)&255), b = adj(n&255);
+  return '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('');
+}
 
 function resizeCanvas(){
   const w = document.getElementById('loomWrap').clientWidth;
@@ -1426,9 +1506,31 @@ function drawKnot(c,r,k,t,pulse){
   const by = y + pad + (full - h); // pressed down toward the bottom of its cell as it's squished
 
   const radius = Math.min(3, cell*(0.3-0.15*Math.min(tt,1))) + looseness*cell*0.12;
-  ctx.fillStyle = k.hex;
+  const fillHex = materialMode ? jitterHex(k.hex, (hashUnit(r,c)-0.5)*0.16) : k.hex;
+  ctx.fillStyle = fillHex;
   roundRect(ctx, x+pad, by, full, h, radius);
   ctx.fill();
+
+  if(materialMode){
+    ctx.save();
+    roundRect(ctx, x+pad, by, full, h, radius);
+    ctx.clip();
+    ctx.globalAlpha = 0.22;
+    ctx.globalCompositeOperation = 'overlay';
+    ctx.fillStyle = fiberNoise;
+    ctx.fillRect(x+pad, by, full, h);
+    ctx.globalCompositeOperation = 'source-over';
+    if(current.material && current.material.toLowerCase().includes('silk')){
+      const sheen = ctx.createLinearGradient(x+pad, by, x+pad+full, by+h);
+      sheen.addColorStop(0, 'rgba(255,255,255,0)');
+      sheen.addColorStop(0.45, 'rgba(255,255,255,0.28)');
+      sheen.addColorStop(0.6, 'rgba(255,255,255,0)');
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = sheen;
+      ctx.fillRect(x+pad, by, full, h);
+    }
+    ctx.restore();
+  }
 
   // a freshly tied knot is loose yarn, not a solid block yet: two cut ends
   // curl up off the top, shrinking away as the row gets beaten down.
@@ -1896,6 +1998,7 @@ function setMode(m){
   paletteGroup.style.display = m==='knot' ? 'flex' : 'none';
 }
 document.querySelectorAll('.mode-btn').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+document.querySelectorAll('.density-btn[data-density]').forEach(b => b.addEventListener('click', () => setDensity(b.dataset.density)));
 
 document.getElementById('clearGuideBtn').addEventListener('click', () => {
   pendingMotif = null;
@@ -2013,6 +2116,13 @@ document.getElementById('beatBtn').addEventListener('click', () => attemptBeat()
 document.getElementById('advanceBtn').addEventListener('click', () => advanceRow());
 
 document.getElementById('clearBtn').addEventListener('click', () => { resetLoom(); });
+document.getElementById('materialBtn').addEventListener('click', () => {
+  materialMode = !materialMode;
+  const btn = document.getElementById('materialBtn');
+  btn.textContent = materialMode ? 'Textured' : 'Flat';
+  btn.classList.toggle('active', materialMode);
+  draw();
+});
 
 // Crops the export to exactly the knots you've actually tied, not the full
 // rectangular loom — so weaving just one motif (say, a lone circular one)
