@@ -383,7 +383,7 @@
         <div class="tool-group" id="motifGroup">
           <span class="tool-label">motif guide</span>
         </div>
-        <button class="ghost-btn" id="clearGuideBtn" style="display:none;">Clear guide</button>
+        <button class="ghost-btn" id="clearGuideBtn" style="display:none;">Clear guides</button>
         <button class="ghost-btn" id="clearBtn">Clear</button>
         <button class="ghost-btn" id="saveBtn">Save PNG</button>
       </div>
@@ -407,7 +407,7 @@
         <span class="beat-status" id="beatStatus"></span>
         <span class="tension-warn" id="tensionWarn"></span>
       </div>
-      <p class="caption">Weaving here is locked to one active row at a time, bottom-up, the way a real vertical loom actually works — everything above the active row is bare, untouchable warp until you reach it. Hover a warp pair and click (or press <strong>A</strong> / <strong>S</strong>) to hand-tie one knot; there's no dragging a color across the board, every knot is its own discrete action. Once the active row has at least one knot, <strong>Pass weft</strong> (or press <strong>W</strong>) throws the horizontal thread loosely across it — only then can you <strong>Beat</strong> it down (or slam <strong>Spacebar</strong>) to lock the row tight and advance to the next one. Try to beat before wefting, or weft an empty row, and the loom refuses with a tension warning, same as skipping a step on a real one. Arm a motif thumbnail below to preview one documented shape's row-by-row slice on the active row only — it still never fills a cell for you, it just tells you which color that cell wants once you hand-tie it, background nodes included.</p>
+      <p class="caption">Weaving here is locked to one active row at a time, bottom-up, the way a real vertical loom actually works — everything above the active row is bare, untouchable warp until you reach it. Hover a warp pair and click (or press <strong>A</strong> / <strong>S</strong>) to hand-tie one knot; there's no dragging a color across the board, every knot is its own discrete action. Once the active row has at least one knot, <strong>Pass weft</strong> (or press <strong>W</strong>) throws the horizontal thread loosely across it — only then can you <strong>Beat</strong> it down (or slam <strong>Spacebar</strong>) to lock the row tight and advance to the next one. Try to beat before wefting, or weft an empty row, and the loom refuses with a tension warning, same as skipping a step on a real one. Arm a motif thumbnail below and click anywhere on the active row to plant it there as a cast shadow — a medallion in the middle, a border motif on each side, as many as you want, all visible at once and none of them going away when you arm the next one. It still never fills a cell for you, it just tells you which color that cell wants once you hand-tie it, background nodes included.</p>
       <div class="legend">
         <div class="legend-item">
           <svg width="34" height="22" viewBox="0 0 34 22"><g stroke="#e4d6b8" stroke-width="1.4" opacity="0.7"><line x1="7" y1="0" x2="7" y2="22"/><line x1="17" y1="0" x2="17" y2="22"/><line x1="27" y1="0" x2="27" y2="22"/></g></svg>
@@ -776,6 +776,7 @@ let activeColor = current.palette[0];
 let grid = makeGrid();
 let beatAnim = null;      // {row, start}
 let weftAnim = null;      // {row, start}
+let cutAnim = null;       // {start} — the finishing scissors flourish on Save PNG
 let tieAnims = new Map(); // "r,c" -> tie start time, for the tactile tie-pop
 let hoverCell = null;
 let cell = 14;
@@ -793,7 +794,11 @@ let loomComplete = false;
 // on the active row only. It never fills a cell for you — it just tells you
 // which color a cell wants once you hand-tie it, background cells included.
 let pendingMotif = null;   // armed, waiting for an anchor click in the active row
-let motifGuide = null;     // {motif, baseRow, anchorCol} once anchored
+let motifGuides = [];      // {motif, baseRow, anchorCol}[] — every guide anchored so far,
+                            // e.g. a medallion in the middle and a border motif on each
+                            // side, all visible and all still live at once. Picking a new
+                            // motif thumbnail only arms it as pending; it never clears the
+                            // ones already placed.
 
 function makeGrid(){
   return Array.from({length:ROWS}, () => Array(COLS).fill(null));
@@ -814,7 +819,7 @@ function resetLoom(){
   rowPhase = 'tying';
   loomComplete = false;
   pendingMotif = null;
-  motifGuide = null;
+  motifGuides = [];
   draw();
   updateBeatUI();
 }
@@ -854,18 +859,21 @@ function motifCharColor(ch, palette){
   return palette[colorIdx] || palette[1];
 }
 
-// The guide character for loom row `r` / column `c`, or null if there's no
-// armed guide, `r` is outside the guide's vertical span, or `c` falls
-// outside the motif's horizontal footprint.
+// The guide character for loom row `r` / column `c` from whichever armed
+// guide covers that cell, or null if none does. Searched most-recently-
+// anchored first, so a deliberately overlapped placement wins.
 function guideCharAtRow(r, c){
-  if(!motifGuide) return null;
-  const m = motifGuide.motif, n = m.rows.length, half = Math.floor(n/2);
-  const rowIdx = (n-1) - (motifGuide.baseRow - r);
-  if(rowIdx < 0 || rowIdx >= n) return null;
-  const gc = c - motifGuide.anchorCol + half;
-  if(gc < 0 || gc >= n) return null;
-  const ch = m.rows[rowIdx][gc];
-  return ch === '.' ? null : ch;
+  for(let i=motifGuides.length-1;i>=0;i--){
+    const g = motifGuides[i];
+    const m = g.motif, n = m.rows.length, half = Math.floor(n/2);
+    const rowIdx = (n-1) - (g.baseRow - r);
+    if(rowIdx < 0 || rowIdx >= n) continue;
+    const gc = c - g.anchorCol + half;
+    if(gc < 0 || gc >= n) continue;
+    const ch = m.rows[rowIdx][gc];
+    if(ch !== '.') return ch;
+  }
+  return null;
 }
 // Convenience wrapper for the row actually being tied right now.
 function guideCharAt(c){
@@ -959,16 +967,16 @@ function draw(){
     ctx.stroke();
   }
 
-  // motif guide: a cast shadow of the whole armed shape, not just the row
-  // you're on — the active row's slice reads clearly enough to tie against,
-  // and everything still above it (not yet reached) shows as a fainter
-  // preview of what's coming, the way a cartoon or a chalk outline would
-  // let a real weaver see the target shape before working up to it. It
-  // still never fills a cell for you — it only ever suggests a color.
-  if(motifGuide && !loomComplete){
-    const n = motifGuide.motif.rows.length;
-    const topRow = Math.max(0, motifGuide.baseRow - (n-1));
-    for(let r=topRow; r<=activeRow; r++){
+  // motif guides: a cast shadow of every armed shape still in progress, not
+  // just one at a time — you can anchor a medallion in the middle and a
+  // border motif on each side and see all of them at once, the way a real
+  // weaver would work from a full cartoon rather than one shape at a time.
+  // The active row's slice reads clearly enough to tie against; everything
+  // still above it (not yet reached) shows as a fainter preview of what's
+  // coming. Still never fills a cell for you — it only ever suggests a color.
+  if(motifGuides.length && !loomComplete){
+    const topRow = motifGuides.reduce((min,g) => Math.min(min, g.baseRow - (g.motif.rows.length-1)), activeRow);
+    for(let r=Math.max(0,topRow); r<=activeRow; r++){
       const isActiveRow = r===activeRow;
       for(let c=0;c<COLS;c++){
         if(grid[r][c]) continue;
@@ -1004,6 +1012,74 @@ function draw(){
   }
 
   drawBeatTool(now);
+  drawCutAnim(now);
+}
+
+// The finishing flourish on Save PNG: a pair of scissors travels across the
+// canvas snipping the finished piece free of the loom, before the actual
+// file save happens. Purely decorative — doSavePNG() runs right after it.
+function drawCutAnim(now){
+  if(!cutAnim) return;
+  const dur = 900;
+  const elapsed = now - cutAnim.start;
+  const p = Math.min(1, elapsed/dur);
+  const y = activeRow*cell + cell/2;
+  const x = p*(canvas.width+80) - 40;
+
+  ctx.save();
+  ctx.strokeStyle = 'rgba(228,214,184,0.9)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6,5]);
+  ctx.beginPath();
+  ctx.moveTo(0, y);
+  ctx.lineTo(Math.max(0,x), y);
+  ctx.stroke();
+  ctx.restore();
+
+  const snipPhase = (elapsed % 280) / 280;
+  const openAngle = Math.sin(snipPhase*Math.PI*2) * 0.4;
+  const bladeLen = Math.max(28, cell*2.6);
+  const handleLen = bladeLen*0.55;
+  const handleR = Math.max(5, cell*0.4);
+
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.fillStyle = '#e6c273';
+  ctx.strokeStyle = '#e6c273';
+  ctx.lineWidth = Math.max(3, cell*0.24);
+  ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.arc(0,0, Math.max(3,cell*0.16), 0, Math.PI*2); ctx.fill();
+
+  ctx.save(); ctx.rotate(openAngle);
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(bladeLen, -bladeLen*0.22); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-handleLen*0.7, handleLen*0.35); ctx.stroke();
+  ctx.beginPath(); ctx.arc(-handleLen*0.85, handleLen*0.42, handleR, 0, Math.PI*2); ctx.stroke();
+  ctx.restore();
+
+  ctx.save(); ctx.rotate(-openAngle);
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(bladeLen, bladeLen*0.22); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-handleLen*0.7, -handleLen*0.35); ctx.stroke();
+  ctx.beginPath(); ctx.arc(-handleLen*0.85, -handleLen*0.42, handleR, 0, Math.PI*2); ctx.stroke();
+  ctx.restore();
+
+  ctx.restore();
+}
+
+function playSnip(){
+  try{
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if(!Ctx) return;
+    const actx = new Ctx();
+    const osc = actx.createOscillator();
+    const gain = actx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(2200, actx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(700, actx.currentTime+0.045);
+    gain.gain.setValueAtTime(0.22, actx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime+0.06);
+    osc.connect(gain); gain.connect(actx.destination);
+    osc.start(); osc.stop(actx.currentTime+0.07);
+  }catch(e){}
 }
 
 // The actual beater — drawn as the region's real tool (comb/kirkit, saber
@@ -1150,11 +1226,13 @@ function animateBeat(){
     } else {
       activeRow -= 1;
       rowPhase = 'tying';
-      if(motifGuide){
-        const n = motifGuide.motif.rows.length;
-        const rowIdx = (n-1) - (motifGuide.baseRow - activeRow);
-        if(rowIdx < 0 || rowIdx >= n) motifGuide = null;
-      }
+      // drop only the guides whose span the loom has now fully passed —
+      // the rest (and anything still pending) stay exactly as placed.
+      motifGuides = motifGuides.filter(g => {
+        const n = g.motif.rows.length;
+        const rowIdx = (n-1) - (g.baseRow - activeRow);
+        return rowIdx >= 0 && rowIdx < n;
+      });
     }
     draw();
     updateBeatUI();
@@ -1271,8 +1349,8 @@ function tieAt(r,c){
   if(mode==='erase'){
     grid[r][c] = null;
   } else {
-    if(pendingMotif && !motifGuide){
-      motifGuide = { motif: pendingMotif, baseRow: activeRow, anchorCol: c };
+    if(pendingMotif){
+      motifGuides.push({ motif: pendingMotif, baseRow: activeRow, anchorCol: c });
       pendingMotif = null;
       buildMotifs();
     }
@@ -1355,17 +1433,19 @@ function buildPalette(){
 function buildMotifs(){
   motifGroup.querySelectorAll('.motif-btn').forEach(n=>n.remove());
   const available = MOTIFS.filter(m => current.motifs.includes(m.id));
-  const armedId = pendingMotif ? pendingMotif.id : (motifGuide ? motifGuide.motif.id : null);
+  // every thumbnail that's pending OR already placed (and still in-span)
+  // shows as armed — picking a new one only ever adds to that set.
+  const armedIds = new Set(motifGuides.map(g => g.motif.id));
+  if(pendingMotif) armedIds.add(pendingMotif.id);
   available.forEach(m => {
     const b = document.createElement('button');
-    b.className = 'motif-btn' + (m.id===armedId ? ' active' : '');
+    b.className = 'motif-btn' + (armedIds.has(m.id) ? ' active' : '');
     b.title = m.name;
     const cnv = document.createElement('canvas');
     renderMotifToCanvas(cnv, m, current.palette);
     b.appendChild(cnv);
     b.addEventListener('click', () => {
       pendingMotif = m;
-      motifGuide = null;
       setMode('knot');
       buildMotifs();
       updateBeatUI();
@@ -1373,7 +1453,7 @@ function buildMotifs(){
     motifGroup.appendChild(b);
   });
   const clearGuideBtn = document.getElementById('clearGuideBtn');
-  if(clearGuideBtn) clearGuideBtn.style.display = (pendingMotif||motifGuide) ? 'inline-block' : 'none';
+  if(clearGuideBtn) clearGuideBtn.style.display = (pendingMotif || motifGuides.length) ? 'inline-block' : 'none';
 }
 
 function setMode(m){
@@ -1385,7 +1465,7 @@ document.querySelectorAll('.mode-btn').forEach(b => b.addEventListener('click', 
 
 document.getElementById('clearGuideBtn').addEventListener('click', () => {
   pendingMotif = null;
-  motifGuide = null;
+  motifGuides = [];
   buildMotifs();
   draw();
 });
@@ -1475,7 +1555,7 @@ document.getElementById('weftBtn').addEventListener('click', () => attemptPassWe
 document.getElementById('beatBtn').addEventListener('click', () => attemptBeat());
 
 document.getElementById('clearBtn').addEventListener('click', () => { resetLoom(); });
-document.getElementById('saveBtn').addEventListener('click', () => {
+function doSavePNG(){
   const filename = current.id + '-carpet.png';
   canvas.toBlob(async (blob) => {
     if (!blob) return;
@@ -1503,7 +1583,27 @@ document.getElementById('saveBtn').addEventListener('click', () => {
     link.click();
     URL.revokeObjectURL(link.href);
   }, 'image/png');
+}
+
+document.getElementById('saveBtn').addEventListener('click', () => {
+  const hasAnything = grid.some(row => row.some(Boolean));
+  if(!hasAnything){ doSavePNG(); return; }
+  cutAnim = { start: performance.now() };
+  playSnip(); setTimeout(playSnip, 300); setTimeout(playSnip, 600);
+  requestAnimationFrame(runCutAnimFrame);
 });
+
+function runCutAnimFrame(){
+  draw();
+  if(!cutAnim) return;
+  if(performance.now() - cutAnim.start < 900){
+    requestAnimationFrame(runCutAnimFrame);
+  } else {
+    cutAnim = null;
+    draw();
+    doSavePNG();
+  }
+}
 
 /* ---------- init ---------- */
 buildPalette();
