@@ -383,6 +383,7 @@
         <div class="tool-group" id="motifGroup">
           <span class="tool-label">motif guide</span>
         </div>
+        <button class="ghost-btn" id="rotateBtn" style="display:none;">⤾ Rotate</button>
         <button class="ghost-btn" id="clearGuideBtn" style="display:none;">Clear guides</button>
         <button class="ghost-btn" id="clearBtn">Clear</button>
         <button class="ghost-btn" id="saveBtn">Save PNG</button>
@@ -404,10 +405,14 @@
           <svg width="20" height="20" viewBox="0 0 20 20"><path d="M4 2v16M8 2v16M12 2v16M16 2v16" stroke="#231a0e" stroke-width="1.6"/><rect x="2" y="1" width="16" height="4" rx="1" fill="#231a0e"/></svg>
           <span id="beatLabel">Beat with comb</span>
         </button>
+        <button class="beat-btn secondary" id="advanceBtn" style="display:none;">
+          <svg width="20" height="20" viewBox="0 0 20 20" style="color:var(--ink)"><polyline points="1,10 5,6 9,10 13,6 17,10" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+          <span>Advance row</span>
+        </button>
         <span class="beat-status" id="beatStatus"></span>
         <span class="tension-warn" id="tensionWarn"></span>
       </div>
-      <p class="caption">Weaving here is locked to one active row at a time, bottom-up, the way a real vertical loom actually works — everything above the active row is bare, untouchable warp until you reach it. Hover a warp pair and click (or press <strong>A</strong> / <strong>S</strong>) to hand-tie one knot; there's no dragging a color across the board, every knot is its own discrete action. Once the active row has at least one knot, <strong>Pass weft</strong> (or press <strong>W</strong>) throws the horizontal thread loosely across it — only then can you <strong>Beat</strong> it down (or slam <strong>Spacebar</strong>) to lock the row tight and advance to the next one. Try to beat before wefting, or weft an empty row, and the loom refuses with a tension warning, same as skipping a step on a real one. Arm a motif thumbnail below and click anywhere on the active row to plant it there as a cast shadow — a medallion in the middle, a border motif on each side, as many as you want, all visible at once and none of them going away when you arm the next one. It still never fills a cell for you, it just tells you which color that cell wants once you hand-tie it, background nodes included.</p>
+      <p class="caption">Weaving here is locked to one active row at a time, bottom-up, the way a real vertical loom actually works — everything above the active row is bare, untouchable warp until you reach it. Hover a warp pair and click (or press <strong>A</strong> / <strong>S</strong>) to hand-tie one knot; there's no dragging a color across the board, every knot is its own discrete action. Once the active row has at least one knot, <strong>Pass weft</strong> (or press <strong>W</strong>) throws the horizontal thread loosely across it — only then can you <strong>Beat</strong> it down (or slam <strong>Spacebar</strong>) to lock the row tight. Beating no longer forces you onward automatically: beat the same row again for a denser, more compressed pack if you want it, then hit <strong>Advance row</strong> (or press <strong>Enter</strong>) when you're ready to move on. Try to beat before wefting, or weft an empty row, and the loom refuses with a tension warning, same as skipping a step on a real one. Arm a motif thumbnail below and click anywhere from the active row up to the top of the grid to plant it there as a cast shadow — a medallion in the middle, a border motif on each side, a shape planted rows ahead of where you're currently tying so you can weave toward it, as many as you want, all visible at once and none of them going away when you arm the next one (the same motif included — arm it again to plant a second copy). While a motif is armed, <strong>Rotate</strong> (or press <strong>R</strong>) turns it 90° at a time before you commit to a placement. It still never fills a cell for you, it just tells you which color that cell wants once you hand-tie it, background nodes included. Switching regions only swaps the palette, motifs and info panel — the loom itself keeps everything you've woven so far, so feel free to mix colors and motifs from as many regions as you like on one piece; <strong>Clear</strong> is the only thing that starts over. When you save, whatever shape you actually wove — not the full rectangle — is what gets cut free and saved.</p>
       <div class="legend">
         <div class="legend-item">
           <svg width="34" height="22" viewBox="0 0 34 22"><g stroke="#e4d6b8" stroke-width="1.4" opacity="0.7"><line x1="7" y1="0" x2="7" y2="22"/><line x1="17" y1="0" x2="17" y2="22"/><line x1="27" y1="0" x2="27" y2="22"/></g></svg>
@@ -443,6 +448,8 @@ const REGIONS = [
     blurb:'Tabriz has an unusually wide range for a single city — curvilinear medallion florals alongside hunting scenes and four-seasons pictorials full of animals and figures — tied with the tight, upright Turkish knot rather than the Persian knot most other Persian cities use. The stamp set below deliberately keeps its two structural traditions apart: a classic medallion carpet, and the older paneled "Bagh" garden-carpet format that has no medallion or corner spandrel at all.',
     beatTool:'comb',
     weftType:'depressed-double',
+    refUrl:'https://www.little-persia.com/pages/tabriz-rug-history-origin-guide',
+    refLabel:'Tabriz rug history & real pieces — Little-Persia',
     sources:[
       {label:'Knot type — symmetric/Turkish (majority view)', url:'https://losangeleshomeofrugs.com/blog/the-art-of-tabriz-rugs-a-masterpiece-of-persian-weaving/'},
       {label:'Knot type — asymmetric/Persian (minority view)', url:'https://alrug.com/blogs/rug-digest/how-to-identify-tabriz-rugs'},
@@ -462,6 +469,8 @@ const REGIONS = [
     blurb:'Heriz weavers favor one oversized medallion drawn in bold, angular lines on a brick-red field, with navy and ivory carrying the border. The ivory corner spandrels are not generic fillers — they carry an angular motif that deliberately echoes the medallion’s own stepped, pendant-tipped silhouette.',
     beatTool:'comb',
     weftType:'single',
+    refUrl:'https://www.little-persia.com/pages/heriz-rug-history-origin-guide',
+    refLabel:'Heriz rug history & real pieces — Little-Persia',
     sources:[
       {label:'Regional style guide — Heriz medallion drawing', url:'https://rugtherock.com/blogs/magazine/types-of-persian-rugs'},
       {label:'Regional style guide — Heriz construction', url:'https://www.mattcamron.com/rug-guides/persian-rugs'},
@@ -480,6 +489,8 @@ const REGIONS = [
     blurb:'Zanjan designs pair a central medallion with a smaller inner one, surrounded by star and flower-head motifs, birds, fish and paisley, in red and dark blue on ivory. Runners often trade the single medallion for a vertical chain of stacked hooked diamonds instead, and there’s no true corner spandrel here — the border just turns the corner.',
     beatTool:'comb',
     weftType:'single',
+    refUrl:'https://www.catalinarug.com/product-category/persian-rugs/zanjan/',
+    refLabel:'Real Zanjan rugs — Catalina Rug',
     sources:[
       {label:'Zanjan motifs, palette and knot mix', url:'https://www.catalinarug.com/rug-encyclopedia/origins-of-rugs/part-2-types-of-persian-rugs/'},
       {label:'Motif detail (nested hexagon medallion, stacked-diamond runner chain, no corner spandrel) — web research: 1stDibs listing photos + regional guides, no Kaggle coverage for this region', url:'https://www.1stdibs.com/buy/zanjan-persian/'}
@@ -497,6 +508,8 @@ const REGIONS = [
     blurb:'Kerman is known for an unusually wide range of designs and color combinations, built on fine local kork wool and dye recipes specific to its master weavers. Its most distinctive specialty is pictorial: coronation scenes, hunting tableaux, and confronting peacocks or phoenixes flanking a cartouche, alongside the more familiar elongated medallion-and-vine formula.',
     beatTool:'saber',
     weftType:'depressed-double',
+    refUrl:'https://www.little-persia.com/pages/kerman-rug-history-origin-guide',
+    refLabel:'Kerman rug history & real pieces — Little-Persia',
     sources:[
       {label:'Kerman design range and kork wool', url:'https://www.catalinarug.com/rug-encyclopedia/origins-of-rugs/part-2-types-of-persian-rugs/'},
       {label:'Kerman’s saber-blade beating tool', url:'https://www.catalinarug.com/blog/persian-rugs-anatomy/'},
@@ -516,6 +529,8 @@ const REGIONS = [
     blurb:'Esfahan work is defined by a distinctive terracotta-crimson accent historically drawn from cochineal dye, set into finely drawn medallion and floral fields. Of every region in this tool, Esfahan is the most purely rounded and polished — no angularity anywhere, down to a corner spandrel that mirrors the medallion’s curves exactly.',
     beatTool:'comb',
     weftType:'depressed-double',
+    refUrl:'https://www.uniqrugs.com/oriental-rugs/isfahan-rugs-c-32',
+    refLabel:'Real Isfahan rugs — Uniq Rugs',
     sources:[
       {label:'Esfahan cochineal red and medallion florals', url:'https://www.mattcamron.com/rug-guides/persian-rugs'},
       {label:'Motif detail (round layered medallion, Shah-Abbasi border, smooth quarter-round spandrel) — web research: 1stDibs listing photos + regional guides, no Kaggle coverage for this region', url:'https://www.1stdibs.com/buy/isfahan-persian-rug/'}
@@ -533,6 +548,8 @@ const REGIONS = [
     blurb:'Bakshayesh produces oversized rugs in muted ivory, beige and warm metallic tones, with folkloric figures and loose, asymmetrical drawing rather than formal medallion symmetry. There’s no corner-spandrel stamp for this region on purpose — many real Bakshayesh carpets simply don’t have one, leaving the field open right to the border.',
     beatTool:'comb',
     weftType:'single',
+    refUrl:'https://www.claremontrug.com/antique-rugs-information/antique-persian-rug-guide/antique-persian-bakshaish-rugs/',
+    refLabel:'Bakshaish rug guide & real pieces — Claremont Rug Co.',
     sources:[
       {label:'Bakshayesh village weaving and palette', url:'https://therugdecor.com/blogs/blog/an-insight-into-types-of-persian-rugs'},
       {label:'Motif detail (off-center loose medallion, omitted spandrels, tree-column field) — web research: Wikimedia Commons carpet photos + Claremont Rug Co. guide, no Kaggle coverage for this region', url:'https://commons.wikimedia.org/wiki/Category:Bakshaish_carpets'}
@@ -550,6 +567,8 @@ const REGIONS = [
     blurb:'Mashhad rugs are usually large, built around a single oversized medallion set into a dense, curvilinear floral field. What actually sets Mashhad apart from its curvilinear cousins isn’t the medallion — it’s the corner spandrel, stretched so long it nearly reaches the middle of each border.',
     beatTool:'comb',
     weftType:'depressed-double',
+    refUrl:'https://www.little-persia.com/pages/mashad-rug-history-origin-guide',
+    refLabel:'Mashhad rug history & real pieces — Little-Persia',
     sources:[
       {label:'Mashhad medallion scale and knot range', url:'https://www.catalinarug.com/blog/beginners-guide-to-traditional-persian-rugs/'},
       {label:'Motif detail (nested cartouche medallion, elongated corner spandrel, boteh/Herati filler) — web research: 1stDibs listing photos, no Kaggle coverage for this region', url:'https://www.1stdibs.com/buy/antique-persian-mashhad-rug/'}
@@ -567,6 +586,8 @@ const REGIONS = [
     blurb:'Qashqai weaving is nomadic: the weaver designs from memory rather than a workshop pattern, producing geometric diamond medallions and stylized animal silhouettes scattered across an allover field. There’s no corner-spandrel stamp for this region — Qashqai corners aren’t a smooth filled shape, they’re just where the angular field and border meet.',
     beatTool:'comb',
     weftType:'single',
+    refUrl:'https://www.little-persia.com/pages/qashqai-rug-history-origin-guide',
+    refLabel:'Qashqai rug history & real pieces — Little-Persia',
     sources:[
       {label:'Tribal/nomadic geometric weaving overview', url:'https://stylebyemilyhenderson.com/the-ultimate-guide-to-persian-rugs-what-makes-them-so-dang-good-desirable-valuable'},
       {label:'Stacked-diamond medallion — image-verified, no single article source', url:''},
@@ -585,6 +606,8 @@ const REGIONS = [
     blurb:'Kashan work is built on dense, all-over floral fields — weeping willows, teardrop medallions, quarter-medallions framing each corner — usually on a deep red field against ivory or midnight-blue borders. Its confronting-gazelle border is a real, recurring trait documented across multiple pieces, not an isolated example.',
     beatTool:'comb',
     weftType:'depressed-double',
+    refUrl:'https://www.little-persia.com/pages/kashan-rug-history-origin-guide',
+    refLabel:'Kashan rug history & real pieces — Little-Persia',
     sources:[
       {label:'Kashan red-field medallion and knot range', url:'https://www.catalinarug.com/blog/beginners-guide-to-traditional-persian-rugs/'},
       {label:'Kashan grouped among core regional styles', url:'https://rugtherock.com/blogs/magazine/persian-rugs-vs-oriental-rugs'},
@@ -603,6 +626,8 @@ const REGIONS = [
     blurb:'Qom weavers work almost entirely in silk and draw on a wide range of borrowed designs — tree-of-life scenes, hunting tableaux, vase and arch motifs — in saturated jewel tones that read differently in silk than in wool. The tree-of-life-with-birds design in particular is a genuine, well-documented Qom specialty, not an occasional borrowing.',
     beatTool:'spike',
     weftType:'depressed-double',
+    refUrl:'https://jewelrugs.com/collections/persian-qum-rugs',
+    refLabel:'Real Persian Qum rugs — Jewel Rugs',
     sources:[
       {label:'Qom silk designs — tree of life, hunting, vase, mehrabi', url:'https://www.rugman.com/carpet-design/qum-rugs/'},
       {label:'Qom silk, jewel-tone palette', url:'https://jewelrugs.com/collections/persian-qum-rugs'},
@@ -622,6 +647,8 @@ const REGIONS = [
     blurb:'Turkmen weaving is dominated almost entirely by shades of deep red, patterned with rows of a repeating gol — an octagonal tribal emblem — instead of a bordered medallion field. Every tribe (Tekke, Ersari, Salor, Saryk, Yomut) has its own named gul, so "Turkmen" here is a composite, not one specific tribal style. The stamp set also keeps the "ensi" door-rug format separate — it isn’t a variation on the gul-grid main carpet, it’s a structurally different four-panel layout entirely.',
     beatTool:'comb',
     weftType:'single',
+    refUrl:'https://www.little-persia.com/pages/turkmen-rug-history-origin-guide',
+    refLabel:'Turkmen rug history & real pieces — Little-Persia',
     sources:[
       {label:'Gul/gol motif — definition and tribal variation', url:'https://en.wikipedia.org/wiki/Gul_(design)'},
       {label:'Turkoman red field and gul construction', url:'https://www.catalinarug.com/product-category/persian-rugs/turkoman/'},
@@ -641,6 +668,8 @@ const REGIONS = [
     blurb:'Bidjar rugs are woven wet — the warp, weft and yarn are dampened through the whole process — then packed with a heavy nail-like spike instead of a comb, which is why finished Bidjars are so rigid they\u2019re nicknamed the "iron rugs of Persia." Design-wise this is the clearest visual opposite of Kerman or Kashan\u2019s curvilinear delicacy in this tool: hooked, angular, and just as often skipping the medallion entirely for a dense allover diaper field.',
     beatTool:'spike',
     weftType:'depressed-double',
+    refUrl:'https://nazmiyalantiquerugs.com/bidjar-rugs/',
+    refLabel:'Real Bidjar rugs — Nazmiyal Antique Rugs',
     sources:[
       {label:'Bidjar wet-weaving and nail-tool compacting', url:'https://www.catalinarug.com/blog/persian-rugs-anatomy/'},
       {label:'Bidjar nail-shaped compacting tool, second source', url:'https://eramrugs.co.uk/blogs/news/process-and-weaving-techniques-of-persian-rugs'},
@@ -787,18 +816,24 @@ let cell = 14;
 // of the canvas (highest index) and decrements toward 0 as each row is
 // finished, mirroring how a rug grows upward on a vertical loom.
 let activeRow = ROWS - 1;
-let rowPhase = 'tying';   // 'tying' -> 'wefted' -> (beat locks it, activeRow--, back to 'tying')
+// 'tying' -> 'wefted' -> 'beaten' (beat locks it at least once; another beat
+// packs it tighter still, or Advance moves on and resets to 'tying').
+let rowPhase = 'tying';
 let loomComplete = false;
+let beatCounts = new Array(ROWS).fill(0); // how many times each row has been beaten — more beats, tighter pack
 
-// A motif guide previews one documented regional shape's row-by-row slice
-// on the active row only. It never fills a cell for you — it just tells you
-// which color a cell wants once you hand-tie it, background cells included.
-let pendingMotif = null;   // armed, waiting for an anchor click in the active row
-let motifGuides = [];      // {motif, baseRow, anchorCol}[] — every guide anchored so far,
-                            // e.g. a medallion in the middle and a border motif on each
+// A motif guide previews one documented regional shape's row-by-row slice.
+// It never fills a cell for you — it just tells you which color a cell
+// wants once you hand-tie it, background cells included.
+let pendingMotif = null;   // armed, waiting for an anchor click
+let pendingRotation = 0;   // 0/90/180/270 — rotation applied to pendingMotif before it's anchored
+let motifGuides = [];      // {motif, baseRow, anchorCol, rotatedRows}[] — every guide anchored so
+                            // far, e.g. a medallion in the middle and a border motif on each
                             // side, all visible and all still live at once. Picking a new
                             // motif thumbnail only arms it as pending; it never clears the
-                            // ones already placed.
+                            // ones already placed. baseRow need not be the active row — a
+                            // shape can be anchored higher up the grid, ahead of where you're
+                            // currently tying, as a shadow to work toward.
 
 function makeGrid(){
   return Array.from({length:ROWS}, () => Array(COLS).fill(null));
@@ -818,7 +853,9 @@ function resetLoom(){
   activeRow = ROWS - 1;
   rowPhase = 'tying';
   loomComplete = false;
+  beatCounts = new Array(ROWS).fill(0);
   pendingMotif = null;
+  pendingRotation = 0;
   motifGuides = [];
   draw();
   updateBeatUI();
@@ -844,19 +881,39 @@ function resizeCanvas(){
   draw();
 }
 
-function roundRect(x,y,w,h,r){
-  ctx.beginPath();
-  ctx.moveTo(x+r,y);
-  ctx.arcTo(x+w,y,x+w,y+h,r);
-  ctx.arcTo(x+w,y+h,x,y+h,r);
-  ctx.arcTo(x,y+h,x,y,r);
-  ctx.arcTo(x,y,x+w,y,r);
-  ctx.closePath();
+function roundRect(context,x,y,w,h,r){
+  context.beginPath();
+  context.moveTo(x+r,y);
+  context.arcTo(x+w,y,x+w,y+h,r);
+  context.arcTo(x+w,y+h,x,y+h,r);
+  context.arcTo(x,y+h,x,y,r);
+  context.arcTo(x,y,x+w,y,r);
+  context.closePath();
 }
 
 function motifCharColor(ch, palette){
   const colorIdx = ch==='1' ? 0 : ch==='2' ? 1 : 2;
   return palette[colorIdx] || palette[1];
+}
+
+// Rotate a square ASCII motif grid 90° clockwise, as many times as `steps`
+// (0-3) asks for. Used both to preview an armed motif's rotation before
+// anchoring it, and to bake the chosen rotation into a guide once anchored.
+function rotateRows90(rows){
+  const n = rows.length;
+  const out = [];
+  for(let i=0;i<n;i++){
+    let row = '';
+    for(let j=0;j<n;j++) row += rows[n-1-j][i];
+    out.push(row);
+  }
+  return out;
+}
+function getRotatedRows(motif, rotationDeg){
+  let rows = motif.rows;
+  const steps = ((rotationDeg/90)%4 + 4) % 4;
+  for(let i=0;i<steps;i++) rows = rotateRows90(rows);
+  return rows;
 }
 
 // The guide character for loom row `r` / column `c` from whichever armed
@@ -865,12 +922,13 @@ function motifCharColor(ch, palette){
 function guideCharAtRow(r, c){
   for(let i=motifGuides.length-1;i>=0;i--){
     const g = motifGuides[i];
-    const m = g.motif, n = m.rows.length, half = Math.floor(n/2);
+    const rows = g.rotatedRows || g.motif.rows;
+    const n = rows.length, half = Math.floor(n/2);
     const rowIdx = (n-1) - (g.baseRow - r);
     if(rowIdx < 0 || rowIdx >= n) continue;
     const gc = c - g.anchorCol + half;
     if(gc < 0 || gc >= n) continue;
-    const ch = m.rows[rowIdx][gc];
+    const ch = rows[rowIdx][gc];
     if(ch !== '.') return ch;
   }
   return null;
@@ -985,7 +1043,31 @@ function draw(){
         const hex = motifCharColor(ch, current.palette);
         ctx.fillStyle = hex + (isActiveRow ? '55' : '26');
         const x = c*cell, y = r*cell;
-        roundRect(x+cell*0.22, y+cell*0.22, cell*0.56, cell*0.56, 2);
+        roundRect(ctx, x+cell*0.22, y+cell*0.22, cell*0.56, cell*0.56, 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  // a live preview of an armed-but-not-yet-anchored motif at the hovered
+  // cell, rotation included — so "turn motifs" is actually visible before
+  // you commit to a placement, not just a silent flag. Works anywhere from
+  // the active row up to the top of the grid, since a shadow can be planted
+  // ahead of where you're currently tying.
+  if(pendingMotif && hoverCell && !loomComplete && hoverCell.r<=activeRow){
+    const rows = getRotatedRows(pendingMotif, pendingRotation);
+    const n = rows.length, half = Math.floor(n/2);
+    for(let ri=0; ri<n; ri++){
+      const rr = hoverCell.r - (n-1) + ri;
+      if(rr<0 || rr>activeRow) continue;
+      for(let ci=0; ci<n; ci++){
+        const ch = rows[ri][ci];
+        if(ch==='.') continue;
+        const cc = hoverCell.c - half + ci;
+        if(cc<0 || cc>=COLS) continue;
+        if(grid[rr][cc]) continue;
+        ctx.fillStyle = motifCharColor(ch, current.palette) + '40';
+        roundRect(ctx, cc*cell+cell*0.22, rr*cell+cell*0.22, cell*0.56, cell*0.56, 2);
         ctx.fill();
       }
     }
@@ -1004,8 +1086,10 @@ function draw(){
     }
   }
 
-  // hover cue: only the active row is workable, so only it ever shows one.
-  if(hoverCell && hoverCell.r===activeRow && !loomComplete){
+  // hover cue: the active row is always workable; rows above it only light
+  // up while a motif is armed, since that's the only action they accept
+  // (planting a shadow ahead — never a knot).
+  if(hoverCell && !loomComplete && (hoverCell.r===activeRow || (pendingMotif && hoverCell.r<activeRow))){
     ctx.strokeStyle = 'rgba(228,214,184,0.55)';
     ctx.lineWidth = 1.5;
     ctx.strokeRect(hoverCell.c*cell+1, hoverCell.r*cell+1, cell-2, cell-2);
@@ -1150,16 +1234,26 @@ function drawBeatTool(now){
   }
 }
 
+// One beat locks a row at normal tightness; beating the same row again
+// before advancing packs it denser still, for weavers who want a more
+// compressed look — with diminishing returns, capped at the same 1.25
+// "over-tightened" ceiling drawKnot already knows how to render.
+function targetTightnessFor(count){
+  if(count<=0) return 0;
+  return Math.min(1.25, 1 + (count-1)*0.15);
+}
 function rowTightness(r, now){
   if(beatAnim && beatAnim.row===r){
     const dur = 280;
     const elapsed = now - beatAnim.start;
-    if(elapsed>=dur) return 1;
+    const from = targetTightnessFor(beatCounts[r]);
+    const to = targetTightnessFor(beatCounts[r]+1);
+    if(elapsed>=dur) return to;
     const p = elapsed/dur;
-    const overshoot = Math.sin(p*Math.PI) * 0.4 * (1-p);
-    return p + overshoot;
+    const overshoot = Math.sin(p*Math.PI) * 0.4 * (1-p) * Math.max(0.4, to-from);
+    return from + (to-from)*p + overshoot;
   }
-  return r > activeRow ? 1 : 0;
+  return targetTightnessFor(beatCounts[r]);
 }
 
 function drawKnot(c,r,k,t,pulse){
@@ -1168,7 +1262,7 @@ function drawKnot(c,r,k,t,pulse){
   pad -= cell*0.07*(pulse||0);
   const x=c*cell, y=r*cell;
   ctx.fillStyle = k.hex;
-  roundRect(x+pad, y+pad, cell-2*pad, cell-2*pad, Math.min(3,cell*(0.3-0.15*Math.min(tt,1))));
+  roundRect(ctx, x+pad, y+pad, cell-2*pad, cell-2*pad, Math.min(3,cell*(0.3-0.15*Math.min(tt,1))));
   ctx.fill();
   ctx.fillStyle = 'rgba(0,0,0,0.28)';
   if(k.knot==='sym'){
@@ -1207,7 +1301,7 @@ function animateWeft(){
 
 function attemptBeat(){
   if(loomComplete) return;
-  if(rowPhase !== 'wefted'){ flashWarning('Pass the weft before you beat — nothing to compact yet.'); return; }
+  if(rowPhase === 'tying'){ flashWarning('Pass the weft before you beat — nothing to compact yet.'); return; }
   beatAnim = {row:activeRow, start:performance.now()};
   playThump();
   requestAnimationFrame(animateBeat);
@@ -1220,23 +1314,38 @@ function animateBeat(){
   if(elapsed < 280){
     requestAnimationFrame(animateBeat);
   } else {
+    const row = beatAnim.row;
     beatAnim = null;
-    if(activeRow===0){
-      loomComplete = true;
-    } else {
-      activeRow -= 1;
-      rowPhase = 'tying';
-      // drop only the guides whose span the loom has now fully passed —
-      // the rest (and anything still pending) stay exactly as placed.
-      motifGuides = motifGuides.filter(g => {
-        const n = g.motif.rows.length;
-        const rowIdx = (n-1) - (g.baseRow - activeRow);
-        return rowIdx >= 0 && rowIdx < n;
-      });
-    }
+    beatCounts[row] += 1;
+    // a beat no longer auto-advances the row — it just locks in (or
+    // deepens) this pass's compression. Moving on is now its own explicit
+    // action, so a weaver who wants a denser row can beat it as many times
+    // as they like first.
+    rowPhase = 'beaten';
     draw();
     updateBeatUI();
   }
+}
+
+function advanceRow(){
+  if(loomComplete) return;
+  if(rowPhase !== 'beaten'){ flashWarning('Beat the row at least once before advancing.'); return; }
+  if(activeRow===0){
+    loomComplete = true;
+  } else {
+    activeRow -= 1;
+    rowPhase = 'tying';
+    // drop only the guides whose span the loom has now fully passed —
+    // the rest (and anything still pending, including ones anchored ahead
+    // of where we just were) stay exactly as placed.
+    motifGuides = motifGuides.filter(g => {
+      const n = (g.rotatedRows || g.motif.rows).length;
+      const topRow = g.baseRow - (n-1);
+      return activeRow >= topRow;
+    });
+  }
+  draw();
+  updateBeatUI();
 }
 
 let warnTimer = null;
@@ -1281,14 +1390,25 @@ function regionPitchRatio(id){
   for(let i=0;i<id.length;i++) h = (h*31 + id.charCodeAt(i)) % 12;
   return Math.pow(2, h/12);
 }
+// A stable string -> semitone hash, reused below to turn an actual knot
+// color into a pitch. Not a claim that any real Naqshe-khani tradition maps
+// specific colors to specific pitches — no source says that — it's just a
+// deterministic way to give each distinct color in the piece its own
+// recognizable tone, the same trick regionPitchRatio already uses for ids.
+function hashToSemitone(str, range){
+  let h = 0;
+  for(let i=0;i<str.length;i++) h = (h*31 + str.charCodeAt(i)) % range;
+  return h;
+}
+function colorPitchHz(hex, baseHz){
+  return baseHz * Math.pow(2, hashToSemitone(hex, 12)/12);
+}
 function playNaqshKhani(){
   try{
     const Ctx = window.AudioContext || window.webkitAudioContext;
     if(!Ctx) return;
     const actx = new Ctx();
     const shift = regionPitchRatio(current.id);
-    const callHz = [392,440,392,349,392].map(f => f*shift);
-    const answerHz = [294,294,262].map(f => f*shift);
     let t = actx.currentTime;
     const note = (f, dur, peak) => {
       const osc = actx.createOscillator();
@@ -1301,9 +1421,52 @@ function playNaqshKhani(){
       osc.connect(gain); gain.connect(actx.destination);
       osc.start(t); osc.stop(t+dur+0.02);
     };
-    callHz.forEach(f => { note(f, 0.16, 0.14); t += 0.17; });
-    t += 0.14; // the beat of silence between a call and its answer
-    answerHz.forEach(f => { note(f, 0.22, 0.11); t += 0.23; });
+
+    // gather rows that have actually been beaten in, closest to the active
+    // row first, so the demo sings the piece you've actually just woven
+    // instead of a fixed tune.
+    const wovenRows = [];
+    for(let r=ROWS-1; r>activeRow; r--){
+      if(grid[r].some(Boolean)) wovenRows.push(r);
+    }
+    const rowsToSing = wovenRows.slice(0, 4); // keep the demo short
+
+    if(rowsToSing.length === 0){
+      // nothing beaten in yet — fall back to the original structural
+      // call-and-response so there's still something illustrative to hear.
+      const callHz = [392,440,392,349,392].map(f => f*shift);
+      const answerHz = [294,294,262].map(f => f*shift);
+      callHz.forEach(f => { note(f, 0.16, 0.14); t += 0.17; });
+      t += 0.14;
+      answerHz.forEach(f => { note(f, 0.22, 0.11); t += 0.23; });
+      return;
+    }
+
+    // one "call" per row: run-length-encode its actual knot colors left to
+    // right, and sing one tone per color-run — pitch from the color, length
+    // from how many knots in a row shared it.
+    rowsToSing.forEach(r => {
+      const row = grid[r];
+      const runs = [];
+      let curHex = null, curCount = 0;
+      row.forEach(k => {
+        const hex = k ? k.hex : null;
+        if(hex === curHex){ curCount++; }
+        else {
+          if(curHex) runs.push({hex:curHex, count:curCount});
+          curHex = hex; curCount = 1;
+        }
+      });
+      if(curHex) runs.push({hex:curHex, count:curCount});
+
+      runs.forEach(run => {
+        const f = colorPitchHz(run.hex, 330) * shift;
+        const dur = Math.min(0.32, 0.1 + run.count*0.03);
+        note(f, dur, 0.13);
+        t += dur + 0.03;
+      });
+      t += 0.12; // a breath between rows, like a caller moving to the next line
+    });
   }catch(e){}
 }
 
@@ -1334,11 +1497,29 @@ function getCell(e){
   return { r: Math.floor(y/cell), c: Math.floor(x/cell) };
 }
 
-function tieAt(r,c){
+// A click either ties a knot (on the active row), or — if a motif is
+// armed — plants that motif's shadow as a guide, anywhere from the active
+// row up to the top of the grid. Rows you haven't reached yet can't take a
+// knot (there's no warp tension to tie against), but they can absolutely
+// take a planted shadow to work toward.
+function handleCellAction(r,c){
   if(loomComplete || c<0 || c>=COLS) return;
-  if(r !== activeRow){
+  if(r > activeRow){
+    flashWarning('Already beaten in — that row is locked.');
+    return;
+  }
+  if(r < activeRow){
+    if(pendingMotif){
+      const rotatedRows = getRotatedRows(pendingMotif, pendingRotation);
+      motifGuides.push({ motif: pendingMotif, baseRow: r, anchorCol: c, rotatedRows });
+      pendingMotif = null;
+      pendingRotation = 0;
+      buildMotifs();
+      draw();
+      return;
+    }
     const rowNum = ROWS - activeRow;
-    flashWarning(r < activeRow ? 'Not reached yet — you’re weaving row '+rowNum+'.' : 'Already beaten in — that row is locked.');
+    flashWarning('Not reached yet — you’re weaving row '+rowNum+'. Arm a motif to plant a shadow there instead.');
     return;
   }
   if(rowPhase !== 'tying'){
@@ -1350,8 +1531,10 @@ function tieAt(r,c){
     grid[r][c] = null;
   } else {
     if(pendingMotif){
-      motifGuides.push({ motif: pendingMotif, baseRow: activeRow, anchorCol: c });
+      const rotatedRows = getRotatedRows(pendingMotif, pendingRotation);
+      motifGuides.push({ motif: pendingMotif, baseRow: activeRow, anchorCol: c, rotatedRows });
       pendingMotif = null;
+      pendingRotation = 0;
       buildMotifs();
     }
     const guideCh = guideCharAt(c);
@@ -1367,7 +1550,7 @@ function tieAt(r,c){
 canvas.addEventListener('click', e => {
   const {r,c} = getCell(e);
   if(r<0||r>=ROWS||c<0||c>=COLS) return;
-  tieAt(r,c);
+  handleCellAction(r,c);
 });
 canvas.addEventListener('pointermove', e => {
   const {r,c} = getCell(e);
@@ -1380,14 +1563,21 @@ canvas.addEventListener('pointermove', e => {
 canvas.addEventListener('pointerleave', () => { hoverCell=null; draw(); });
 
 // Spacebar slams the beat lever; W throws the weft; A/S mimic catching the
-// loop with either hand — both tie (or erase) whatever's currently hovered,
-// so tying never strictly requires the mouse.
+// loop with either hand — both tie (or plant a shadow) at whatever's
+// currently hovered, so none of this strictly requires the mouse. Enter
+// advances to the next row once the current one's beaten, and R rotates
+// whatever motif is currently armed.
 window.addEventListener('keydown', e => {
   const k = e.key;
   if(k===' '){ e.preventDefault(); attemptBeat(); return; }
   if(k==='w' || k==='W'){ e.preventDefault(); attemptPassWeft(); return; }
+  if(k==='Enter'){ e.preventDefault(); advanceRow(); return; }
+  if(k==='r' || k==='R'){
+    if(pendingMotif){ pendingRotation = (pendingRotation+90)%360; buildMotifs(); draw(); }
+    return;
+  }
   if(k==='a' || k==='A' || k==='s' || k==='S'){
-    if(hoverCell) tieAt(hoverCell.r, hoverCell.c);
+    if(hoverCell) handleCellAction(hoverCell.r, hoverCell.c);
   }
 });
 
@@ -1446,6 +1636,7 @@ function buildMotifs(){
     b.appendChild(cnv);
     b.addEventListener('click', () => {
       pendingMotif = m;
+      pendingRotation = 0;
       setMode('knot');
       buildMotifs();
       updateBeatUI();
@@ -1454,6 +1645,11 @@ function buildMotifs(){
   });
   const clearGuideBtn = document.getElementById('clearGuideBtn');
   if(clearGuideBtn) clearGuideBtn.style.display = (pendingMotif || motifGuides.length) ? 'inline-block' : 'none';
+  const rotateBtn = document.getElementById('rotateBtn');
+  if(rotateBtn){
+    rotateBtn.style.display = pendingMotif ? 'inline-block' : 'none';
+    rotateBtn.textContent = '⤾ Rotate' + (pendingRotation ? ' ('+pendingRotation+'°)' : '');
+  }
 }
 
 function setMode(m){
@@ -1465,14 +1661,20 @@ document.querySelectorAll('.mode-btn').forEach(b => b.addEventListener('click', 
 
 document.getElementById('clearGuideBtn').addEventListener('click', () => {
   pendingMotif = null;
+  pendingRotation = 0;
   motifGuides = [];
+  buildMotifs();
+  draw();
+});
+document.getElementById('rotateBtn').addEventListener('click', () => {
+  if(!pendingMotif) return;
+  pendingRotation = (pendingRotation + 90) % 360;
   buildMotifs();
   draw();
 });
 
 function buildSpec(){
   const s = document.getElementById('spec');
-  const refUrl = 'https://commons.wikimedia.org/w/index.php?search=' + encodeURIComponent(current.name+' Persian rug') + '&title=Special:MediaSearch&type=image';
   const srcList = current.sources.map(src => src.url
     ? '<li><a href="'+src.url+'" target="_blank" rel="noopener">'+src.label+' ↗</a></li>'
     : '<li class="unlinked">'+src.label+'</li>'
@@ -1481,10 +1683,10 @@ function buildSpec(){
     '<h2>'+current.name+'</h2>' +
     '<span class="zone-tag">'+current.zone+' · '+current.kind+' · '+current.family+'</span>' +
     '<p class="blurb">'+current.blurb+'</p>' +
-    '<a class="ref-link" href="'+refUrl+'" target="_blank" rel="noopener">See real '+current.name+' rugs on Wikimedia Commons ↗</a>' +
+    '<a class="ref-link" href="'+current.refUrl+'" target="_blank" rel="noopener">'+current.refLabel+' ↗</a>' +
     '<div class="chant-row">'+
       '<button class="chant-btn" type="button" onclick="playNaqshKhani()">▶ Play illustrative chant demo</button>'+
-      '<span class="chant-note">synthesized call-and-response rhythm — not a real Naqshe-khani recording</span>'+
+      '<span class="chant-note">sung from the colors and knot-counts you\'ve actually beaten into the loom so far — synthesized, not a real Naqshe-khani recording</span>'+
     '</div>' +
     '<div class="chant-row">'+
       '<a class="chant-btn" href="https://www.youtube.com/watch?v=zeT5EaniYPM" target="_blank" rel="noopener">🎬 Watch real Naqshe-khani (video) ↗</a>'+
@@ -1516,14 +1718,20 @@ function field(label, value){
 }
 
 function selectRegion(id){
+  // Switching regions only swaps the palette, motif set and info panel —
+  // the loom itself is the viewer's playground, not something tied to one
+  // region. Whatever's already tied, wefted or beaten stays exactly as it
+  // is; you can freely mix colors, motifs and patterns from as many
+  // regions as you like on the same piece. Clear (not a region switch) is
+  // the only thing that starts a fresh loom.
   current = REGIONS.find(r => r.id===id);
   activeColor = current.palette[0];
   document.querySelectorAll('.region-btn').forEach(b => b.classList.toggle('active', b.dataset.id===id));
-  resetLoom();
   buildPalette();
   buildMotifs();
   buildSpec();
   updateBeatUI();
+  draw();
 }
 
 const BEAT_TOOL_NAMES = {
@@ -1535,29 +1743,79 @@ function updateBeatUI(){
   const label = document.getElementById('beatLabel');
   const status = document.getElementById('beatStatus');
   const rowIndicator = document.getElementById('rowIndicator');
+  const advanceBtn = document.getElementById('advanceBtn');
   label.textContent = 'Beat with ' + (BEAT_TOOL_NAMES[current.beatTool] || 'comb');
   if(loomComplete){
     rowIndicator.textContent = 'All '+ROWS+' rows woven and beaten tight.';
     status.textContent = 'Finished — Clear to start a new piece.';
+    if(advanceBtn) advanceBtn.style.display = 'none';
     return;
   }
   const rowNum = ROWS - activeRow; // 1-indexed, bottom row = row 1
   const tiedHere = grid[activeRow].filter(Boolean).length;
-  const phaseLabel = rowPhase==='tying'
-    ? (tiedHere+' knot'+(tiedHere===1?'':'s')+' tied — pass the weft when ready')
-    : 'weft thrown — beat it down to lock the row';
+  let phaseLabel;
+  if(rowPhase==='tying'){
+    phaseLabel = tiedHere+' knot'+(tiedHere===1?'':'s')+' tied — pass the weft when ready';
+  } else if(rowPhase==='wefted'){
+    phaseLabel = 'weft thrown — beat it down to lock the row';
+  } else {
+    const n = beatCounts[activeRow];
+    phaseLabel = 'beaten '+n+'x — beat again for a tighter pack, or advance to the next row';
+  }
   rowIndicator.textContent = 'Row '+rowNum+' of '+ROWS+' — '+phaseLabel;
   const doneRows = ROWS-1-activeRow;
   status.textContent = doneRows+' row'+(doneRows===1?'':'s')+' beaten tight so far';
+  if(advanceBtn) advanceBtn.style.display = rowPhase==='beaten' ? 'inline-block' : 'none';
 }
 
 document.getElementById('weftBtn').addEventListener('click', () => attemptPassWeft());
 document.getElementById('beatBtn').addEventListener('click', () => attemptBeat());
+document.getElementById('advanceBtn').addEventListener('click', () => advanceRow());
 
 document.getElementById('clearBtn').addEventListener('click', () => { resetLoom(); });
+
+// Crops the export to exactly the knots you've actually tied, not the full
+// rectangular loom — so weaving just one motif (say, a lone circular one)
+// saves as that shape, transparent everywhere else, instead of a big empty
+// rectangle around it. Returns null if nothing's been tied yet.
+function buildWovenPieceCanvas(){
+  let minR=ROWS, maxR=-1, minC=COLS, maxC=-1;
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      if(grid[r][c]){
+        if(r<minR) minR=r; if(r>maxR) maxR=r;
+        if(c<minC) minC=c; if(c>maxC) maxC=c;
+      }
+    }
+  }
+  if(maxR<0) return null;
+  const off = document.createElement('canvas');
+  off.width = (maxC-minC+1)*cell;
+  off.height = (maxR-minR+1)*cell;
+  const octx = off.getContext('2d');
+  for(let r=minR;r<=maxR;r++){
+    for(let c=minC;c<=maxC;c++){
+      const k = grid[r][c];
+      if(!k) continue;
+      const x=(c-minC)*cell, y=(r-minR)*cell, pad=cell*0.05;
+      octx.fillStyle = k.hex;
+      roundRect(octx, x+pad, y+pad, cell-2*pad, cell-2*pad, Math.min(3,cell*0.15));
+      octx.fill();
+      octx.fillStyle = 'rgba(0,0,0,0.28)';
+      if(k.knot==='sym'){
+        octx.fillRect(x+cell*0.18, y+cell*0.72, cell*0.64, Math.max(1,cell*0.12));
+      } else {
+        octx.fillRect(x+cell*0.58, y+cell*0.16, Math.max(1,cell*0.16), cell*0.68);
+      }
+    }
+  }
+  return off;
+}
+
 function doSavePNG(){
   const filename = current.id + '-carpet.png';
-  canvas.toBlob(async (blob) => {
+  const sourceCanvas = buildWovenPieceCanvas() || canvas;
+  sourceCanvas.toBlob(async (blob) => {
     if (!blob) return;
     // Inside the Claude artifact host, a plain <a download> link is inert
     // (the sandbox never grants that permission) — use the platform's own
