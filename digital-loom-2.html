@@ -574,7 +574,7 @@ const REGIONS = [
     loom:'Fixed vertical workshop loom',
     family:'Curvilinear court style, with a pictorial/narrative streak',
     motifs:['tabriz_medallion_geo','tabriz_herati_border','tabriz_spandrel_geo','tabriz_confronting_camels','tabriz_bagh_panel','tabriz_bagh_border','tabriz_cypress'],
-    palette:['#7A2E28','#C9A24B','#A3352B','#EDE0C4','#2E3B49'],
+    palette:['#7A2E28','#C9A24B','#A3352B','#EDE0C4','#2E3B49','#6B4A2E','#241A14'],
     blurb:'Tabriz has an unusually wide range for a single city — curvilinear medallion florals alongside hunting scenes and four-seasons pictorials full of animals and figures — tied with the tight, upright Turkish knot rather than the Persian knot most other Persian cities use. The stamp set below deliberately keeps its two structural traditions apart: a classic medallion carpet, and the older paneled "Bagh" garden-carpet format that has no medallion or corner spandrel at all.',
     beatTool:'comb',
     weftType:'depressed-double',
@@ -595,7 +595,7 @@ const REGIONS = [
     loom:'Fixed vertical village loom',
     family:'Bold geometric, large-block style',
     motifs:['heriz_medallion_geo','heriz_herati_border','spandrel_geo','heriz_vaqvaq'],
-    palette:['#8C2E22','#1F3A5C','#EDE0C4','#B5622F','#3A2A1E'],
+    palette:['#8C2E22','#1F3A5C','#EDE0C4','#B5622F','#3A2A1E','#14273D','#A85A4A'],
     blurb:'Heriz weavers favor one oversized medallion drawn in bold, angular lines on a brick-red field, with navy and ivory carrying the border. The ivory corner spandrels are not generic fillers — they carry an angular motif that deliberately echoes the medallion’s own stepped, pendant-tipped silhouette.',
     beatTool:'comb',
     weftType:'single',
@@ -615,7 +615,7 @@ const REGIONS = [
     loom:'Fixed vertical village loom',
     family:'Bold geometric, village style',
     motifs:['zanjan_medallion_geo','zanjan_folk_border','zanjan_stacked_diamonds'],
-    palette:['#8C2A2A','#243A5E','#EDE0C4','#5C6E4A','#8A6A3A'],
+    palette:['#8C2A2A','#243A5E','#EDE0C4','#5C6E4A','#8A6A3A','#8A8A7A','#1C2E48'],
     blurb:'Zanjan designs pair a central medallion with a smaller inner one, surrounded by star and flower-head motifs, birds, fish and paisley, in red and dark blue on ivory. Runners often trade the single medallion for a vertical chain of stacked hooked diamonds instead, and there’s no true corner spandrel here — the border just turns the corner.',
     beatTool:'comb',
     weftType:'single',
@@ -633,9 +633,9 @@ const REGIONS = [
     layout:'Mihrabi — curvilinear floral, vase and garden scenes, typically built around an elongated pointed-oval cartouche medallion that often encloses a small calligraphic accent, framed by a fine floral vine-and-rosette border and quarter-medallion corner spandrels. Kerman is also Persia’s best-documented source of pictorial "picture rugs" — coronation and hunting scenes, and peacock/phoenix figures flanking a cartouche in the border',
     loom:'Fixed vertical workshop loom',
     family:'Curvilinear court style',
-    motifs:['kerman_medallion_fine','kerman_vine_border','lechak','kerman_pictorial_pair'],
-    palette:['#C0546B','#4A6B8A','#EDE0C4','#7C8A5A','#3A2A2E'],
-    blurb:'Kerman is known for an unusually wide range of designs and color combinations, built on fine local kork wool and dye recipes specific to its master weavers. Its most distinctive specialty is pictorial: coronation scenes, hunting tableaux, and confronting peacocks or phoenixes flanking a cartouche, alongside the more familiar elongated medallion-and-vine formula.',
+    motifs:['kerman_medallion_fine','kerman_vine_border','lechak','kerman_pictorial_pair','kerman_boteh','kerman_vase_palmette'],
+    palette:['#C0546B','#4A6B8A','#EDE0C4','#7C8A5A','#3A2A2E','#1F3A6B','#D89AA0'],
+    blurb:'Kerman is known for an unusually wide range of designs and color combinations, built on fine local kork wool and dye recipes specific to its master weavers. Its most distinctive specialty is pictorial: coronation scenes, hunting tableaux, and confronting peacocks or phoenixes flanking a cartouche, alongside the more familiar elongated medallion-and-vine formula. Two more Kerman traits get their own stamps: the boteh (paisley), which Kerman weavers carried over from their own shawl industry once carpet production took off in the 1880s, and the palmette-and-vase format that defines the historic 16th-17th-century "Kerman vase carpets."',
     beatTool:'saber',
     weftType:'depressed-double',
     refUrl:'https://www.little-persia.com/pages/kerman-rug-history-origin-guide',
@@ -644,7 +644,9 @@ const REGIONS = [
       {label:'Kerman design range and kork wool', url:'https://www.catalinarug.com/rug-encyclopedia/origins-of-rugs/part-2-types-of-persian-rugs/'},
       {label:'Kerman’s saber-blade beating tool', url:'https://www.catalinarug.com/blog/persian-rugs-anatomy/'},
       {label:'Saber-blade tool, second source', url:'https://mjrug.com/tools-used-in-weaving-a-persian-rug/'},
-      {label:'Motif detail (elongated cartouche medallion, vine border, pictorial peacock/phoenix pieces, pictorial-vs-ornamental sorting) — visual survey of the Qajar Dynasty Iranian Carpet Dataset (Kaggle), Kerman-tagged pieces', url:'https://www.kaggle.com/datasets/mahdisarbazi/qajar-dynasty-iranian-carpet-dataset'}
+      {label:'Motif detail (elongated cartouche medallion, vine border, pictorial peacock/phoenix pieces, pictorial-vs-ornamental sorting) — visual survey of the Qajar Dynasty Iranian Carpet Dataset (Kaggle), Kerman-tagged pieces', url:'https://www.kaggle.com/datasets/mahdisarbazi/qajar-dynasty-iranian-carpet-dataset'},
+      {label:'Boteh motif — Kerman shawl industry carried into carpet production from the 1880s', url:'https://www.little-persia.com/blogs/rug-chronicles/boteh-motif-paisley'},
+      {label:'Kerman "vase carpets" — 16th-17th-c. palmette-and-vase format', url:'https://www.araratrugs.com/kerman-vase-technique-carpet-5'}
     ],
   },
   { id:'esfahan', name:'Esfahan', zone:'Central', kind:'City workshop',
@@ -655,7 +657,7 @@ const REGIONS = [
     loom:'Fixed vertical workshop loom',
     family:'Curvilinear court style',
     motifs:['esfahan_medallion_fine','esfahan_border_fine','lechak','esfahan_palmette'],
-    palette:['#B5432C','#243A5E','#EDE0C4','#C9A24B','#5C2E28'],
+    palette:['#B5432C','#243A5E','#EDE0C4','#C9A24B','#5C2E28','#7A2018','#B8ACA0'],
     blurb:'Esfahan work is defined by a distinctive terracotta-crimson accent historically drawn from cochineal dye, set into finely drawn medallion and floral fields. Of every region in this tool, Esfahan is the most purely rounded and polished — no angularity anywhere, down to a corner spandrel that mirrors the medallion’s curves exactly.',
     beatTool:'comb',
     weftType:'depressed-double',
@@ -673,16 +675,18 @@ const REGIONS = [
     layout:'Rustic, asymmetrical folk motifs rather than strict medallion symmetry — a large, loosely-drawn lozenge medallion is often deliberately placed off-center, since weavers favored dynamic asymmetry over perfect centering. Corner spandrels are frequently omitted entirely, left open to the border with no fill shape at all, which is why this tool doesn’t force one into existence for this region either. Some pieces fill the whole field with a repeating vertical column of stylized cypress trees instead of a medallion',
     loom:'Fixed vertical village loom',
     family:'Bold geometric / folk style',
-    motifs:['bakshayesh_medallion_geo','bakshayesh_wandering_border','bakshayesh_tree_column'],
-    palette:['#E4D6B8','#CFC3A0','#8C7A52','#9E8A5A','#6B5A3A'],
-    blurb:'Bakshayesh produces oversized rugs in muted ivory, beige and warm metallic tones, with folkloric figures and loose, asymmetrical drawing rather than formal medallion symmetry. There’s no corner-spandrel stamp for this region on purpose — many real Bakshayesh carpets simply don’t have one, leaving the field open right to the border.',
+    motifs:['bakshayesh_medallion_geo','bakshayesh_wandering_border','bakshayesh_tree_column','bakshayesh_flaming_palmette','bakshayesh_minakhani_loose'],
+    palette:['#E4D6B8','#CFC3A0','#8C7A52','#9E8A5A','#6B5A3A','#B08070','#8A9070'],
+    blurb:'Bakshayesh produces oversized rugs in muted ivory, beige and warm metallic tones, with folkloric figures and loose, asymmetrical drawing rather than formal medallion symmetry. There’s no corner-spandrel stamp for this region on purpose — many real Bakshayesh carpets simply don’t have one, leaving the field open right to the border. Its rarest signature is the oversized "flaming palmette," documented as appearing on only a small number of real Bakshaish pieces; the rosette-trellis stamp keeps the same loose, never-twice-the-same irregularity as its other motifs.',
     beatTool:'comb',
     weftType:'single',
     refUrl:'https://www.claremontrug.com/antique-rugs-information/antique-persian-rug-guide/antique-persian-bakshaish-rugs/',
     refLabel:'Bakshaish rug guide & real pieces — Claremont Rug Co.',
     sources:[
       {label:'Bakshayesh village weaving and palette', url:'https://therugdecor.com/blogs/blog/an-insight-into-types-of-persian-rugs'},
-      {label:'Motif detail (off-center loose medallion, omitted spandrels, tree-column field) — web research: Wikimedia Commons carpet photos + Claremont Rug Co. guide, no Kaggle coverage for this region', url:'https://commons.wikimedia.org/wiki/Category:Bakshaish_carpets'}
+      {label:'Motif detail (off-center loose medallion, omitted spandrels, tree-column field) — web research: Wikimedia Commons carpet photos + Claremont Rug Co. guide, no Kaggle coverage for this region', url:'https://commons.wikimedia.org/wiki/Category:Bakshaish_carpets'},
+      {label:'Large-scale "flaming palmette" — a rare, documented Bakshaish signature shape', url:'https://www.claremontrug.com/antique-rugs-information/antique-persian-rug-guide/the-magic-of-bakshaish-artistry/'},
+      {label:'Minakhani (rosette-linked trellis) listed among notable Bakshaish designs', url:'https://www.claremontrug.com/antique-rugs-information/antique-persian-rug-guide/collectible-antique-persian-bakshaish-rugs-full-article/'}
     ],
   },
   { id:'mashhad', name:'Mashhad', zone:'Khorasan — Northeast', kind:'City workshop',
@@ -693,7 +697,7 @@ const REGIONS = [
     loom:'Fixed vertical workshop loom',
     family:'Curvilinear court style',
     motifs:['mashhad_medallion_fine','mashhad_boteh_border','mashhad_spandrel_elongated','mashhad_boteh_fill'],
-    palette:['#7A2530','#1F3A5C','#C9A24B','#EDE0C4','#3A2A2E'],
+    palette:['#7A2530','#1F3A5C','#C9A24B','#EDE0C4','#3A2A2E','#4A1820','#B8863A'],
     blurb:'Mashhad rugs are usually large, built around a single oversized medallion set into a dense, curvilinear floral field. What actually sets Mashhad apart from its curvilinear cousins isn’t the medallion — it’s the corner spandrel, stretched so long it nearly reaches the middle of each border.',
     beatTool:'comb',
     weftType:'depressed-double',
@@ -711,8 +715,8 @@ const REGIONS = [
     layout:'Afshan — an angular diamond medallion (the most authentic Qashqai shape) with a small nested hooked diamond inside it, surrounded by four hook marks; medallion counts run odd by rug size, and larger pieces sometimes render this as three vertically stacked diamonds instead of one. No smooth spandrel — small triangular "mountain/tree" shapes sometimes anchor the field’s short ends instead of a rounded corner treatment',
     loom:'Portable horizontal ground loom',
     family:'Bold geometric, nomadic style',
-    motifs:['qashqai_medallion_geo','qashqai_hook_border','qashqai_triple_diamond'],
-    palette:['#8C2A2A','#243A5E','#B5622F','#EDE0C4','#3A2A1E'],
+    motifs:['qashqai_medallion_geo','qashqai_hook_border','qashqai_triple_diamond','qashqai_bird','qashqai_animal'],
+    palette:['#8C2A2A','#243A5E','#B5622F','#EDE0C4','#3A2A1E','#D4A73C','#16283F'],
     blurb:'Qashqai weaving is nomadic: the weaver designs from memory rather than a workshop pattern, producing geometric diamond medallions and stylized animal silhouettes scattered across an allover field. There’s no corner-spandrel stamp for this region — Qashqai corners aren’t a smooth filled shape, they’re just where the angular field and border meet.',
     beatTool:'comb',
     weftType:'single',
@@ -721,7 +725,8 @@ const REGIONS = [
     sources:[
       {label:'Tribal/nomadic geometric weaving overview', url:'https://stylebyemilyhenderson.com/the-ultimate-guide-to-persian-rugs-what-makes-them-so-dang-good-desirable-valuable'},
       {label:'Stacked-diamond medallion — image-verified, no single article source', url:''},
-      {label:'Motif detail (nested hooked diamond, odd medallion counts, triple-stacked variant, no spandrel) — web research: 1stDibs listing photos + regional guides, no Kaggle coverage for this region', url:'https://www.1stdibs.com/buy/qashqai-rugs/'}
+      {label:'Motif detail (nested hooked diamond, odd medallion counts, triple-stacked variant, no spandrel) — web research: 1stDibs listing photos + regional guides, no Kaggle coverage for this region', url:'https://www.1stdibs.com/buy/qashqai-rugs/'},
+      {label:'Small bird and animal figures scattered across the field — a documented Qashqai storytelling hallmark', url:'https://www.little-persia.com/pages/qashqai-rug-history-origin-guide'}
     ],
   },
   { id:'kashan', name:'Kashan', zone:'Central', kind:'City workshop (royal tradition)',
@@ -732,7 +737,7 @@ const REGIONS = [
     loom:'Fixed vertical workshop loom',
     family:'Curvilinear court style',
     motifs:['kashan_medallion_fine','kashan_gazelle_border','lechak','willow'],
-    palette:['#7A1E22','#EDE0C4','#16213A','#C9A24B','#3A2A1E'],
+    palette:['#7A1E22','#EDE0C4','#16213A','#C9A24B','#3A2A1E','#0D1830','#3A5240'],
     blurb:'Kashan work is built on dense, all-over floral fields — weeping willows, teardrop medallions, quarter-medallions framing each corner — usually on a deep red field against ivory or midnight-blue borders. Its confronting-gazelle border is a real, recurring trait documented across multiple pieces, not an isolated example.',
     beatTool:'comb',
     weftType:'depressed-double',
@@ -752,7 +757,7 @@ const REGIONS = [
     loom:'Fixed vertical workshop loom',
     family:'Pictorial / narrative style',
     motifs:['qom_medallion_fine','qom_border_fine','lechak','qom_tree_of_life'],
-    palette:['#0E7C86','#8C1F3B','#C9A24B','#EDE0C4','#1F3A5C'],
+    palette:['#0E7C86','#8C1F3B','#C9A24B','#EDE0C4','#1F3A5C','#0F5C42','#5C2E6E'],
     blurb:'Qom weavers work almost entirely in silk and draw on a wide range of borrowed designs — tree-of-life scenes, hunting tableaux, vase and arch motifs — in saturated jewel tones that read differently in silk than in wool. The tree-of-life-with-birds design in particular is a genuine, well-documented Qom specialty, not an occasional borrowing.',
     beatTool:'spike',
     weftType:'depressed-double',
@@ -773,7 +778,7 @@ const REGIONS = [
     loom:'Portable horizontal ground loom',
     family:'Monochrome, red-dominated style',
     motifs:['octagon','turkmen_gul_minor','turkmen_guard_border','turkmen_ensi_panel','turkmen_ensi_border'],
-    palette:['#6E1A1A','#8C2A2A','#1A1418','#EDE0C4','#2E2A2A'],
+    palette:['#6E1A1A','#8C2A2A','#1A1418','#EDE0C4','#2E2A2A','#4A1010','#8A6A48'],
     blurb:'Turkmen weaving is dominated almost entirely by shades of deep red, patterned with rows of a repeating gol — an octagonal tribal emblem — instead of a bordered medallion field. Every tribe (Tekke, Ersari, Salor, Saryk, Yomut) has its own named gul, so "Turkmen" here is a composite, not one specific tribal style. The stamp set also keeps the "ensi" door-rug format separate — it isn’t a variation on the gul-grid main carpet, it’s a structurally different four-panel layout entirely.',
     beatTool:'comb',
     weftType:'single',
@@ -793,8 +798,8 @@ const REGIONS = [
     layout:'Two traditions kept as separate stamp entries: (1) an angular hooked-diamond medallion — latch-hook nubs at the tips, never a rounded shape — with a dense micro-floret diaper border, and no corner spandrel at all (the diamond\u2019s point meets the border directly); (2) Herati and Mina Khani allover florals with no medallion whatsoever, which is traditional for this region rather than a simplification. Kaggle\u2019s "Kurdistan" tag is the closest available proxy for Bidjar — the dataset has no Bidjar-specific label, only the broader region',
     loom:'Fixed vertical village loom',
     family:'Bold geometric / extreme-density village style',
-    motifs:['bidjar_medallion_hooked','bidjar_diaper_border','bidjar_allover_diaper','herati_geo'],
-    palette:['#7A2020','#1F3550','#C9A24B','#EDE0C4','#3A2A1E'],
+    motifs:['bidjar_medallion_hooked','bidjar_diaper_border','bidjar_allover_diaper','herati_geo','bidjar_minakhani'],
+    palette:['#7A2020','#1F3550','#C9A24B','#EDE0C4','#3A2A1E','#4A1F3A','#2E4A2E'],
     blurb:'Bidjar rugs are woven wet — the warp, weft and yarn are dampened through the whole process — then packed with a heavy nail-like spike instead of a comb, which is why finished Bidjars are so rigid they\u2019re nicknamed the "iron rugs of Persia." Design-wise this is the clearest visual opposite of Kerman or Kashan\u2019s curvilinear delicacy in this tool: hooked, angular, and just as often skipping the medallion entirely for a dense allover diaper field.',
     beatTool:'spike',
     weftType:'depressed-double',
@@ -803,7 +808,8 @@ const REGIONS = [
     sources:[
       {label:'Bidjar wet-weaving and nail-tool compacting', url:'https://www.catalinarug.com/blog/persian-rugs-anatomy/'},
       {label:'Bidjar nail-shaped compacting tool, second source', url:'https://eramrugs.co.uk/blogs/news/process-and-weaving-techniques-of-persian-rugs'},
-      {label:'Motif detail (hooked-diamond medallion, no-spandrel corner, allover-diaper alternative) — visual survey of the Qajar Dynasty Iranian Carpet Dataset (Kaggle), Kurdistan-tagged pieces (closest available proxy for Bidjar — no Bidjar-specific tag exists)', url:'https://www.kaggle.com/datasets/mahdisarbazi/qajar-dynasty-iranian-carpet-dataset'}
+      {label:'Motif detail (hooked-diamond medallion, no-spandrel corner, allover-diaper alternative) — visual survey of the Qajar Dynasty Iranian Carpet Dataset (Kaggle), Kurdistan-tagged pieces (closest available proxy for Bidjar — no Bidjar-specific tag exists)', url:'https://www.kaggle.com/datasets/mahdisarbazi/qajar-dynasty-iranian-carpet-dataset'},
+      {label:'Mina Khani — among the most popular Kurdish allover patterns, used in Bidjar production', url:'https://www.araratrugs.com/ART00493'}
     ],
   },
 ];
@@ -925,6 +931,27 @@ const MOTIFS = [
     '1.2.1.2','.......','2.1.2.1','.......','1.2.1.2','.......','2.1.2.1' ]},
   { id:'bidjar_allover_diaper', name:'Allover diaper field — no medallion (Bidjar, allover tradition)', rows:[
     '1.2.1.2.1','.........','2.1.2.1.2','.........','1.2.1.2.1','.........','2.1.2.1.2','.........','1.2.1.2.1' ]},
+
+  /* --- batch 4: real region-specific motifs added on request — see sources on each region --- */
+  { id:'kerman_boteh', name:'Boteh — the curling paisley Kerman shawl-weavers carried into carpets', rows:[
+    '......2..','.....22..','....212..','...2112..','..21112..',
+    '.211112..','.2113112.','.2111112.','.2222222.' ]},
+  { id:'kerman_vase_palmette', name:'Vase-and-palmette — the 17th-c. Kerman "vase carpet" format', rows:[
+    '....212....','...21112...','..2111112..','.211131112.','.211111112.',
+    '..2111112..','...21112...','...21112...','..2111112..','.211111112.','..2222222..' ]},
+  { id:'qashqai_bird', name:'Small stylized bird — field-scatter figure (Qashqai)', rows:[
+    '...2...','..232..','.21112.','2111112','.11.11.','..1.1..','.......' ]},
+  { id:'qashqai_animal', name:'Small stylized quadruped — field-scatter figure (Qashqai)', rows:[
+    '......3','..2222.','.211112','2111112','.1.11.1','.1....1','.......' ]},
+  { id:'bidjar_minakhani', name:'Mina Khani trellis unit, rendered in Bidjar’s dense hooked style', rows:[
+    '1.......1','.2.....2.','..2.1.2..','...212...','1..2.2..1',
+    '...212...','..2.1.2..','.2.....2.','1.......1' ]},
+  { id:'bakshayesh_flaming_palmette', name:'Flaming palmette — the rare, oversized Bakshaish signature shape', rows:[
+    '..2.1.2..','.1..1..1.','..1...1..','...131...','....1....',
+    '....1....','....1....','.........','.........' ]},
+  { id:'bakshayesh_minakhani_loose', name:'Rosette-linked trellis, drawn loose and off-center (Bakshaish)', rows:[
+    '..212....','.21112...','..212....','....2....','.....2...',
+    '......2..','.......2.','........1','.........' ]},
 ];
 
 // A real outline of Iran by province (Highcharts public admin-1 boundary
