@@ -261,6 +261,15 @@
   .finish-option-icon{font-size:32px;}
   .finish-option-title{font-weight:700; font-size:15px;}
   .finish-option-desc{font-size:12px; color:var(--wool-dim); line-height:1.5;}
+  .gift-checkbox-field{
+    display:flex; align-items:center; gap:8px;
+    margin-bottom:16px;
+    font-size:13.5px;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .gift-checkbox-field input{width:16px; height:16px; cursor:pointer;}
+  .gift-self-note{font-size:13px; color:var(--wool-dim); line-height:1.5; margin:0 0 16px;}
   .gift-field{display:block; margin-bottom:14px; font-size:12.5px; color:var(--wool-dim);}
   .gift-field span{display:block; margin-bottom:5px;}
   .gift-field em{font-style:normal; opacity:0.75;}
@@ -289,6 +298,7 @@
     font-family:monospace;
   }
   .gift-mailto-btn{display:block; width:100%; text-align:center; text-decoration:none; box-sizing:border-box;}
+  .gift-mailto-btn[hidden]{display:none;}
 
   /* A gift is a letter, not a form -- so its two modals get their own
      warm, aged-paper skin instead of the app's usual dark panels. The
@@ -941,26 +951,29 @@
     <button class="modal-close" id="giftFormClose" title="Close">&times;</button>
     <h2>Wrap this rug</h2>
     <form id="giftForm">
-      <label class="gift-field">
-        <span>Recipient's name <em>(optional)</em></span>
-        <input type="text" id="giftRecipientName" maxlength="60" placeholder="Who is this for?">
+      <label class="gift-checkbox-field">
+        <input type="checkbox" id="giftIsSelf">
+        <span>🎁 This is for me</span>
       </label>
-      <label class="gift-field">
-        <span>Recipient's email</span>
-        <input type="email" id="giftRecipientEmail" maxlength="200" required placeholder="them@example.com">
-      </label>
-      <label class="gift-field">
-        <span>Your name <em>(optional)</em></span>
-        <input type="text" id="giftSenderName" maxlength="60" placeholder="Who's it from?">
-      </label>
-      <label class="gift-field">
-        <span>Your email <em>(so we know it's really you — never stored)</em></span>
-        <input type="email" id="giftSenderEmail" maxlength="200" required placeholder="you@example.com">
-      </label>
-      <label class="gift-field">
-        <span>Your message</span>
-        <textarea id="giftMessage" maxlength="500" rows="4" placeholder="Say something about it..."></textarea>
-      </label>
+      <div id="giftRecipientFields">
+        <label class="gift-field">
+          <span>Recipient's name <em>(optional)</em></span>
+          <input type="text" id="giftRecipientName" maxlength="60" placeholder="Who is this for?">
+        </label>
+        <label class="gift-field">
+          <span>Recipient's email <em>(optional — opens a pre-written email to send)</em></span>
+          <input type="email" id="giftRecipientEmail" maxlength="200" placeholder="them@example.com">
+        </label>
+        <label class="gift-field">
+          <span>Your name <em>(optional)</em></span>
+          <input type="text" id="giftSenderName" maxlength="60" placeholder="Who's it from?">
+        </label>
+        <label class="gift-field">
+          <span>Your message</span>
+          <textarea id="giftMessage" maxlength="500" rows="4" placeholder="Say something about it..."></textarea>
+        </label>
+      </div>
+      <p class="gift-self-note" id="giftSelfNote" hidden>It'll seal with a little surprise for you to find when you open it.</p>
       <div class="gift-form-actions">
         <button type="button" class="ghost-btn" id="giftFormBack">← Back</button>
         <button type="submit" class="beat-btn" id="giftWrapSubmitBtn">Wrap it 🎁</button>
@@ -1519,17 +1532,44 @@ function resetLoom(){
   updateBeatUI();
 }
 
-// Changing the weave density changes the grid resolution itself, not just
-// how it's drawn, so (unlike a region switch) it starts the piece over --
-// there's no honest way to keep existing knots lined up on a differently
-// sized grid.
+// Changing the weave density changes the grid resolution itself -- this
+// used to just discard the whole piece and start over, but tossing
+// someone's work because they wanted a different density mid-weave is a
+// bad surprise, especially for a learning tool. Instead, resample the
+// existing pattern onto the new resolution (same idea as resizing an
+// image): every cell on the new grid samples the nearest cell on the old
+// one, so the same picture just redraws at a different resolution.
 function setDensity(key){
   if(!DENSITY_PRESETS[key] || key===density) return;
+  const oldCOLS = COLS, oldROWS = ROWS, oldGrid = grid;
   density = key;
   COLS = DENSITY_PRESETS[key].cols;
   ROWS = DENSITY_PRESETS[key].rows;
   document.querySelectorAll('.density-btn').forEach(b => b.classList.toggle('active', b.dataset.density===key));
-  resetLoom();
+  const newGrid = makeGrid();
+  for(let r=0;r<ROWS;r++){
+    const srcR = Math.round(r * (oldROWS-1) / (ROWS-1));
+    for(let c=0;c<COLS;c++){
+      const srcC = Math.round(c * (oldCOLS-1) / (COLS-1));
+      newGrid[r][c] = oldGrid[srcR][srcC];
+    }
+  }
+  grid = newGrid;
+  activeRow = Math.min(ROWS-1, Math.max(0, Math.round(activeRow * (ROWS-1) / (oldROWS-1))));
+  rowPhase = 'tying';
+  loomComplete = false;
+  beatCounts = new Array(ROWS).fill(0);
+  beatAnim = null;
+  weftAnim = null;
+  tieAnims.clear();
+  // The old guides' grid coordinates no longer line up with anything --
+  // the pattern they already stamped survives (it's baked into the
+  // resampled knots above), only the shadow preview resets.
+  pendingMotif = null;
+  pendingRotation = 0;
+  motifGuides = [];
+  buildMotifs();
+  updateBeatUI();
   resizeCanvas();
 }
 
@@ -2347,12 +2387,21 @@ canvas.addEventListener('pointerleave', () => { hoverCell=null; draw(); });
 // advances to the next row once the current one's beaten, and R rotates
 // whatever motif is currently armed.
 window.addEventListener('keydown', e => {
+  // Typing anywhere (a gift note, a name field, ...) must never trigger a
+  // loom shortcut -- Space in particular used to beat the carpet instead
+  // of typing a space character.
+  const targetTag = e.target && e.target.tagName;
+  if(targetTag==='INPUT' || targetTag==='TEXTAREA' || (e.target && e.target.isContentEditable)) return;
   const k = e.key;
   if(k===' '){ e.preventDefault(); attemptBeat(); return; }
   if(k==='w' || k==='W'){ e.preventDefault(); attemptPassWeft(); return; }
   if(k==='Enter'){ e.preventDefault(); advanceRow(); return; }
   if(k==='r' || k==='R'){
     if(pendingMotif){ pendingRotation = (pendingRotation+90)%360; buildMotifs(); draw(); }
+    return;
+  }
+  if(k==='Escape'){
+    if(pendingMotif){ pendingMotif = null; pendingRotation = 0; buildMotifs(); draw(); }
     return;
   }
   if(k==='a' || k==='A' || k==='s' || k==='S'){
@@ -2419,8 +2468,15 @@ function buildPalette(){
     b.addEventListener('click', () => {
       activeColor = hex;
       setMode('knot');
+      // Picking a plain color is how you say "just a knot, no motif" --
+      // an armed motif shouldn't need a separate hunt for "Clear guides"
+      // to escape.
+      pendingMotif = null;
+      pendingRotation = 0;
       buildPalette();
+      buildMotifs();
       updateLoomCursor(hex);
+      draw();
     });
     paletteGroup.appendChild(b);
   });
@@ -2698,6 +2754,7 @@ document.getElementById('finishGiftBtn').addEventListener('click', () => {
 
 function openGiftForm(){
   document.getElementById('giftForm').reset();
+  updateGiftSelfToggle();
   document.getElementById('giftFormModal').hidden = false;
 }
 function closeGiftForm(){ document.getElementById('giftFormModal').hidden = true; }
@@ -2709,6 +2766,12 @@ document.getElementById('giftFormBack').addEventListener('click', () => {
   closeGiftForm();
   openFinishModal();
 });
+function updateGiftSelfToggle(){
+  const isSelf = document.getElementById('giftIsSelf').checked;
+  document.getElementById('giftRecipientFields').hidden = isSelf;
+  document.getElementById('giftSelfNote').hidden = !isSelf;
+}
+document.getElementById('giftIsSelf').addEventListener('change', updateGiftSelfToggle);
 
 async function insertGift(body){
   const resp = await fetch(SUPABASE_URL+'gifts', {
@@ -2729,50 +2792,94 @@ function giftLinkFor(id){
   return location.origin + location.pathname + '?gift=' + id;
 }
 
-// Draws a region's first motif into a wax-seal element as a single-tone
-// "pressed" impression: a dark offset shadow plus a light offset highlight
-// around each filled cell fakes an engraved indentation, sitting on the
-// CSS radial-gradient wax color behind the (otherwise transparent) canvas.
-function renderWaxSeal(sealEl, regionId){
+// A wax seal, not tied to the gift's own region -- picking a random motif
+// from the whole pool each time is part of the surprise. Aims for a
+// photographed impression rather than a flat digital stamp: a mottled,
+// uneven wax pour (radial gradient plus scattered blotches, never a flat
+// color), the motif pressed in slightly rotated and softened (a real seal
+// is never perfectly axis-aligned or crisp-edged), and a glossy vignette
+// on top the way light catches a rounded wax surface.
+function renderWaxSeal(sealEl){
   let cnv = sealEl.querySelector('canvas');
   if(!cnv){ cnv = document.createElement('canvas'); sealEl.appendChild(cnv); }
-  const region = REGIONS.find(r => r.id === regionId) || REGIONS[0];
-  const motifId = region.motifs && region.motifs[0];
-  const motif = MOTIFS.find(m => m.id === motifId);
+  const motif = MOTIFS[Math.floor(Math.random()*MOTIFS.length)];
   const size = 220;
   cnv.width = size; cnv.height = size;
-  const ctx = cnv.getContext('2d');
-  ctx.clearRect(0,0,size,size);
-  if(!motif) return;
-  const rows = motif.rows;
-  const n = rows.length;
-  const inset = size*0.24;
-  const cellPx = (size - inset*2) / n;
-  for(let r=0;r<n;r++){
-    const row = rows[r];
-    for(let c=0;c<row.length;c++){
-      if(row[c]==='.') continue;
-      const x = inset + c*cellPx, y = inset + r*cellPx;
-      ctx.fillStyle = 'rgba(0,0,0,0.5)';
-      ctx.fillRect(x+1.2, y+1.2, cellPx+0.6, cellPx+0.6);
-      ctx.fillStyle = 'rgba(255,205,170,0.22)';
-      ctx.fillRect(x-0.8, y-0.8, cellPx+0.6, cellPx+0.6);
-      ctx.fillStyle = 'rgba(0,0,0,0.28)';
-      ctx.fillRect(x, y, cellPx, cellPx);
-    }
+  const c2 = cnv.getContext('2d');
+  c2.clearRect(0,0,size,size);
+
+  const base = c2.createRadialGradient(size*0.38,size*0.32,size*0.04,size*0.5,size*0.5,size*0.62);
+  base.addColorStop(0,'#a5342c');
+  base.addColorStop(0.45,'#8a231d');
+  base.addColorStop(0.75,'#6e1a17');
+  base.addColorStop(1,'#460e0c');
+  c2.fillStyle = base;
+  c2.beginPath();
+  c2.arc(size/2, size/2, size*0.48, 0, Math.PI*2);
+  c2.fill();
+
+  c2.save();
+  c2.beginPath();
+  c2.arc(size/2, size/2, size*0.48, 0, Math.PI*2);
+  c2.clip();
+
+  // a poured wax surface is never perfectly smooth -- scatter faint
+  // darker pools and lighter bubbles across it
+  for(let i=0;i<16;i++){
+    const bx = size*0.5 + (Math.random()-0.5)*size*0.75;
+    const by = size*0.5 + (Math.random()-0.5)*size*0.75;
+    const br = size*(0.02+Math.random()*0.05);
+    c2.fillStyle = Math.random()<0.5 ? 'rgba(0,0,0,0.10)' : 'rgba(255,150,120,0.09)';
+    c2.beginPath(); c2.arc(bx,by,br,0,Math.PI*2); c2.fill();
   }
+
+  if(motif){
+    c2.translate(size/2, size/2);
+    c2.rotate((Math.random()-0.5)*0.3);
+    c2.translate(-size/2, -size/2);
+    const rows = motif.rows;
+    const n = rows.length;
+    const inset = size*0.26;
+    const cellPx = (size - inset*2) / n;
+    c2.filter = 'blur(0.7px)';
+    for(let r=0;r<n;r++){
+      const row = rows[r];
+      for(let c=0;c<row.length;c++){
+        if(row[c]==='.') continue;
+        const j = (hashUnit(r,c)-0.5)*0.14;
+        const x = inset + c*cellPx, y = inset + r*cellPx;
+        c2.fillStyle = 'rgba(20,4,2,'+(0.5+j)+')';
+        c2.fillRect(x+1.3, y+1.3, cellPx+0.7, cellPx+0.7);
+        c2.fillStyle = 'rgba(255,190,150,'+(0.24+j*0.5)+')';
+        c2.fillRect(x-1, y-1, cellPx+0.7, cellPx+0.7);
+        c2.fillStyle = 'rgba(20,4,2,'+(0.24+j*0.3)+')';
+        c2.fillRect(x, y, cellPx, cellPx);
+      }
+    }
+    c2.filter = 'none';
+  }
+
+  // glossy highlight + edge falloff, like light on a rounded wax surface
+  const sheen = c2.createRadialGradient(size*0.35,size*0.28,0,size*0.5,size*0.5,size*0.56);
+  sheen.addColorStop(0,'rgba(255,255,255,0.3)');
+  sheen.addColorStop(0.3,'rgba(255,255,255,0.06)');
+  sheen.addColorStop(0.7,'rgba(0,0,0,0)');
+  sheen.addColorStop(1,'rgba(0,0,0,0.4)');
+  c2.setTransform(1,0,0,1,0,0);
+  c2.fillStyle = sheen;
+  c2.fillRect(0,0,size,size);
+  c2.restore();
 }
 
 document.getElementById('giftForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const captured = captureWovenSparseGrid();
   if(!captured){ closeGiftForm(); return; }
-  const recipientName = document.getElementById('giftRecipientName').value.trim().slice(0,60);
-  const recipientEmail = document.getElementById('giftRecipientEmail').value.trim();
-  const senderName = document.getElementById('giftSenderName').value.trim().slice(0,60);
-  const senderEmail = document.getElementById('giftSenderEmail').value.trim();
-  const message = document.getElementById('giftMessage').value.trim().slice(0,500);
-  const isSelfGift = recipientEmail.length>0 && recipientEmail.toLowerCase() === senderEmail.toLowerCase();
+  const isSelfGift = document.getElementById('giftIsSelf').checked;
+  const recipientName = isSelfGift ? '' : document.getElementById('giftRecipientName').value.trim().slice(0,60);
+  const recipientEmail = isSelfGift ? '' : document.getElementById('giftRecipientEmail').value.trim();
+  const senderName = isSelfGift ? '' : document.getElementById('giftSenderName').value.trim().slice(0,60);
+  const message = isSelfGift ? '' : document.getElementById('giftMessage').value.trim().slice(0,500);
   const body = {
     recipient_name: recipientName || null,
     sender_name: senderName || null,
@@ -2790,7 +2897,7 @@ document.getElementById('giftForm').addEventListener('submit', async (e) => {
   try{
     const [saved] = await insertGift(body);
     closeGiftForm();
-    showGiftDone(saved, recipientName, recipientEmail, message);
+    showGiftDone(saved, recipientName, recipientEmail, message, isSelfGift);
   }catch(err){
     flashWarning('Could not wrap your gift — try again in a moment.');
   }finally{
@@ -2799,21 +2906,26 @@ document.getElementById('giftForm').addEventListener('submit', async (e) => {
   }
 });
 
-function showGiftDone(saved, recipientName, recipientEmail, message){
+function showGiftDone(saved, recipientName, recipientEmail, message, isSelfGift){
   const link = giftLinkFor(saved.id);
-  document.getElementById('giftDoneRecipient').textContent = recipientName || 'them';
+  document.getElementById('giftDoneRecipient').textContent = isSelfGift ? 'yourself' : (recipientName || 'them');
   document.getElementById('giftDoneLink').value = link;
-  renderWaxSeal(document.getElementById('giftDoneSeal'), current.id);
+  renderWaxSeal(document.getElementById('giftDoneSeal'));
   const previewCanvas = document.getElementById('giftDonePreview');
   const built = buildWovenPieceCanvas();
   if(built){
     previewCanvas.width = built.width; previewCanvas.height = built.height;
     previewCanvas.getContext('2d').drawImage(built,0,0);
   }
-  const subject = encodeURIComponent('A carpet, woven for you');
-  const bodyText = (message ? message+'\n\n' : '') + 'Unroll it here: ' + link;
-  document.getElementById('giftMailtoBtn').href =
-    'mailto:'+encodeURIComponent(recipientEmail)+'?subject='+subject+'&body='+encodeURIComponent(bodyText);
+  const mailtoBtn = document.getElementById('giftMailtoBtn');
+  if(recipientEmail){
+    const subject = encodeURIComponent('A carpet, woven for you');
+    const bodyText = (message ? message+'\n\n' : '') + 'Unroll it here: ' + link;
+    mailtoBtn.href = 'mailto:'+encodeURIComponent(recipientEmail)+'?subject='+subject+'&body='+encodeURIComponent(bodyText);
+    mailtoBtn.hidden = false;
+  } else {
+    mailtoBtn.hidden = true;
+  }
   document.getElementById('giftDoneModal').hidden = false;
 }
 document.getElementById('giftDoneClose').addEventListener('click', () => {
@@ -2858,7 +2970,7 @@ async function initGiftReveal(giftId){
     errorEl.textContent = 'This gift link doesn\'t match anything — check that you copied the whole link.';
     return;
   }
-  renderWaxSeal(sealEl, gift.region_id);
+  renderWaxSeal(sealEl);
   sealEl.addEventListener('click', () => breakSeal(gift), { once:true });
 }
 function breakSeal(gift){
@@ -2877,7 +2989,7 @@ function unrollGift(gift){
   const roll = document.getElementById('giftRugRoll');
   const cnv = document.getElementById('giftRugCanvas');
   stage.hidden = false;
-  renderSparseGridCanvas(cnv, gift, 420, 60);
+  renderTexturedRugCanvas(cnv, gift, 380, 32);
   const targetWidth = cnv.width;
   wrapEl.style.height = cnv.height + 'px';
   wrapEl.style.width = '0px';
@@ -3040,6 +3152,81 @@ function renderSparseGridCanvas(canvas, piece, target, maxPx){
 }
 function renderQuiltPieceCanvas(canvas, piece){
   renderSparseGridCanvas(canvas, piece, 140, 24);
+}
+
+// The gift reveal is a single hero image, not one of many small board
+// thumbnails, so it earns the same rendering the live loom itself uses --
+// per-knot fiber texture, silk sheen where the region calls for it, and
+// dangling warp-end fringe top and bottom -- reconstructed from the
+// stored sparse grid instead of the live canvas state. The stored data
+// doesn't carry each knot's symmetric/asymmetric structure (only its
+// color), so every knot renders with the more common symmetric mark.
+function renderTexturedRugCanvas(canvas, piece, target, maxPx){
+  const cellPx = Math.min(maxPx, Math.max(4, Math.round(target/Math.max(piece.width,piece.height))));
+  const region = REGIONS.find(r => r.id === piece.region_id);
+  const isSilk = !!(region && region.material && region.material.toLowerCase().includes('silk'));
+  const fringeLen = cellPx*1.4;
+  canvas.width = piece.width*cellPx;
+  canvas.height = piece.height*cellPx + fringeLen*2;
+  const c2 = canvas.getContext('2d');
+  const cellMap = new Map();
+  (piece.grid||[]).forEach(cellData => cellMap.set(cellData[0]+','+cellData[1], cellData[2]));
+
+  for(let r=0;r<piece.height;r++){
+    for(let c=0;c<piece.width;c++){
+      const hex = cellMap.get(r+','+c);
+      if(!hex) continue;
+      const x = c*cellPx, y = r*cellPx + fringeLen, pad = cellPx*0.11;
+      const full = cellPx - 2*pad;
+      const radius = Math.min(3, cellPx*0.15);
+      c2.fillStyle = jitterHex(hex, (hashUnit(r,c)-0.5)*0.16);
+      roundRect(c2, x+pad, y+pad, full, full, radius);
+      c2.fill();
+
+      c2.save();
+      roundRect(c2, x+pad, y+pad, full, full, radius);
+      c2.clip();
+      c2.globalAlpha = 0.22;
+      c2.globalCompositeOperation = 'overlay';
+      c2.fillStyle = fiberNoise;
+      c2.fillRect(x+pad, y+pad, full, full);
+      c2.globalCompositeOperation = 'source-over';
+      if(isSilk){
+        const sheen = c2.createLinearGradient(x+pad, y+pad, x+pad+full, y+pad+full);
+        sheen.addColorStop(0, 'rgba(255,255,255,0)');
+        sheen.addColorStop(0.45, 'rgba(255,255,255,0.28)');
+        sheen.addColorStop(0.6, 'rgba(255,255,255,0)');
+        c2.globalAlpha = 1;
+        c2.fillStyle = sheen;
+        c2.fillRect(x+pad, y+pad, full, full);
+      }
+      c2.restore();
+
+      c2.fillStyle = 'rgba(0,0,0,0.28)';
+      c2.fillRect(x+cellPx*0.18, y+pad+full*0.62, cellPx*0.64, Math.max(1,cellPx*0.1));
+    }
+  }
+
+  c2.strokeStyle = '#cfc0a0';
+  c2.lineWidth = Math.max(1, cellPx*0.1);
+  c2.lineCap = 'round';
+  for(let c=0;c<piece.width;c++){
+    const xMid = c*cellPx + cellPx/2;
+    const wig = (c%2===0 ? 1 : -1) * cellPx*0.08;
+    if(cellMap.has('0,'+c)){
+      c2.beginPath();
+      c2.moveTo(xMid, fringeLen);
+      c2.quadraticCurveTo(xMid+wig, fringeLen*0.5, xMid, 0);
+      c2.stroke();
+    }
+    if(cellMap.has((piece.height-1)+','+c)){
+      const yBase = fringeLen + piece.height*cellPx;
+      c2.beginPath();
+      c2.moveTo(xMid, yBase);
+      c2.quadraticCurveTo(xMid+wig, yBase+fringeLen*0.5, xMid, yBase+fringeLen);
+      c2.stroke();
+    }
+  }
 }
 
 function renderQuiltBoard(){
