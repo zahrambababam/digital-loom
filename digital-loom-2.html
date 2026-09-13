@@ -64,6 +64,107 @@
     max-width:62ch;
     line-height:1.55;
   }
+  .view-toggle{
+    display:flex;
+    gap:8px;
+    margin-top:16px;
+  }
+  .view-toggle-btn{
+    background:transparent;
+    border:1px solid var(--panel-line);
+    color:var(--ink-dim);
+    padding:8px 16px;
+    border-radius:5px;
+    font-family:'Karla',sans-serif;
+    font-size:13.5px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .view-toggle-btn.active{
+    background:var(--gold);
+    color:#231a0e;
+    border-color:var(--gold);
+  }
+  #quiltView{margin-top:8px;}
+  .quilt-toolbar{
+    background:var(--panel);
+    border:1px solid var(--panel-line);
+    border-radius:6px;
+    padding:14px 16px;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:14px;
+    justify-content:space-between;
+  }
+  .quilt-intro{
+    margin:0;
+    font-size:13px;
+    color:var(--ink-dim);
+    max-width:70ch;
+    line-height:1.5;
+  }
+  .quilt-actions{display:flex; align-items:center; gap:10px; flex:none;}
+  .quilt-status{font-size:12px; color:var(--wool-dim);}
+  .quilt-placement-banner{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:10px;
+    background:rgba(201,162,75,0.12);
+    border:1px solid var(--gold);
+    border-radius:6px;
+    padding:12px 16px;
+    margin-top:10px;
+    font-size:13px;
+    color:var(--ink);
+  }
+  .quilt-placement-banner[hidden]{display:none;}
+  .quilt-placement-banner input{
+    background:var(--bg-deep);
+    border:1px solid var(--panel-line);
+    color:var(--ink);
+    padding:7px 10px;
+    border-radius:4px;
+    font-family:'Karla',sans-serif;
+    font-size:13px;
+  }
+  .quilt-board-wrap{
+    margin-top:16px;
+    background:var(--bg-deep);
+    border-radius:6px;
+    padding:20px;
+    overflow:auto;
+    max-height:70vh;
+  }
+  .quilt-board{
+    position:relative;
+    min-width:100%;
+    min-height:300px;
+  }
+  .quilt-piece{
+    position:absolute;
+    border:2px solid var(--panel-line);
+    border-radius:4px;
+    cursor:pointer;
+    background:var(--bg-deep);
+    transition:border-color .12s, transform .12s;
+  }
+  .quilt-piece:hover{border-color:var(--wool-dim); transform:scale(1.04); z-index:5;}
+  .quilt-piece.selected{border-color:var(--gold); box-shadow:0 0 0 2px var(--gold); z-index:6;}
+  .quilt-piece canvas{display:block; width:100%; height:100%;}
+  .quilt-piece .quilt-piece-name{
+    position:absolute;
+    bottom:-16px;
+    left:0;
+    right:0;
+    text-align:center;
+    font-size:9px;
+    color:var(--wool-dim);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
   .layout{
     display:grid;
     grid-template-columns:220px 1fr;
@@ -470,9 +571,13 @@
   <header>
     <h1>The Loom</h1>
     <p>Pick a region of Iran, load its documented palette and motif vocabulary, and start setting knots. Each region carries its own colors, knot structure and layout, drawn from a handful of rug-history sources as a starting scaffold. How will you tie the past into the future?</p>
+    <div class="view-toggle">
+      <button class="view-toggle-btn active" id="showLoomBtn">My Loom</button>
+      <button class="view-toggle-btn" id="showQuiltBtn">Community Quilt</button>
+    </div>
   </header>
 
-  <div class="layout">
+  <div class="layout" id="loomView">
     <nav class="rail" id="rail"></nav>
 
     <main>
@@ -502,6 +607,7 @@
         <button class="ghost-btn" id="clearGuideBtn" style="display:none;">Clear guides</button>
         <button class="ghost-btn" id="clearBtn">Clear</button>
         <button class="ghost-btn" id="saveBtn">Save PNG</button>
+        <button class="ghost-btn" id="addToQuiltBtn" title="Attach your piece to the community quilt">🧵 Add to Quilt</button>
       </div>
 
       <div class="loom-frame">
@@ -561,6 +667,26 @@
       <section class="spec" id="spec"></section>
     </main>
   </div>
+
+  <section id="quiltView" hidden>
+    <div class="quilt-toolbar">
+      <p class="quilt-intro">Every piece here was woven by someone using this loom, then attached next to a piece they liked. Nobody can edit or remove another person's square once it's placed — the quilt only ever grows.</p>
+      <div class="quilt-actions">
+        <button class="ghost-btn" id="quiltRefreshBtn">↻ Refresh</button>
+        <span class="quilt-status" id="quiltStatus"></span>
+      </div>
+    </div>
+    <div class="quilt-placement-banner" id="quiltPlacementBanner" hidden>
+      <span id="quiltPlacementText">Click a piece below to attach yours next to it, or place it as a new corner.</span>
+      <input type="text" id="quiltNameInput" placeholder="Sign it (optional)" maxlength="40">
+      <button class="beat-btn secondary" id="quiltPlaceCornerBtn">Place as new corner</button>
+      <button class="beat-btn" id="quiltConfirmBtn" disabled>Attach here</button>
+      <button class="ghost-btn" id="quiltCancelBtn">Cancel</button>
+    </div>
+    <div class="quilt-board-wrap">
+      <div class="quilt-board" id="quiltBoard"></div>
+    </div>
+  </section>
 </div>
 
 <script>
@@ -2263,6 +2389,254 @@ function runCutAnimFrame(){
     doSavePNG();
   }
 }
+
+/* ---------- community quilt ----------
+   A public, append-only board: anyone can attach a finished piece next to
+   an existing one they like. Backed by a Supabase Postgres table with
+   public-read/public-insert row-level security and no update/delete
+   policies at all -- so once a piece is placed, nobody (not even its own
+   weaver, since there's no login) can alter or remove someone else's
+   square. This can't run inside the Claude Artifact sandbox itself (its
+   CSP blocks every outside network call except loading a script from a
+   short CDN allowlist) -- it only works from the plain hosted HTML file,
+   and degrades to an explanatory message everywhere else. */
+const SUPABASE_URL = 'https://zzgnqatnfjpjsvmpnyfr.supabase.co/rest/v1/';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6Z25xYXRuZmpwanN2bXBueWZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNzQxODgsImV4cCI6MjEwNDg1MDE4OH0.w8yuUevaR3wo3PkBv0Y7cajR1yyxi4vhAJBNKU6qug0';
+const QUILT_CELL = 150;
+
+const quiltState = { pieces: [], positions: {}, pendingAttachTo: undefined, chosen: false };
+
+function supabaseHeaders(extra){
+  return Object.assign({ apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer '+SUPABASE_ANON_KEY }, extra||{});
+}
+async function fetchQuiltPieces(){
+  const resp = await fetch(SUPABASE_URL+'quilt_pieces?select=*&order=created_at.asc', { headers: supabaseHeaders() });
+  if(!resp.ok) throw new Error('fetch failed: '+resp.status);
+  return await resp.json();
+}
+async function insertQuiltPiece(body){
+  const resp = await fetch(SUPABASE_URL+'quilt_pieces', {
+    method: 'POST',
+    headers: supabaseHeaders({ 'Content-Type':'application/json', Prefer:'return=representation' }),
+    body: JSON.stringify(body)
+  });
+  if(!resp.ok) throw new Error('insert failed: '+resp.status);
+  return await resp.json();
+}
+
+// The rectangle actually tied, cropped the same way Save PNG crops it --
+// a quilt piece takes the shape of what you wove, not a big empty box.
+function getWovenBounds(){
+  let minR=ROWS,maxR=-1,minC=COLS,maxC=-1;
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      if(grid[r][c]){
+        if(r<minR) minR=r; if(r>maxR) maxR=r;
+        if(c<minC) minC=c; if(c>maxC) maxC=c;
+      }
+    }
+  }
+  return maxR<0 ? null : {minR,maxR,minC,maxC};
+}
+
+// A deterministic grid layout built from each piece's chosen neighbor:
+// root pieces (attached_to === null) fill row 0 left to right; every
+// other piece searches outward from its parent's cell for the closest
+// still-open slot. Every viewer processes the same pieces in the same
+// (creation) order, so everyone's browser converges on the same board.
+function layoutQuiltPositions(pieces){
+  const occupied = new Set();
+  const key = (c,r) => c+','+r;
+  const positions = {};
+  function firstOpenSlot(col,row){
+    for(let radius=1; radius<200; radius++){
+      const candidates = [];
+      for(let dc=-radius; dc<=radius; dc++){
+        for(let dr=-radius; dr<=radius; dr++){
+          if(Math.max(Math.abs(dc),Math.abs(dr)) !== radius) continue;
+          candidates.push([col+dc,row+dr]);
+        }
+      }
+      candidates.sort((a,b) => Math.hypot(a[0]-col,a[1]-row) - Math.hypot(b[0]-col,b[1]-row));
+      for(const [c,r] of candidates){ if(r>=0 && !occupied.has(key(c,r))) return {col:c,row:r}; }
+    }
+    return {col:col+radius,row};
+  }
+  pieces.forEach(p => {
+    let col, row;
+    if(p.attached_to && positions[p.attached_to]){
+      const parent = positions[p.attached_to];
+      const slot = firstOpenSlot(parent.col, parent.row);
+      col = slot.col; row = slot.row;
+    } else {
+      col = 0; row = 0;
+      while(occupied.has(key(col,row))) col++;
+    }
+    positions[p.id] = {col,row};
+    occupied.add(key(col,row));
+  });
+  // Neighbor search can drift columns negative (rows are clamped to >=0,
+  // columns aren't) -- shift everything back onto the board so nothing
+  // renders past the container's left edge, outside the scrollable area.
+  let minCol = 0;
+  for(const id in positions) minCol = Math.min(minCol, positions[id].col);
+  if(minCol < 0) for(const id in positions) positions[id].col -= minCol;
+  return positions;
+}
+
+function renderQuiltPieceCanvas(canvas, piece){
+  // Target roughly the same on-screen footprint whether a piece is a
+  // small test scrap or a full 40x50 weave, so nothing shrinks to an
+  // unclickable sliver -- only cap how large a single cell can get.
+  const px = Math.min(24, Math.max(1, Math.round(140/Math.max(piece.width,piece.height))));
+  canvas.width = piece.width*px;
+  canvas.height = piece.height*px;
+  const c2 = canvas.getContext('2d');
+  c2.fillStyle = '#171213';
+  c2.fillRect(0,0,canvas.width,canvas.height);
+  (piece.grid||[]).forEach(cell => {
+    const r=cell[0], c=cell[1], hex=cell[2];
+    c2.fillStyle = hex;
+    c2.fillRect(c*px, r*px, px, px);
+  });
+}
+
+function renderQuiltBoard(){
+  const board = document.getElementById('quiltBoard');
+  board.innerHTML = '';
+  quiltState.positions = layoutQuiltPositions(quiltState.pieces);
+  let maxCol=0, maxRow=0;
+  quiltState.pieces.forEach(p => {
+    const pos = quiltState.positions[p.id];
+    maxCol = Math.max(maxCol, pos.col); maxRow = Math.max(maxRow, pos.row);
+    const el = document.createElement('div');
+    el.className = 'quilt-piece';
+    el.style.left = (pos.col*QUILT_CELL) + 'px';
+    el.style.top = (pos.row*QUILT_CELL) + 'px';
+    el.dataset.id = p.id;
+    const cnv = document.createElement('canvas');
+    renderQuiltPieceCanvas(cnv, p);
+    cnv.style.width = cnv.width+'px';
+    cnv.style.height = cnv.height+'px';
+    el.style.width = cnv.width+'px';
+    el.style.height = cnv.height+'px';
+    el.appendChild(cnv);
+    if(p.name){
+      const label = document.createElement('div');
+      label.className = 'quilt-piece-name';
+      label.textContent = p.name;
+      el.appendChild(label);
+    }
+    el.title = (p.name ? p.name+' — ' : '') + p.region_id;
+    el.addEventListener('click', () => {
+      if(!quiltState.inPlacementMode) return;
+      quiltState.pendingAttachTo = p.id;
+      quiltState.chosen = true;
+      document.querySelectorAll('.quilt-piece').forEach(x => x.classList.toggle('selected', x.dataset.id===p.id));
+      document.getElementById('quiltConfirmBtn').disabled = false;
+      document.getElementById('quiltPlacementText').textContent = 'Attaching next to ' + (p.name || 'this piece') + '.';
+    });
+    board.appendChild(el);
+  });
+  board.style.width = ((maxCol+2)*QUILT_CELL) + 'px';
+  board.style.height = ((maxRow+2)*QUILT_CELL) + 'px';
+}
+
+async function loadQuilt(){
+  const status = document.getElementById('quiltStatus');
+  status.textContent = 'Loading…';
+  try{
+    quiltState.pieces = await fetchQuiltPieces();
+    renderQuiltBoard();
+    status.textContent = quiltState.pieces.length + ' piece' + (quiltState.pieces.length===1?'':'s') + ' woven in so far';
+  }catch(err){
+    status.textContent = '';
+    document.getElementById('quiltBoard').innerHTML =
+      '<p style="color:var(--wool-dim); font-size:13px; max-width:60ch; padding:10px;">'+
+      'The Community Quilt needs outside network access, which this preview doesn\'t have '+
+      '(the Claude Artifact sandbox blocks it, same as any offline copy would). Open the '+
+      'standalone hosted version of this file to see and add to the real quilt.</p>';
+  }
+}
+
+function showLoomView(){
+  document.getElementById('loomView').style.display = '';
+  document.getElementById('quiltView').hidden = true;
+  document.getElementById('showLoomBtn').classList.add('active');
+  document.getElementById('showQuiltBtn').classList.remove('active');
+}
+function showQuiltView(){
+  document.getElementById('loomView').style.display = 'none';
+  document.getElementById('quiltView').hidden = false;
+  document.getElementById('showLoomBtn').classList.remove('active');
+  document.getElementById('showQuiltBtn').classList.add('active');
+  loadQuilt();
+}
+function cancelQuiltPlacement(){
+  quiltState.inPlacementMode = false;
+  quiltState.pendingAttachTo = undefined;
+  quiltState.chosen = false;
+  document.getElementById('quiltPlacementBanner').hidden = true;
+  document.querySelectorAll('.quilt-piece').forEach(x => x.classList.remove('selected'));
+}
+
+document.getElementById('showLoomBtn').addEventListener('click', showLoomView);
+document.getElementById('showQuiltBtn').addEventListener('click', showQuiltView);
+document.getElementById('quiltRefreshBtn').addEventListener('click', loadQuilt);
+document.getElementById('quiltCancelBtn').addEventListener('click', cancelQuiltPlacement);
+document.getElementById('quiltPlaceCornerBtn').addEventListener('click', () => {
+  quiltState.pendingAttachTo = null;
+  quiltState.chosen = true;
+  document.querySelectorAll('.quilt-piece').forEach(x => x.classList.remove('selected'));
+  document.getElementById('quiltConfirmBtn').disabled = false;
+  document.getElementById('quiltPlacementText').textContent = 'Placing as a new corner of the quilt.';
+});
+document.getElementById('quiltConfirmBtn').addEventListener('click', async () => {
+  if(!quiltState.chosen) return;
+  const bounds = getWovenBounds();
+  if(!bounds){ cancelQuiltPlacement(); return; }
+  const sparse = [];
+  for(let r=bounds.minR;r<=bounds.maxR;r++){
+    for(let c=bounds.minC;c<=bounds.maxC;c++){
+      const k = grid[r][c];
+      if(k) sparse.push([r-bounds.minR, c-bounds.minC, k.hex]);
+    }
+  }
+  const nameInput = document.getElementById('quiltNameInput');
+  const body = {
+    name: nameInput.value.trim().slice(0,40) || null,
+    region_id: current.id,
+    palette: current.palette,
+    grid: sparse,
+    width: bounds.maxC-bounds.minC+1,
+    height: bounds.maxR-bounds.minR+1,
+    attached_to: quiltState.pendingAttachTo || null,
+  };
+  const confirmBtn = document.getElementById('quiltConfirmBtn');
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = 'Attaching…';
+  try{
+    await insertQuiltPiece(body);
+    nameInput.value = '';
+    confirmBtn.textContent = 'Attach here';
+    cancelQuiltPlacement();
+    await loadQuilt();
+  }catch(err){
+    confirmBtn.textContent = 'Attach here';
+    confirmBtn.disabled = false;
+    document.getElementById('quiltStatus').textContent = 'Could not save your piece — try again in a moment.';
+  }
+});
+document.getElementById('addToQuiltBtn').addEventListener('click', () => {
+  if(!getWovenBounds()){ flashWarning('Weave at least one knot before adding it to the quilt.'); return; }
+  showQuiltView();
+  quiltState.inPlacementMode = true;
+  quiltState.pendingAttachTo = undefined;
+  quiltState.chosen = false;
+  document.getElementById('quiltPlacementBanner').hidden = false;
+  document.getElementById('quiltPlacementText').textContent = 'Click a piece below to attach yours next to it, or place it as a new corner.';
+  document.getElementById('quiltConfirmBtn').disabled = true;
+});
 
 /* ---------- init ---------- */
 buildPalette();
