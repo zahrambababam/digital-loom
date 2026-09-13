@@ -267,6 +267,29 @@
     margin-bottom:16px;
   }
   .ref-link:hover{border-bottom-color:var(--gold);}
+  .chant-row{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:-6px 0 16px;
+  }
+  .chant-btn{
+    background:none;
+    border:1px solid var(--panel-line);
+    color:var(--gold);
+    padding:5px 11px;
+    border-radius:4px;
+    font-family:'Karla',sans-serif;
+    font-size:12.5px;
+    cursor:pointer;
+  }
+  .chant-btn:hover{border-color:var(--gold);}
+  .chant-note{
+    font-size:11px;
+    color:var(--wool-dim);
+    font-style:italic;
+  }
   .sources{
     border-top:1px solid var(--panel-line);
     padding-top:14px;
@@ -366,7 +389,7 @@
         </div>
         <div class="legend-item">
           <svg width="34" height="22" viewBox="0 0 34 22"><polyline points="1,7 7,15 13,7 19,15 25,7 31,15" fill="none" stroke="#e4d6b8" stroke-width="2"/></svg>
-          <span><strong>Weft</strong> — the over-under pass that locks a finished row</span>
+          <span><strong>Weft</strong> — the over-under pass that locks a finished row; fine city-workshop regions show it as a tighter double pass (depressed warp), village/nomadic regions as one looser pass</span>
         </div>
         <div class="legend-item">
           <svg width="34" height="22" viewBox="0 0 34 22"><rect x="6" y="3" width="16" height="16" rx="2" fill="#c9a24b"/><rect x="16" y="4" width="2.5" height="12" fill="rgba(0,0,0,0.3)"/></svg>
@@ -393,6 +416,7 @@ const REGIONS = [
     palette:['#7A2E28','#C9A24B','#A3352B','#EDE0C4','#2E3B49'],
     blurb:'Tabriz has an unusually wide range for a single city — curvilinear medallion florals alongside hunting scenes and four-seasons pictorials full of animals and figures — tied with the tight, upright Turkish knot rather than the Persian knot most other Persian cities use. The stamp set below deliberately keeps its two structural traditions apart: a classic medallion carpet, and the older paneled "Bagh" garden-carpet format that has no medallion or corner spandrel at all.',
     beatTool:'comb',
+    weftType:'depressed-double',
     sources:[
       {label:'Knot type — symmetric/Turkish (majority view)', url:'https://losangeleshomeofrugs.com/blog/the-art-of-tabriz-rugs-a-masterpiece-of-persian-weaving/'},
       {label:'Knot type — asymmetric/Persian (minority view)', url:'https://alrug.com/blogs/rug-digest/how-to-identify-tabriz-rugs'},
@@ -411,6 +435,7 @@ const REGIONS = [
     palette:['#8C2E22','#1F3A5C','#EDE0C4','#B5622F','#3A2A1E'],
     blurb:'Heriz weavers favor one oversized medallion drawn in bold, angular lines on a brick-red field, with navy and ivory carrying the border. The ivory corner spandrels are not generic fillers — they carry an angular motif that deliberately echoes the medallion’s own stepped, pendant-tipped silhouette.',
     beatTool:'comb',
+    weftType:'single',
     sources:[
       {label:'Regional style guide — Heriz medallion drawing', url:'https://rugtherock.com/blogs/magazine/types-of-persian-rugs'},
       {label:'Regional style guide — Heriz construction', url:'https://www.mattcamron.com/rug-guides/persian-rugs'},
@@ -428,6 +453,7 @@ const REGIONS = [
     palette:['#8C2A2A','#243A5E','#EDE0C4','#5C6E4A','#8A6A3A'],
     blurb:'Zanjan designs pair a central medallion with a smaller inner one, surrounded by star and flower-head motifs, birds, fish and paisley, in red and dark blue on ivory. Runners often trade the single medallion for a vertical chain of stacked hooked diamonds instead, and there’s no true corner spandrel here — the border just turns the corner.',
     beatTool:'comb',
+    weftType:'single',
     sources:[
       {label:'Zanjan motifs, palette and knot mix', url:'https://www.catalinarug.com/rug-encyclopedia/origins-of-rugs/part-2-types-of-persian-rugs/'},
       {label:'Motif detail (nested hexagon medallion, stacked-diamond runner chain, no corner spandrel) — web research: 1stDibs listing photos + regional guides, no Kaggle coverage for this region', url:'https://www.1stdibs.com/buy/zanjan-persian/'}
@@ -444,6 +470,7 @@ const REGIONS = [
     palette:['#C0546B','#4A6B8A','#EDE0C4','#7C8A5A','#3A2A2E'],
     blurb:'Kerman is known for an unusually wide range of designs and color combinations, built on fine local kork wool and dye recipes specific to its master weavers. Its most distinctive specialty is pictorial: coronation scenes, hunting tableaux, and confronting peacocks or phoenixes flanking a cartouche, alongside the more familiar elongated medallion-and-vine formula.',
     beatTool:'saber',
+    weftType:'depressed-double',
     sources:[
       {label:'Kerman design range and kork wool', url:'https://www.catalinarug.com/rug-encyclopedia/origins-of-rugs/part-2-types-of-persian-rugs/'},
       {label:'Kerman’s saber-blade beating tool', url:'https://www.catalinarug.com/blog/persian-rugs-anatomy/'},
@@ -462,6 +489,7 @@ const REGIONS = [
     palette:['#B5432C','#243A5E','#EDE0C4','#C9A24B','#5C2E28'],
     blurb:'Esfahan work is defined by a distinctive terracotta-crimson accent historically drawn from cochineal dye, set into finely drawn medallion and floral fields. Of every region in this tool, Esfahan is the most purely rounded and polished — no angularity anywhere, down to a corner spandrel that mirrors the medallion’s curves exactly.',
     beatTool:'comb',
+    weftType:'depressed-double',
     sources:[
       {label:'Esfahan cochineal red and medallion florals', url:'https://www.mattcamron.com/rug-guides/persian-rugs'},
       {label:'Motif detail (round layered medallion, Shah-Abbasi border, smooth quarter-round spandrel) — web research: 1stDibs listing photos + regional guides, no Kaggle coverage for this region', url:'https://www.1stdibs.com/buy/isfahan-persian-rug/'}
@@ -478,6 +506,7 @@ const REGIONS = [
     palette:['#E4D6B8','#CFC3A0','#8C7A52','#9E8A5A','#6B5A3A'],
     blurb:'Bakshayesh produces oversized rugs in muted ivory, beige and warm metallic tones, with folkloric figures and loose, asymmetrical drawing rather than formal medallion symmetry. There’s no corner-spandrel stamp for this region on purpose — many real Bakshayesh carpets simply don’t have one, leaving the field open right to the border.',
     beatTool:'comb',
+    weftType:'single',
     sources:[
       {label:'Bakshayesh village weaving and palette', url:'https://therugdecor.com/blogs/blog/an-insight-into-types-of-persian-rugs'},
       {label:'Motif detail (off-center loose medallion, omitted spandrels, tree-column field) — web research: Wikimedia Commons carpet photos + Claremont Rug Co. guide, no Kaggle coverage for this region', url:'https://commons.wikimedia.org/wiki/Category:Bakshaish_carpets'}
@@ -494,6 +523,7 @@ const REGIONS = [
     palette:['#7A2530','#1F3A5C','#C9A24B','#EDE0C4','#3A2A2E'],
     blurb:'Mashhad rugs are usually large, built around a single oversized medallion set into a dense, curvilinear floral field. What actually sets Mashhad apart from its curvilinear cousins isn’t the medallion — it’s the corner spandrel, stretched so long it nearly reaches the middle of each border.',
     beatTool:'comb',
+    weftType:'depressed-double',
     sources:[
       {label:'Mashhad medallion scale and knot range', url:'https://www.catalinarug.com/blog/beginners-guide-to-traditional-persian-rugs/'},
       {label:'Motif detail (nested cartouche medallion, elongated corner spandrel, boteh/Herati filler) — web research: 1stDibs listing photos, no Kaggle coverage for this region', url:'https://www.1stdibs.com/buy/antique-persian-mashhad-rug/'}
@@ -510,6 +540,7 @@ const REGIONS = [
     palette:['#8C2A2A','#243A5E','#B5622F','#EDE0C4','#3A2A1E'],
     blurb:'Qashqai weaving is nomadic: the weaver designs from memory rather than a workshop pattern, producing geometric diamond medallions and stylized animal silhouettes scattered across an allover field. There’s no corner-spandrel stamp for this region — Qashqai corners aren’t a smooth filled shape, they’re just where the angular field and border meet.',
     beatTool:'comb',
+    weftType:'single',
     sources:[
       {label:'Tribal/nomadic geometric weaving overview', url:'https://stylebyemilyhenderson.com/the-ultimate-guide-to-persian-rugs-what-makes-them-so-dang-good-desirable-valuable'},
       {label:'Stacked-diamond medallion — image-verified, no single article source', url:''},
@@ -527,6 +558,7 @@ const REGIONS = [
     palette:['#7A1E22','#EDE0C4','#16213A','#C9A24B','#3A2A1E'],
     blurb:'Kashan work is built on dense, all-over floral fields — weeping willows, teardrop medallions, quarter-medallions framing each corner — usually on a deep red field against ivory or midnight-blue borders. Its confronting-gazelle border is a real, recurring trait documented across multiple pieces, not an isolated example.',
     beatTool:'comb',
+    weftType:'depressed-double',
     sources:[
       {label:'Kashan red-field medallion and knot range', url:'https://www.catalinarug.com/blog/beginners-guide-to-traditional-persian-rugs/'},
       {label:'Kashan grouped among core regional styles', url:'https://rugtherock.com/blogs/magazine/persian-rugs-vs-oriental-rugs'},
@@ -544,6 +576,7 @@ const REGIONS = [
     palette:['#0E7C86','#8C1F3B','#C9A24B','#EDE0C4','#1F3A5C'],
     blurb:'Qom weavers work almost entirely in silk and draw on a wide range of borrowed designs — tree-of-life scenes, hunting tableaux, vase and arch motifs — in saturated jewel tones that read differently in silk than in wool. The tree-of-life-with-birds design in particular is a genuine, well-documented Qom specialty, not an occasional borrowing.',
     beatTool:'spike',
+    weftType:'depressed-double',
     sources:[
       {label:'Qom silk designs — tree of life, hunting, vase, mehrabi', url:'https://www.rugman.com/carpet-design/qum-rugs/'},
       {label:'Qom silk, jewel-tone palette', url:'https://jewelrugs.com/collections/persian-qum-rugs'},
@@ -562,6 +595,7 @@ const REGIONS = [
     palette:['#6E1A1A','#8C2A2A','#1A1418','#EDE0C4','#2E2A2A'],
     blurb:'Turkmen weaving is dominated almost entirely by shades of deep red, patterned with rows of a repeating gol — an octagonal tribal emblem — instead of a bordered medallion field. Every tribe (Tekke, Ersari, Salor, Saryk, Yomut) has its own named gul, so "Turkmen" here is a composite, not one specific tribal style. The stamp set also keeps the "ensi" door-rug format separate — it isn’t a variation on the gul-grid main carpet, it’s a structurally different four-panel layout entirely.',
     beatTool:'comb',
+    weftType:'single',
     sources:[
       {label:'Gul/gol motif — definition and tribal variation', url:'https://en.wikipedia.org/wiki/Gul_(design)'},
       {label:'Turkoman red field and gul construction', url:'https://www.catalinarug.com/product-category/persian-rugs/turkoman/'},
@@ -580,6 +614,7 @@ const REGIONS = [
     palette:['#7A2020','#1F3550','#C9A24B','#EDE0C4','#3A2A1E'],
     blurb:'Bidjar rugs are woven wet — the warp, weft and yarn are dampened through the whole process — then packed with a heavy nail-like spike instead of a comb, which is why finished Bidjars are so rigid they\u2019re nicknamed the "iron rugs of Persia." Design-wise this is the clearest visual opposite of Kerman or Kashan\u2019s curvilinear delicacy in this tool: hooked, angular, and just as often skipping the medallion entirely for a dense allover diaper field.',
     beatTool:'spike',
+    weftType:'depressed-double',
     sources:[
       {label:'Bidjar wet-weaving and nail-tool compacting', url:'https://www.catalinarug.com/blog/persian-rugs-anatomy/'},
       {label:'Bidjar nail-shaped compacting tool, second source', url:'https://eramrugs.co.uk/blogs/news/process-and-weaving-techniques-of-persian-rugs'},
@@ -773,20 +808,36 @@ function draw(){
   // passed over-under across the alternated warp. It starts pale and loose;
   // beating it (with the region's actual tool — comb, saber or spike) is
   // what locks it tight, which is why it darkens and thickens once beaten.
+  //
+  // Fine city-workshop regions (weftType 'depressed-double') pull a pair of
+  // wefts tight enough to displace alternating warps onto two levels —
+  // "depressed warp" — which is what lets them pack knots far denser than a
+  // single-weft nomadic/village structure. Drawn here as two tighter,
+  // closer-set passes instead of one looser single pass. See the sources
+  // panel below for where that construction detail comes from.
+  const isDepressed = current.weftType === 'depressed-double';
   for(let r=0;r<ROWS;r++){
     if(!grid[r].some(Boolean)) continue;
     const t = rowTightness(r, now);
     const y = (r+1)*cell;
-    ctx.strokeStyle = 'rgba(228,214,184,'+(0.30+0.5*Math.min(t,1))+')';
-    ctx.lineWidth = Math.max(1, cell*(0.08+0.16*Math.min(t,1)));
-    ctx.beginPath();
-    for(let c=0;c<COLS;c++){
-      const xMid = c*cell + cell/2;
-      const over = c % 2 === 0;
-      ctx.moveTo(xMid - cell/2, y + (over ? -cell*0.12 : cell*0.12));
-      ctx.lineTo(xMid + cell/2, y + (over ? cell*0.12 : -cell*0.12));
-    }
-    ctx.stroke();
+    const alpha = 0.30+0.5*Math.min(t,1);
+    const lw = Math.max(1, cell*(0.08+0.16*Math.min(t,1)));
+    const passes = isDepressed
+      ? [{dy:-cell*0.05, amp:cell*0.09}, {dy:cell*0.05, amp:cell*0.09}]
+      : [{dy:0, amp:cell*0.12}];
+    passes.forEach(p => {
+      ctx.strokeStyle = 'rgba(228,214,184,'+alpha+')';
+      ctx.lineWidth = isDepressed ? Math.max(1, lw*0.75) : lw;
+      ctx.beginPath();
+      for(let c=0;c<COLS;c++){
+        const xMid = c*cell + cell/2;
+        const over = c % 2 === 0;
+        const yy = y + p.dy;
+        ctx.moveTo(xMid - cell/2, yy + (over ? -p.amp : p.amp));
+        ctx.lineTo(xMid + cell/2, yy + (over ? p.amp : -p.amp));
+      }
+      ctx.stroke();
+    });
   }
 
   // knots: each one hand-tied around a pair of warp threads. Unbeaten knots
@@ -867,6 +918,47 @@ function playThump(){
     gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime+0.15);
     osc.connect(gain); gain.connect(actx.destination);
     osc.start(); osc.stop(actx.currentTime+0.16);
+  }catch(e){}
+}
+
+// Naqshe-khani ("pattern-singing") is a real, documented practice — a lead
+// weaver calls out the pattern (colors/knot counts) in a rhythmic chant and
+// co-weavers answer or execute in time. See the Encyclopaedia Iranica and
+// Woven Sounds/Woven Garden links in the sources panel for the genuine
+// tradition and real field recordings. What plays here is NOT a recording
+// or transcription of any real chant — it's a synthesized call-and-response
+// tone sequence illustrating only the rhythmic *structure* (a short call,
+// a pause, a shorter answer), so it can't be mistaken for ethnomusicological
+// data. The pitch is nudged per region purely for variety, not because any
+// source documents region-specific pitch.
+function regionPitchRatio(id){
+  let h = 0;
+  for(let i=0;i<id.length;i++) h = (h*31 + id.charCodeAt(i)) % 12;
+  return Math.pow(2, h/12);
+}
+function playNaqshKhani(){
+  try{
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if(!Ctx) return;
+    const actx = new Ctx();
+    const shift = regionPitchRatio(current.id);
+    const callHz = [392,440,392,349,392].map(f => f*shift);
+    const answerHz = [294,294,262].map(f => f*shift);
+    let t = actx.currentTime;
+    const note = (f, dur, peak) => {
+      const osc = actx.createOscillator();
+      const gain = actx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(f, t);
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(peak, t+0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+      osc.connect(gain); gain.connect(actx.destination);
+      osc.start(t); osc.stop(t+dur+0.02);
+    };
+    callHz.forEach(f => { note(f, 0.16, 0.14); t += 0.17; });
+    t += 0.14; // the beat of silence between a call and its answer
+    answerHz.forEach(f => { note(f, 0.22, 0.11); t += 0.23; });
   }catch(e){}
 }
 
@@ -1012,10 +1104,17 @@ function buildSpec(){
     '<span class="zone-tag">'+current.zone+' · '+current.kind+' · '+current.family+'</span>' +
     '<p class="blurb">'+current.blurb+'</p>' +
     '<a class="ref-link" href="'+refUrl+'" target="_blank" rel="noopener">See real '+current.name+' rugs on Wikimedia Commons ↗</a>' +
+    '<div class="chant-row">'+
+      '<button class="chant-btn" type="button" onclick="playNaqshKhani()">▶ Play illustrative chant demo</button>'+
+      '<span class="chant-note">synthesized call-and-response rhythm — not a real Naqshe-khani recording</span>'+
+    '</div>' +
     '<dl class="fields">' +
       field('origin_region', current.name+' ('+current.zone+')') +
       field('knot_type', current.knot) +
       field('density_raj', current.raj) +
+      field('weft_structure', current.weftType==='depressed-double'
+        ? 'Depressed warp, double weft — paired wefts pulled tight enough to displace alternating warps onto two levels, packing knots denser (this is what the higher raj figure above is built on)'
+        : 'Single weft, warps level — the standard nomadic/village structure, wefts passed with minimal tension') +
       field('warp_weft_material', current.material) +
       field('dye_type', current.dye) +
       field('primary_motif_layout', current.layout) +
@@ -1023,6 +1122,10 @@ function buildSpec(){
     '</dl>' +
     '<div class="sources"><h3>Where this came from</h3><ul>'+srcList+
       '<li><a href="https://www.catalinarug.com/blog/how-persian-oriental-rugs-are-made/" target="_blank" rel="noopener">General knot/weft/beating process ↗</a></li>'+
+      '<li><a href="https://www.abc-oriental-rug.com/Oriental-rug-construction-elements.html" target="_blank" rel="noopener">Depressed warp / double-weft construction — definition and mechanism ↗</a></li>'+
+      '<li><a href="https://www.iranicaonline.org/articles/song-carpet-weaving/" target="_blank" rel="noopener">Naqshe-khani (pattern-singing) — Encyclopaedia Iranica, "Song of carpet-weaving" ↗</a></li>'+
+      '<li><a href="https://www.oeaw.ac.at/vlach/projects/phd-projects/persian-carpet-the-woven-sounds" target="_blank" rel="noopener">Hear real Naqshe-khani recordings — Mehdi Aminian’s "The Woven Sounds" project (Univ. of Vienna / OEAW) ↗</a></li>'+
+      '<li><a href="https://dmd.uconn.edu/2025-mfa-exhibition-nooshin-farashaei" target="_blank" rel="noopener">Hear real Naqshe-khani recordings — "Woven Garden" (2025 MFA thesis project) ↗</a></li>'+
     '</ul></div>' +
     '<p class="note">Density (Raj) figures are indicative bands, not per-region counts pulled from a dataset — swap in real numbers from the Kaggle Iranian-carpet dataset if this needs to be rigorous. Motif stamps are stylized pixel abstractions built from the sources above, not redrawn from specific archival pieces — use the Wikimedia link to check what you\u2019re weaving against actual rugs. The four family labels (curvilinear court / pictorial-narrative / bold geometric / monochrome red) are a common way rug literature groups these regions, not one citable taxonomy. Where sources disagree (Tabriz\u2019s knot type is the clearest case), both views are listed above rather than picked silently.</p>';
 }
