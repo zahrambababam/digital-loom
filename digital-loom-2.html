@@ -386,65 +386,69 @@ const REGIONS = [
     knot:'Symmetric (Turkish/Ghiordes) — see note below', raj:'~45–55 raj (fine, indicative)',
     material:'Wool pile on cotton foundation, often double-wefted; fine pieces in silk',
     dye:'Historically natural (madder, walnut); some 19th-c. aniline synthetics',
-    layout:'Lechak-Toranj and Mihrabi medallions, but also pictorial Shikargah (hunting scene) and Chahar-Bagh (four seasons) designs thick with animals and figures',
+    layout:'Two distinct Tabriz traditions, kept as separate stamp sets rather than blended: (1) a classic lobed, pointed-oval medallion with angular quarter-palmette spandrels and a turtle-palmette Herati border; (2) the historic "Bagh" garden-panel format — a grid of small compartment cartouches with no central medallion and no corner spandrel at all, often carrying confronting-bird or cypress vignettes inside each panel',
     loom:'Fixed vertical workshop loom',
     family:'Curvilinear court style, with a pictorial/narrative streak',
-    motifs:['toranj_fine','lechak','animal_fine'],
+    motifs:['tabriz_medallion_geo','tabriz_herati_border','tabriz_spandrel_geo','tabriz_confronting_camels','tabriz_bagh_panel','tabriz_bagh_border','tabriz_cypress'],
     palette:['#7A2E28','#C9A24B','#A3352B','#EDE0C4','#2E3B49'],
-    blurb:'Tabriz has an unusually wide range for a single city — curvilinear medallion florals alongside hunting scenes and four-seasons pictorials full of animals and figures — tied with the tight, upright Turkish knot rather than the Persian knot most other Persian cities use.',
+    blurb:'Tabriz has an unusually wide range for a single city — curvilinear medallion florals alongside hunting scenes and four-seasons pictorials full of animals and figures — tied with the tight, upright Turkish knot rather than the Persian knot most other Persian cities use. The stamp set below deliberately keeps its two structural traditions apart: a classic medallion carpet, and the older paneled "Bagh" garden-carpet format that has no medallion or corner spandrel at all.',
     beatTool:'comb',
     sources:[
       {label:'Knot type — symmetric/Turkish (majority view)', url:'https://losangeleshomeofrugs.com/blog/the-art-of-tabriz-rugs-a-masterpiece-of-persian-weaving/'},
       {label:'Knot type — asymmetric/Persian (minority view)', url:'https://alrug.com/blogs/rug-digest/how-to-identify-tabriz-rugs'},
-      {label:'Pictorial hunting-scene rugs — image-verified, no single article source', url:''}
+      {label:'Pictorial hunting-scene rugs — image-verified, no single article source', url:''},
+      {label:'Motif detail (medallion shape, Herati border, Bagh garden-panel format, confronting animals) — visual survey of the Qajar Dynasty Iranian Carpet Dataset (Kaggle), Tabriz-tagged pieces', url:'https://www.kaggle.com/datasets/mahdisarbazi/qajar-dynasty-iranian-carpet-dataset'}
     ],
   },
   { id:'heriz', name:'Heriz', zone:'Northwest — Azerbaijan', kind:'Village',
     knot:'Asymmetric (Persian)', raj:'~24–30 raj (village, indicative)',
     material:'Wool pile, cotton foundation',
     dye:'Mixed natural and early synthetic, depending on age',
-    layout:'Toranj — single large angular medallion',
+    layout:'Toranj — large angular lobed medallion with pendant points, ivory corner spandrels whose angular motif echoes the medallion’s own stepped outline, and a wide indigo Herati (turtle-palmette) border on an open, comparatively uncluttered field; rare older pieces carry a "vaq-vaq" talking-tree motif with animal or bird heads at the branch tips',
     loom:'Fixed vertical village loom',
     family:'Bold geometric, large-block style',
-    motifs:['toranj_geo'],
+    motifs:['heriz_medallion_geo','heriz_herati_border','spandrel_geo','heriz_vaqvaq'],
     palette:['#8C2E22','#1F3A5C','#EDE0C4','#B5622F','#3A2A1E'],
-    blurb:'Heriz weavers favor one oversized medallion drawn in bold, angular lines on a brick-red field, with navy and ivory carrying the border.',
+    blurb:'Heriz weavers favor one oversized medallion drawn in bold, angular lines on a brick-red field, with navy and ivory carrying the border. The ivory corner spandrels are not generic fillers — they carry an angular motif that deliberately echoes the medallion’s own stepped, pendant-tipped silhouette.',
     beatTool:'comb',
     sources:[
       {label:'Regional style guide — Heriz medallion drawing', url:'https://rugtherock.com/blogs/magazine/types-of-persian-rugs'},
-      {label:'Regional style guide — Heriz construction', url:'https://www.mattcamron.com/rug-guides/persian-rugs'}
+      {label:'Regional style guide — Heriz construction', url:'https://www.mattcamron.com/rug-guides/persian-rugs'},
+      {label:'Motif detail (pendant medallion, spandrel-echoes-medallion, Herati border, vaq-vaq variant) — web research: Wikimedia Commons carpet photos + dealer/collector guides, no Kaggle coverage for this region', url:'https://commons.wikimedia.org/wiki/Category:Rugs_and_carpets_of_Heris'}
     ],
   },
   { id:'zanjan', name:'Zanjan', zone:'Northwest', kind:'Village, tribal-influenced',
     knot:'Mixed — both Turkish and Persian knots by tribe', raj:'~26–32 raj (indicative)',
     material:'Wool or cotton foundation, single-wefted at center',
     dye:'Natural base tones with gray, green, brown, camel and blue accents',
-    layout:'Afshan-style allover field with a central and secondary medallion',
+    layout:'Either a small angular diamond medallion enclosed within a much larger hexagonal medallion frame stretching nearly the full field, or — in runner formats — a vertical chain of three or more stacked hooked-diamond medallions running the rug’s length instead of one central shape. No formal spandrel: borders simply miter-turn at the corner, occasionally marked with a small rosette rather than a filled corner shape',
     loom:'Fixed vertical village loom',
     family:'Bold geometric, village style',
-    motifs:['toranj_geo','star_geo','herati_geo'],
+    motifs:['zanjan_medallion_geo','zanjan_folk_border','zanjan_stacked_diamonds'],
     palette:['#8C2A2A','#243A5E','#EDE0C4','#5C6E4A','#8A6A3A'],
-    blurb:'Zanjan designs pair a central medallion with a smaller inner one, surrounded by star and flower-head motifs, birds, fish and paisley, in red and dark blue on ivory.',
+    blurb:'Zanjan designs pair a central medallion with a smaller inner one, surrounded by star and flower-head motifs, birds, fish and paisley, in red and dark blue on ivory. Runners often trade the single medallion for a vertical chain of stacked hooked diamonds instead, and there’s no true corner spandrel here — the border just turns the corner.',
     beatTool:'comb',
     sources:[
-      {label:'Zanjan motifs, palette and knot mix', url:'https://www.catalinarug.com/rug-encyclopedia/origins-of-rugs/part-2-types-of-persian-rugs/'}
+      {label:'Zanjan motifs, palette and knot mix', url:'https://www.catalinarug.com/rug-encyclopedia/origins-of-rugs/part-2-types-of-persian-rugs/'},
+      {label:'Motif detail (nested hexagon medallion, stacked-diamond runner chain, no corner spandrel) — web research: 1stDibs listing photos + regional guides, no Kaggle coverage for this region', url:'https://www.1stdibs.com/buy/zanjan-persian/'}
     ],
   },
   { id:'kerman', name:'Kerman', zone:'South-Central', kind:'City workshop',
     knot:'Asymmetric (Persian)', raj:'~50–65 raj (fine, indicative)',
     material:'Fine kork wool pile on cotton; some silk-and-wool',
     dye:'Distinct master-dye recipes specific to Kerman workshops',
-    layout:'Mihrabi — curvilinear floral, vase and garden scenes',
+    layout:'Mihrabi — curvilinear floral, vase and garden scenes, typically built around an elongated pointed-oval cartouche medallion that often encloses a small calligraphic accent, framed by a fine floral vine-and-rosette border and quarter-medallion corner spandrels. Kerman is also Persia’s best-documented source of pictorial "picture rugs" — coronation and hunting scenes, and peacock/phoenix figures flanking a cartouche in the border',
     loom:'Fixed vertical workshop loom',
     family:'Curvilinear court style',
-    motifs:['gol_fine','toranj_fine'],
+    motifs:['kerman_medallion_fine','kerman_vine_border','lechak','kerman_pictorial_pair'],
     palette:['#C0546B','#4A6B8A','#EDE0C4','#7C8A5A','#3A2A2E'],
-    blurb:'Kerman is known for an unusually wide range of designs and color combinations, built on fine local kork wool and dye recipes specific to its master weavers.',
+    blurb:'Kerman is known for an unusually wide range of designs and color combinations, built on fine local kork wool and dye recipes specific to its master weavers. Its most distinctive specialty is pictorial: coronation scenes, hunting tableaux, and confronting peacocks or phoenixes flanking a cartouche, alongside the more familiar elongated medallion-and-vine formula.',
     beatTool:'saber',
     sources:[
       {label:'Kerman design range and kork wool', url:'https://www.catalinarug.com/rug-encyclopedia/origins-of-rugs/part-2-types-of-persian-rugs/'},
       {label:'Kerman’s saber-blade beating tool', url:'https://www.catalinarug.com/blog/persian-rugs-anatomy/'},
-      {label:'Saber-blade tool, second source', url:'https://mjrug.com/tools-used-in-weaving-a-persian-rug/'}
+      {label:'Saber-blade tool, second source', url:'https://mjrug.com/tools-used-in-weaving-a-persian-rug/'},
+      {label:'Motif detail (elongated cartouche medallion, vine border, pictorial peacock/phoenix pieces, pictorial-vs-ornamental sorting) — visual survey of the Qajar Dynasty Iranian Carpet Dataset (Kaggle), Kerman-tagged pieces', url:'https://www.kaggle.com/datasets/mahdisarbazi/qajar-dynasty-iranian-carpet-dataset'}
     ],
   },
   { id:'esfahan', name:'Esfahan', zone:'Central', kind:'City workshop',
@@ -610,6 +614,58 @@ const MOTIFS = [
     '..21112..','.2111112.','211111112','1.11.11.1','1.1...1.1' ]},
   { id:'animal_geo', name:'Stag — tribal (block)', rows:[
     '1.....1','.1...1.','..1.1..','...2...','..111..','.11111.','1111111' ]},
+
+  /* --- batch 1: Tabriz, Heriz, Zanjan, Kerman — see report in conversation history --- */
+  { id:'heriz_medallion_geo', name:'Toranj — angular pendant medallion (Heriz)', rows:[
+    '....3....','...212...','..21112..','.2111112.','212111212',
+    '.2111112.','..21112..','...212...','....3....' ]},
+  { id:'heriz_herati_border', name:'Herati — turtle-palmette border unit (Heriz)', rows:[
+    '...2...','..212..','.31113.','3111113','.31113.','..212..','...2...' ]},
+  { id:'spandrel_geo', name:'Spandrel — hooked corner, echoes medallion (Heriz)', rows:[
+    '311111112','111111112','11111112.','1111112..','111112...',
+    '1112.....','112......','12.......','2........' ]},
+  { id:'heriz_vaqvaq', name:'Vaq-vaq — talking tree with animal heads (Heriz, rare)', rows:[
+    '3..1.1..3','.3.1.1.3.','..2.1.2..','...212...','...111...',
+    '...212...','..21112..','.2111112.','211111112' ]},
+
+  { id:'zanjan_medallion_geo', name:'Toranj — small diamond in hexagon frame (Zanjan)', rows:[
+    '....2....','...2.2...','..2...2..','.2..1..2.','2..111..2',
+    '.2..1..2.','..2...2..','...2.2...','....2....' ]},
+  { id:'zanjan_folk_border', name:'Rosette with icon dots — guard stripe unit (Zanjan)', rows:[
+    '.3...3.','..212..','.21112.','2111112','.21112.','..212..','.3...3.' ]},
+  { id:'zanjan_stacked_diamonds', name:'Stacked hooked diamonds — runner chain (Zanjan)', rows:[
+    '....1....','...111...','....1....','....2....','...212...',
+    '.3.111.3.','....2....','...111...','....1....' ]},
+
+  { id:'kerman_medallion_fine', name:'Toranj — elongated cartouche with calligraphy accent (Kerman)', rows:[
+    '....212....','..2111112..','.211111112.','21111111112','21111111112',
+    '21111311112','21111111112','21111111112','.211111112.','..2111112..','....212....' ]},
+  { id:'kerman_vine_border', name:'Rosette with vine tendrils — border chain unit (Kerman)', rows:[
+    '....2....','...212...','..21112..','321111123','211111112',
+    '321111123','..21112..','...212...','....2....' ]},
+  { id:'kerman_pictorial_pair', name:'Confronting peacocks flanking a cartouche (Kerman)', rows:[
+    '1.......1','.1.....1.','..1...1..','1.1.2.1.1','.1.111.1.',
+    '1.1.2.1.1','..1...1..','.1.....1.','1.......1' ]},
+
+  { id:'tabriz_medallion_geo', name:'Toranj — lobed pointed-oval medallion (Tabriz, classic)', rows:[
+    '....2....','...212...','.3.111.3.','.2111112.','211111112',
+    '.2111112.','.3.111.3.','...212...','....2....' ]},
+  { id:'tabriz_herati_border', name:'Herati — rosette with diagonal leaf curls (Tabriz, classic)', rows:[
+    '3.....3','.2...2.','..212..','.11111.','..212..','.2...2.','3.....3' ]},
+  { id:'tabriz_spandrel_geo', name:'Spandrel — angular quarter-palmette, echoes lobed medallion (Tabriz, classic)', rows:[
+    '111111112','111111112','11111312.','1111112..','111112...',
+    '1112.....','112......','12.......','2........' ]},
+  { id:'tabriz_confronting_camels', name:'Confronting camels in border cartouche (Tabriz, classic)', rows:[
+    '1.......1','.11...11.','..1.2.1..','.1.111.1.','1.11111.1',
+    '.1.111.1.','..1.2.1..','.11...11.','1.......1' ]},
+  { id:'tabriz_bagh_panel', name:'Garden panel — one compartment of the Bagh grid, no medallion (Tabriz, garden-panel)', rows:[
+    '222222222','2.......2','2..1.1..2','2...1...2','2..111..2',
+    '2.......2','2.......2','2.......2','222222222' ]},
+  { id:'tabriz_bagh_border', name:'Confronting birds — garden-panel register border (Tabriz, garden-panel)', rows:[
+    '1.....1','.1...1.','..1.1..','...2...','..1.1..','.1...1.','1.....1' ]},
+  { id:'tabriz_cypress', name:'Cypress tree — garden-panel secondary motif (Tabriz, garden-panel)', rows:[
+    '....1....','....1....','...111...','...111...','..11111..',
+    '..11111..','.1111111.','....2....','...222...' ]},
 ];
 
 /* ---------- state ---------- */
