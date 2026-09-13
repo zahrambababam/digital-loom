@@ -133,15 +133,58 @@
     margin-top:16px;
     background:var(--bg-deep);
     border-radius:6px;
-    padding:20px;
-    overflow:auto;
-    max-height:70vh;
-  }
-  .quilt-board{
     position:relative;
-    min-width:100%;
-    min-height:300px;
+    overflow:hidden;
+    height:70vh;
+    min-height:420px;
+    touch-action:none;
+    cursor:grab;
   }
+  .quilt-board-wrap.dragging{cursor:grabbing;}
+  .quilt-board{
+    position:absolute;
+    top:0; left:0;
+    transform-origin:0 0;
+    min-width:1px;
+    min-height:1px;
+  }
+  .quilt-zoom-controls{
+    position:absolute;
+    right:14px; bottom:14px;
+    display:flex;
+    align-items:center;
+    gap:2px;
+    background:rgba(23,18,19,0.85);
+    border:1px solid var(--panel-line);
+    border-radius:20px;
+    padding:4px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.4);
+    z-index:10;
+  }
+  .quilt-zoom-btn{
+    width:30px; height:30px;
+    border-radius:50%;
+    border:none;
+    background:transparent;
+    color:var(--ink);
+    font-size:16px;
+    line-height:1;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:background .12s;
+  }
+  .quilt-zoom-btn:hover{background:rgba(255,255,255,0.1);}
+  .quilt-zoom-fit{font-size:13px;}
+  .quilt-zoom-pct{
+    min-width:46px;
+    background:transparent;
+    border:none;
+    color:var(--wool-dim);
+    font-size:11.5px;
+    cursor:pointer;
+    padding:0 2px;
+  }
+  .quilt-zoom-pct:hover{color:var(--ink);}
   .quilt-piece{
     position:absolute;
     border:2px solid var(--panel-line);
@@ -683,8 +726,14 @@
       <button class="beat-btn" id="quiltConfirmBtn" disabled>Attach here</button>
       <button class="ghost-btn" id="quiltCancelBtn">Cancel</button>
     </div>
-    <div class="quilt-board-wrap">
+    <div class="quilt-board-wrap" id="quiltBoardWrap">
       <div class="quilt-board" id="quiltBoard"></div>
+      <div class="quilt-zoom-controls">
+        <button class="quilt-zoom-btn" id="quiltZoomOutBtn" title="Zoom out">&minus;</button>
+        <button class="quilt-zoom-pct" id="quiltZoomPctBtn" title="Reset to 100%">100%</button>
+        <button class="quilt-zoom-btn" id="quiltZoomInBtn" title="Zoom in">+</button>
+        <button class="quilt-zoom-btn quilt-zoom-fit" id="quiltZoomFitBtn" title="Fit the whole quilt in view">⤢</button>
+      </div>
     </div>
   </section>
 </div>
@@ -2403,8 +2452,11 @@ function runCutAnimFrame(){
 const SUPABASE_URL = 'https://zzgnqatnfjpjsvmpnyfr.supabase.co/rest/v1/';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6Z25xYXRuZmpwanN2bXBueWZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNzQxODgsImV4cCI6MjEwNDg1MDE4OH0.w8yuUevaR3wo3PkBv0Y7cajR1yyxi4vhAJBNKU6qug0';
 const QUILT_CELL = 150;
+const QUILT_ZOOM_MIN = 0.06;
+const QUILT_ZOOM_MAX = 6;
 
 const quiltState = { pieces: [], positions: {}, pendingAttachTo: undefined, chosen: false };
+const quiltZoom = { scale: 1, x: 0, y: 0, everFit: false };
 
 function supabaseHeaders(extra){
   return Object.assign({ apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer '+SUPABASE_ANON_KEY }, extra||{});
@@ -2540,6 +2592,149 @@ function renderQuiltBoard(){
   });
   board.style.width = ((maxCol+2)*QUILT_CELL) + 'px';
   board.style.height = ((maxRow+2)*QUILT_CELL) + 'px';
+  applyQuiltTransform();
+  if(!quiltZoom.everFit){
+    fitQuiltToView();
+    quiltZoom.everFit = true;
+  }
+}
+
+/* ---------- quilt pan/zoom ----------
+   A big, free-range canvas -- wheel/pinch to zoom (anchored on the pointer
+   so the spot you're looking at doesn't jump), drag to pan, buttons for
+   +/-/fit. A drag is distinguished from a click on a piece by movement
+   distance, so panning across a piece never accidentally selects it. */
+function applyQuiltTransform(){
+  const board = document.getElementById('quiltBoard');
+  board.style.transform = 'translate('+quiltZoom.x+'px,'+quiltZoom.y+'px) scale('+quiltZoom.scale+')';
+  const pct = document.getElementById('quiltZoomPctBtn');
+  if(pct) pct.textContent = Math.round(quiltZoom.scale*100) + '%';
+}
+function clampQuiltScale(s){
+  return Math.min(QUILT_ZOOM_MAX, Math.max(QUILT_ZOOM_MIN, s));
+}
+// Zooms so the board-space point under (anchorX, anchorY) -- in the wrap's
+// own client coordinates -- stays visually fixed under that same point.
+function zoomQuiltTo(newScale, anchorX, anchorY){
+  newScale = clampQuiltScale(newScale);
+  const boardLocalX = (anchorX - quiltZoom.x) / quiltZoom.scale;
+  const boardLocalY = (anchorY - quiltZoom.y) / quiltZoom.scale;
+  quiltZoom.scale = newScale;
+  quiltZoom.x = anchorX - boardLocalX*newScale;
+  quiltZoom.y = anchorY - boardLocalY*newScale;
+  applyQuiltTransform();
+}
+function quiltWrapCenter(){
+  const wrap = document.getElementById('quiltBoardWrap');
+  const r = wrap.getBoundingClientRect();
+  return { x: r.width/2, y: r.height/2, rect: r };
+}
+function zoomQuiltByFactor(factor, clientX, clientY){
+  const wrap = document.getElementById('quiltBoardWrap');
+  const r = wrap.getBoundingClientRect();
+  const ax = clientX!==undefined ? clientX-r.left : r.width/2;
+  const ay = clientY!==undefined ? clientY-r.top : r.height/2;
+  zoomQuiltTo(quiltZoom.scale*factor, ax, ay);
+}
+function fitQuiltToView(){
+  const board = document.getElementById('quiltBoard');
+  const wrap = document.getElementById('quiltBoardWrap');
+  const bw = parseFloat(board.style.width)||QUILT_CELL, bh = parseFloat(board.style.height)||QUILT_CELL;
+  const r = wrap.getBoundingClientRect();
+  if(r.width<=0 || r.height<=0) return;
+  const pad = 40;
+  const scale = clampQuiltScale(Math.min((r.width-pad)/bw, (r.height-pad)/bh, 1.5));
+  quiltZoom.scale = scale;
+  quiltZoom.x = (r.width - bw*scale)/2;
+  quiltZoom.y = (r.height - bh*scale)/2;
+  applyQuiltTransform();
+}
+
+let quiltDrag = null;
+const quiltPointers = new Map();
+let quiltPinch = null;
+
+function quiltSuppressNextClick(){
+  const suppress = ev => { ev.stopPropagation(); ev.preventDefault(); };
+  window.addEventListener('click', suppress, { capture:true, once:true });
+  // Safety net: if the browser never fires a click after this drag (e.g.
+  // the pointer was released outside the window), don't leave this armed
+  // to silently eat an unrelated click later.
+  setTimeout(() => window.removeEventListener('click', suppress, { capture:true }), 400);
+}
+function onQuiltPointerDown(e){
+  const wrap = document.getElementById('quiltBoardWrap');
+  // Don't capture yet -- capturing here would retarget the click event
+  // itself onto the wrap, so a plain click on a piece (no drag) would
+  // never reach that piece's own click handler. Capture is grabbed lazily
+  // in onQuiltPointerMove, only once real dragging is confirmed.
+  quiltPointers.set(e.pointerId, { x:e.clientX, y:e.clientY });
+  if(quiltPointers.size === 1){
+    quiltDrag = { pointerId:e.pointerId, startX:e.clientX, startY:e.clientY, startOffX:quiltZoom.x, startOffY:quiltZoom.y, moved:false };
+  } else if(quiltPointers.size === 2){
+    quiltDrag = null;
+    const pts = [...quiltPointers.values()];
+    const dist = Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y);
+    const r = wrap.getBoundingClientRect();
+    const midX = (pts[0].x+pts[1].x)/2, midY = (pts[0].y+pts[1].y)/2;
+    quiltPinch = { startDist: Math.max(1,dist), startScale: quiltZoom.scale, startOffX: quiltZoom.x, startOffY: quiltZoom.y, startMidX: midX-r.left, startMidY: midY-r.top };
+  }
+}
+function onQuiltPointerMove(e){
+  if(!quiltPointers.has(e.pointerId)) return;
+  quiltPointers.set(e.pointerId, { x:e.clientX, y:e.clientY });
+  const wrap = document.getElementById('quiltBoardWrap');
+  if(quiltPointers.size === 2 && quiltPinch){
+    const pts = [...quiltPointers.values()];
+    const dist = Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y);
+    const r = wrap.getBoundingClientRect();
+    const midX = (pts[0].x+pts[1].x)/2 - r.left, midY = (pts[0].y+pts[1].y)/2 - r.top;
+    const newScale = clampQuiltScale(quiltPinch.startScale * (dist/quiltPinch.startDist));
+    const boardLocalX = (quiltPinch.startMidX - quiltPinch.startOffX) / quiltPinch.startScale;
+    const boardLocalY = (quiltPinch.startMidY - quiltPinch.startOffY) / quiltPinch.startScale;
+    quiltZoom.scale = newScale;
+    quiltZoom.x = midX - boardLocalX*newScale;
+    quiltZoom.y = midY - boardLocalY*newScale;
+    applyQuiltTransform();
+    return;
+  }
+  if(quiltDrag){
+    const dx = e.clientX - quiltDrag.startX, dy = e.clientY - quiltDrag.startY;
+    if(!quiltDrag.moved && Math.hypot(dx,dy) > 4){
+      quiltDrag.moved = true;
+      wrap.classList.add('dragging');
+      try{ wrap.setPointerCapture(quiltDrag.pointerId); }catch(err){}
+    }
+    if(quiltDrag.moved){
+      quiltZoom.x = quiltDrag.startOffX + dx;
+      quiltZoom.y = quiltDrag.startOffY + dy;
+      applyQuiltTransform();
+    }
+  }
+}
+function onQuiltPointerUp(e){
+  const wrap = document.getElementById('quiltBoardWrap');
+  try{ wrap.releasePointerCapture(e.pointerId); }catch(err){}
+  quiltPointers.delete(e.pointerId);
+  if(quiltPointers.size < 2) quiltPinch = null;
+  if(quiltDrag){
+    if(quiltDrag.moved){
+      wrap.classList.remove('dragging');
+      quiltSuppressNextClick();
+    }
+    quiltDrag = null;
+  }
+  if(quiltPointers.size === 1){
+    const [[id,pt]] = quiltPointers;
+    quiltDrag = { pointerId:id, startX:pt.x, startY:pt.y, startOffX:quiltZoom.x, startOffY:quiltZoom.y, moved:true };
+    wrap.classList.add('dragging');
+    try{ wrap.setPointerCapture(id); }catch(err){}
+  }
+}
+function onQuiltWheel(e){
+  e.preventDefault();
+  const factor = Math.pow(1.0018, -e.deltaY);
+  zoomQuiltByFactor(factor, e.clientX, e.clientY);
 }
 
 async function loadQuilt(){
@@ -2551,8 +2746,12 @@ async function loadQuilt(){
     status.textContent = quiltState.pieces.length + ' piece' + (quiltState.pieces.length===1?'':'s') + ' woven in so far';
   }catch(err){
     status.textContent = '';
+    quiltZoom.scale = 1; quiltZoom.x = 0; quiltZoom.y = 0;
+    applyQuiltTransform();
+    document.getElementById('quiltBoard').style.width = '';
+    document.getElementById('quiltBoard').style.height = '';
     document.getElementById('quiltBoard').innerHTML =
-      '<p style="color:var(--wool-dim); font-size:13px; max-width:60ch; padding:10px;">'+
+      '<p style="color:var(--wool-dim); font-size:13px; max-width:60ch; padding:10px; position:static;">'+
       'The Community Quilt needs outside network access, which this preview doesn\'t have '+
       '(the Claude Artifact sandbox blocks it, same as any offline copy would). Open the '+
       'standalone hosted version of this file to see and add to the real quilt.</p>';
@@ -2637,6 +2836,22 @@ document.getElementById('addToQuiltBtn').addEventListener('click', () => {
   document.getElementById('quiltPlacementText').textContent = 'Click a piece below to attach yours next to it, or place it as a new corner.';
   document.getElementById('quiltConfirmBtn').disabled = true;
 });
+
+(() => {
+  const wrap = document.getElementById('quiltBoardWrap');
+  wrap.addEventListener('pointerdown', onQuiltPointerDown);
+  wrap.addEventListener('pointermove', onQuiltPointerMove);
+  wrap.addEventListener('pointerup', onQuiltPointerUp);
+  wrap.addEventListener('pointercancel', onQuiltPointerUp);
+  wrap.addEventListener('wheel', onQuiltWheel, { passive:false });
+  document.getElementById('quiltZoomInBtn').addEventListener('click', () => zoomQuiltByFactor(1.4));
+  document.getElementById('quiltZoomOutBtn').addEventListener('click', () => zoomQuiltByFactor(1/1.4));
+  document.getElementById('quiltZoomPctBtn').addEventListener('click', () => {
+    const c = quiltWrapCenter();
+    zoomQuiltTo(1, c.x, c.y);
+  });
+  document.getElementById('quiltZoomFitBtn').addEventListener('click', fitQuiltToView);
+})();
 
 /* ---------- init ---------- */
 buildPalette();
