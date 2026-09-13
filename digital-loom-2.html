@@ -823,11 +823,11 @@ function draw(){
     const alpha = 0.30+0.5*Math.min(t,1);
     const lw = Math.max(1, cell*(0.08+0.16*Math.min(t,1)));
     const passes = isDepressed
-      ? [{dy:-cell*0.05, amp:cell*0.09}, {dy:cell*0.05, amp:cell*0.09}]
+      ? [{dy:-cell*0.17, amp:cell*0.06}, {dy:cell*0.17, amp:cell*0.06}]
       : [{dy:0, amp:cell*0.12}];
     passes.forEach(p => {
       ctx.strokeStyle = 'rgba(228,214,184,'+alpha+')';
-      ctx.lineWidth = isDepressed ? Math.max(1, lw*0.75) : lw;
+      ctx.lineWidth = isDepressed ? Math.max(1, lw*0.6) : lw;
       ctx.beginPath();
       for(let c=0;c<COLS;c++){
         const xMid = c*cell + cell/2;
