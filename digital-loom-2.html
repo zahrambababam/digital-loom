@@ -854,18 +854,22 @@ function motifCharColor(ch, palette){
   return palette[colorIdx] || palette[1];
 }
 
-// The guide character for loom column `c` in the *active* row, or null if
-// there's no armed guide, the active row is past the guide's span, or `c`
-// falls outside the motif's horizontal footprint.
-function guideCharAt(c){
+// The guide character for loom row `r` / column `c`, or null if there's no
+// armed guide, `r` is outside the guide's vertical span, or `c` falls
+// outside the motif's horizontal footprint.
+function guideCharAtRow(r, c){
   if(!motifGuide) return null;
   const m = motifGuide.motif, n = m.rows.length, half = Math.floor(n/2);
-  const rowIdx = (n-1) - (motifGuide.baseRow - activeRow);
+  const rowIdx = (n-1) - (motifGuide.baseRow - r);
   if(rowIdx < 0 || rowIdx >= n) return null;
   const gc = c - motifGuide.anchorCol + half;
   if(gc < 0 || gc >= n) return null;
   const ch = m.rows[rowIdx][gc];
   return ch === '.' ? null : ch;
+}
+// Convenience wrapper for the row actually being tied right now.
+function guideCharAt(c){
+  return guideCharAtRow(activeRow, c);
 }
 
 function pulseFor(r,c,now){
@@ -955,18 +959,27 @@ function draw(){
     ctx.stroke();
   }
 
-  // motif guide: a translucent preview of the armed shape's slice through
-  // the active row only.
+  // motif guide: a cast shadow of the whole armed shape, not just the row
+  // you're on — the active row's slice reads clearly enough to tie against,
+  // and everything still above it (not yet reached) shows as a fainter
+  // preview of what's coming, the way a cartoon or a chalk outline would
+  // let a real weaver see the target shape before working up to it. It
+  // still never fills a cell for you — it only ever suggests a color.
   if(motifGuide && !loomComplete){
-    for(let c=0;c<COLS;c++){
-      if(grid[activeRow][c]) continue;
-      const ch = guideCharAt(c);
-      if(!ch) continue;
-      const hex = motifCharColor(ch, current.palette);
-      ctx.fillStyle = hex + '55';
-      const x = c*cell, y = activeRow*cell;
-      roundRect(x+cell*0.22, y+cell*0.22, cell*0.56, cell*0.56, 2);
-      ctx.fill();
+    const n = motifGuide.motif.rows.length;
+    const topRow = Math.max(0, motifGuide.baseRow - (n-1));
+    for(let r=topRow; r<=activeRow; r++){
+      const isActiveRow = r===activeRow;
+      for(let c=0;c<COLS;c++){
+        if(grid[r][c]) continue;
+        const ch = guideCharAtRow(r, c);
+        if(!ch) continue;
+        const hex = motifCharColor(ch, current.palette);
+        ctx.fillStyle = hex + (isActiveRow ? '55' : '26');
+        const x = c*cell, y = r*cell;
+        roundRect(x+cell*0.22, y+cell*0.22, cell*0.56, cell*0.56, 2);
+        ctx.fill();
+      }
     }
   }
 
@@ -988,6 +1001,76 @@ function draw(){
     ctx.strokeStyle = 'rgba(228,214,184,0.55)';
     ctx.lineWidth = 1.5;
     ctx.strokeRect(hoverCell.c*cell+1, hoverCell.r*cell+1, cell-2, cell-2);
+  }
+
+  drawBeatTool(now);
+}
+
+// The actual beater — drawn as the region's real tool (comb/kirkit, saber
+// blade, or iron spike), swinging down from above and slamming onto the
+// active row in sync with the thump sound and the tightening effect, then
+// gone once the beat completes. Not just a screen-space "packing" effect —
+// something you can see land.
+function drawBeatTool(now){
+  if(!beatAnim) return;
+  const dur = 280;
+  const elapsed = now - beatAnim.start;
+  const p = Math.min(1, elapsed/dur);
+  const row = beatAnim.row;
+
+  // fast downswing that reaches the row by 70% of the animation, then a
+  // small springy bounce-back off the impact for the rest of it.
+  const swingP = p < 0.7 ? (p/0.7) : 1;
+  const bounce = p >= 0.7 ? Math.sin((p-0.7)/0.3*Math.PI) * 0.05 * (1-(p-0.7)/0.3) : 0;
+  const travelRows = Math.min(4, row);
+  const startY = (row - travelRows) * cell;
+  const endY = row * cell;
+  const easedSwing = 1 - Math.pow(1-swingP, 3); // ease-out: fast start, settles into the hit
+  const y = startY + (endY-startY)*easedSwing - bounce*cell;
+
+  const toolH = Math.max(7, cell*1.05);
+  ctx.save();
+  const tool = current.beatTool;
+  if(tool==='comb'){
+    // the kirkit/daffeh: a solid bar with a row of teeth biting into the weave
+    ctx.fillStyle = '#c9a24b';
+    ctx.fillRect(0, y-toolH, canvas.width, toolH*0.55);
+    ctx.fillStyle = '#a6813a';
+    for(let c=0;c<COLS;c++){
+      ctx.fillRect(c*cell+cell*0.12, y-toolH*0.45, cell*0.76, toolH*0.45);
+    }
+  } else if(tool==='saber'){
+    // Kerman's saber blade: one long angled edge
+    ctx.fillStyle = '#c9a24b';
+    ctx.beginPath();
+    ctx.moveTo(0, y-toolH);
+    ctx.lineTo(canvas.width, y-toolH*0.35);
+    ctx.lineTo(canvas.width, y-toolH*0.08);
+    ctx.lineTo(0, y-toolH*0.7);
+    ctx.closePath();
+    ctx.fill();
+  } else {
+    // the iron spike used to compact Bidjar and Qom's denser weave
+    ctx.fillStyle = '#c9a24b';
+    ctx.fillRect(0, y-toolH, canvas.width, toolH*0.3);
+    ctx.fillStyle = '#a6813a';
+    for(let c=0;c<COLS;c++){
+      const cx = c*cell + cell*0.5;
+      ctx.beginPath();
+      ctx.moveTo(cx-cell*0.28, y-toolH*0.7);
+      ctx.lineTo(cx+cell*0.28, y-toolH*0.7);
+      ctx.lineTo(cx, y-toolH*0.1);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+
+  // impact flash right as the tool lands
+  if(p > 0.62 && p < 0.82){
+    const flashAlpha = 1 - Math.abs(p-0.7)/0.12;
+    ctx.fillStyle = 'rgba(255,255,255,'+Math.max(0,flashAlpha*0.4)+')';
+    ctx.fillRect(0, endY-cell*0.18, canvas.width, cell*0.36);
   }
 }
 
