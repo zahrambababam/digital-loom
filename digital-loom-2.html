@@ -261,6 +261,15 @@
   .finish-option-icon{font-size:32px;}
   .finish-option-title{font-weight:700; font-size:15px;}
   .finish-option-desc{font-size:12px; color:var(--wool-dim); line-height:1.5;}
+  .gift-checkbox-field{
+    display:flex; align-items:center; gap:8px;
+    margin-bottom:16px;
+    font-size:13.5px;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .gift-checkbox-field input{width:16px; height:16px; cursor:pointer;}
+  .gift-self-note{font-size:13px; color:var(--wool-dim); line-height:1.5; margin:0 0 16px;}
   .gift-field{display:block; margin-bottom:14px; font-size:12.5px; color:var(--wool-dim);}
   .gift-field span{display:block; margin-bottom:5px;}
   .gift-field em{font-style:normal; opacity:0.75;}
@@ -289,6 +298,7 @@
     font-family:monospace;
   }
   .gift-mailto-btn{display:block; width:100%; text-align:center; text-decoration:none; box-sizing:border-box;}
+  .gift-mailto-btn[hidden]{display:none;}
 
   /* A gift is a letter, not a form -- so its two modals get their own
      warm, aged-paper skin instead of the app's usual dark panels. The
@@ -296,26 +306,28 @@
      .modal-close, ...) by redefining the same CSS variables locally, so
      nothing has to be restyled twice. */
   .letter-card{
-    --panel: #ece0c4;
-    --panel-line: #c3af7d;
-    --bg-deep: #e1d2a9;
-    --ink: #362a18;
-    --ink-dim: #5c4a30;
-    --wool-dim: #7d6844;
-    background-color: #ece0c4;
+    --panel: #ddc99c;
+    --panel-line: #b39b6a;
+    --bg-deep: #d1bb87;
+    --ink: #2e2314;
+    --ink-dim: #4a3a22;
+    --wool-dim: #6b5636;
+    background-color: #a89878;
     background-image:
-      radial-gradient(ellipse 75% 55% at 12% 8%, rgba(255,252,235,0.6), transparent 55%),
-      radial-gradient(ellipse 70% 60% at 90% 95%, rgba(110,85,45,0.14), transparent 55%),
-      radial-gradient(circle at 50% 40%, rgba(90,68,35,0.07), transparent 62%),
-      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch' result='t'/><feColorMatrix in='t' type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23p)'/></svg>"),
-      radial-gradient(ellipse 120% 100% at 50% 50%, transparent 55%, rgba(65,46,20,0.2) 100%);
-    background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat;
-    background-size: 100% 100%, 100% 100%, 100% 100%, 130px 130px, 100% 100%;
-    background-blend-mode: normal, normal, normal, overlay, normal;
-    border:1px solid #b6a173;
+      radial-gradient(ellipse 32% 24% at 10% 8%, rgba(35,26,13,0.38), transparent 65%),
+      radial-gradient(ellipse 28% 24% at 90% 15%, rgba(32,23,11,0.32), transparent 60%),
+      radial-gradient(ellipse 36% 28% at 82% 90%, rgba(28,19,9,0.42), transparent 60%),
+      radial-gradient(ellipse 24% 22% at 12% 85%, rgba(34,25,12,0.3), transparent 60%),
+      radial-gradient(ellipse 20% 16% at 60% 55%, rgba(30,21,10,0.2), transparent 65%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch' result='t'/><feColorMatrix in='t' type='saturate' values='0'/><feComponentTransfer><feFuncR type='linear' slope='1.6' intercept='-0.25'/><feFuncG type='linear' slope='1.6' intercept='-0.25'/><feFuncB type='linear' slope='1.6' intercept='-0.25'/></feComponentTransfer></filter><rect width='100%25' height='100%25' filter='url(%23p)'/></svg>"),
+      radial-gradient(ellipse 105% 90% at 50% 50%, transparent 32%, rgba(18,12,5,0.68) 100%);
+    background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat, no-repeat;
+    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 130px 130px, 100% 100%;
+    background-blend-mode: normal, normal, normal, normal, normal, multiply, normal;
+    border:1px solid #7a6a48;
     box-shadow:
-      0 1px 0 #d9cba3, 0 3px 0 #d0c093, 0 5px 0 #c6b485,
-      0 24px 48px rgba(20,14,6,0.5);
+      0 1px 0 #a8996f, 0 3px 0 #9a8a63, 0 5px 0 #8c7c57,
+      0 24px 48px rgba(10,7,3,0.6);
   }
   .letter-card h2{font-family:'Cormorant Garamond',serif; font-weight:600; font-size:26px;}
   .letter-card .modal-close:hover{background:rgba(54,42,24,0.1); color:#1f160c;}
@@ -329,17 +341,23 @@
   .gift-done-preview-wrap canvas{max-width:100%; max-height:180px; object-fit:contain;}
 
   /* ---------- wax seal ---------- */
+  /* A pressed wax seal's edge is never smooth -- it's an irregular,
+     lumpy rim where the wax spread unevenly under the stamp, with the
+     occasional small drip. clip-path (not border-radius) draws that
+     outline; a drop-shadow filter is used instead of box-shadow for the
+     outer shadow because box-shadow doesn't follow a clip-path's shape. */
   .wax-seal{
     width:110px; height:110px;
     margin:6px auto 18px;
-    border-radius:44% 56% 53% 47% / 47% 44% 56% 53%;
-    box-shadow:0 6px 14px rgba(0,0,0,0.45), inset 0 2px 4px rgba(255,255,255,0.08), inset 0 -6px 10px rgba(0,0,0,0.4);
     position:relative;
     background:radial-gradient(circle at 35% 30%, #9a2e28, #6e1a17 65%, #4a0f0d 100%);
+    box-shadow: inset 0 2px 4px rgba(255,255,255,0.08), inset 0 -6px 10px rgba(0,0,0,0.4);
+    clip-path: polygon(96.0% 50.0%, 92.7% 62.5%, 88.5% 74.7%, 79.0% 83.5%, 69.3% 92.2%, 56.4% 94.7%, 42.9% 99.1%, 31.3% 90.9%, 20.8% 83.7%, 11.1% 75.0%, 4.2% 63.5%, 5.5% 50.0%, 4.1% 36.5%, 11.6% 25.3%, 19.4% 14.7%, 31.4% 9.4%, 43.5% 4.7%, 56.6% 4.3%, 68.5% 9.4%, 79.7% 15.7%, 87.3% 26.0%, 93.1% 37.3%);
+    filter: drop-shadow(0 6px 10px rgba(0,0,0,0.45));
   }
   .wax-seal canvas{
     position:absolute; inset:0; width:100%; height:100%;
-    border-radius:inherit;
+    clip-path: inherit;
   }
   .gift-seal-break{cursor:pointer; transition:transform .2s;}
   .gift-seal-break:hover{transform:scale(1.04);}
@@ -928,7 +946,7 @@
         <span class="finish-option-desc">Attach it next to a piece you like on the shared public board. Anyone can see it, forever — nobody can edit or remove it once it's placed.</span>
       </button>
       <button class="finish-option" id="finishGiftBtn">
-        <span class="finish-option-icon">🎁</span>
+        <span class="finish-option-icon"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"></rect><path d="M12 8v13"></path><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"></path><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8"></path><path d="M16.5 8a2.5 2.5 0 0 0 0-5C13 3 12 8 12 8"></path></svg></span>
         <span class="finish-option-title">Wrap &amp; Gift this Rug</span>
         <span class="finish-option-desc">Seal it with a note and send it to someone — or to yourself. They'll unroll it on their own screen.</span>
       </button>
@@ -941,29 +959,33 @@
     <button class="modal-close" id="giftFormClose" title="Close">&times;</button>
     <h2>Wrap this rug</h2>
     <form id="giftForm">
-      <label class="gift-field">
-        <span>Recipient's name <em>(optional)</em></span>
-        <input type="text" id="giftRecipientName" maxlength="60" placeholder="Who is this for?">
+      <label class="gift-checkbox-field">
+        <input type="checkbox" id="giftIsSelf">
+        <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"></rect><path d="M12 8v13"></path><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"></path><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8"></path><path d="M16.5 8a2.5 2.5 0 0 0 0-5C13 3 12 8 12 8"></path></svg>
+        <span>Gift yourself</span>
       </label>
-      <label class="gift-field">
-        <span>Recipient's email</span>
-        <input type="email" id="giftRecipientEmail" maxlength="200" required placeholder="them@example.com">
-      </label>
-      <label class="gift-field">
-        <span>Your name <em>(optional)</em></span>
-        <input type="text" id="giftSenderName" maxlength="60" placeholder="Who's it from?">
-      </label>
-      <label class="gift-field">
-        <span>Your email <em>(so we know it's really you — never stored)</em></span>
-        <input type="email" id="giftSenderEmail" maxlength="200" required placeholder="you@example.com">
-      </label>
-      <label class="gift-field">
-        <span>Your message</span>
-        <textarea id="giftMessage" maxlength="500" rows="4" placeholder="Say something about it..."></textarea>
-      </label>
+      <div id="giftRecipientFields">
+        <label class="gift-field">
+          <span>Recipient's name <em>(optional)</em></span>
+          <input type="text" id="giftRecipientName" maxlength="60" placeholder="Who is this for?">
+        </label>
+        <label class="gift-field">
+          <span>Recipient's email <em>(optional — opens a pre-written email to send)</em></span>
+          <input type="email" id="giftRecipientEmail" maxlength="200" placeholder="them@example.com">
+        </label>
+        <label class="gift-field">
+          <span>Your name <em>(optional)</em></span>
+          <input type="text" id="giftSenderName" maxlength="60" placeholder="Who's it from?">
+        </label>
+        <label class="gift-field">
+          <span>Your message</span>
+          <textarea id="giftMessage" maxlength="500" rows="4" placeholder="Say something about it..."></textarea>
+        </label>
+      </div>
+      <p class="gift-self-note" id="giftSelfNote" hidden>It'll seal with a little surprise for you to find when you open it.</p>
       <div class="gift-form-actions">
         <button type="button" class="ghost-btn" id="giftFormBack">← Back</button>
-        <button type="submit" class="beat-btn" id="giftWrapSubmitBtn">Wrap it 🎁</button>
+        <button type="submit" class="beat-btn" id="giftWrapSubmitBtn"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"></rect><path d="M12 8v13"></path><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"></path><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8"></path><path d="M16.5 8a2.5 2.5 0 0 0 0-5C13 3 12 8 12 8"></path></svg> <span id="giftWrapSubmitLabel">Wrap it</span></button>
       </div>
     </form>
   </div>
@@ -1519,17 +1541,44 @@ function resetLoom(){
   updateBeatUI();
 }
 
-// Changing the weave density changes the grid resolution itself, not just
-// how it's drawn, so (unlike a region switch) it starts the piece over --
-// there's no honest way to keep existing knots lined up on a differently
-// sized grid.
+// Changing the weave density changes the grid resolution itself -- this
+// used to just discard the whole piece and start over, but tossing
+// someone's work because they wanted a different density mid-weave is a
+// bad surprise, especially for a learning tool. Instead, resample the
+// existing pattern onto the new resolution (same idea as resizing an
+// image): every cell on the new grid samples the nearest cell on the old
+// one, so the same picture just redraws at a different resolution.
 function setDensity(key){
   if(!DENSITY_PRESETS[key] || key===density) return;
+  const oldCOLS = COLS, oldROWS = ROWS, oldGrid = grid;
   density = key;
   COLS = DENSITY_PRESETS[key].cols;
   ROWS = DENSITY_PRESETS[key].rows;
   document.querySelectorAll('.density-btn').forEach(b => b.classList.toggle('active', b.dataset.density===key));
-  resetLoom();
+  const newGrid = makeGrid();
+  for(let r=0;r<ROWS;r++){
+    const srcR = Math.round(r * (oldROWS-1) / (ROWS-1));
+    for(let c=0;c<COLS;c++){
+      const srcC = Math.round(c * (oldCOLS-1) / (COLS-1));
+      newGrid[r][c] = oldGrid[srcR][srcC];
+    }
+  }
+  grid = newGrid;
+  activeRow = Math.min(ROWS-1, Math.max(0, Math.round(activeRow * (ROWS-1) / (oldROWS-1))));
+  rowPhase = 'tying';
+  loomComplete = false;
+  beatCounts = new Array(ROWS).fill(0);
+  beatAnim = null;
+  weftAnim = null;
+  tieAnims.clear();
+  // The old guides' grid coordinates no longer line up with anything --
+  // the pattern they already stamped survives (it's baked into the
+  // resampled knots above), only the shadow preview resets.
+  pendingMotif = null;
+  pendingRotation = 0;
+  motifGuides = [];
+  buildMotifs();
+  updateBeatUI();
   resizeCanvas();
 }
 
@@ -2347,12 +2396,21 @@ canvas.addEventListener('pointerleave', () => { hoverCell=null; draw(); });
 // advances to the next row once the current one's beaten, and R rotates
 // whatever motif is currently armed.
 window.addEventListener('keydown', e => {
+  // Typing anywhere (a gift note, a name field, ...) must never trigger a
+  // loom shortcut -- Space in particular used to beat the carpet instead
+  // of typing a space character.
+  const targetTag = e.target && e.target.tagName;
+  if(targetTag==='INPUT' || targetTag==='TEXTAREA' || (e.target && e.target.isContentEditable)) return;
   const k = e.key;
   if(k===' '){ e.preventDefault(); attemptBeat(); return; }
   if(k==='w' || k==='W'){ e.preventDefault(); attemptPassWeft(); return; }
   if(k==='Enter'){ e.preventDefault(); advanceRow(); return; }
   if(k==='r' || k==='R'){
     if(pendingMotif){ pendingRotation = (pendingRotation+90)%360; buildMotifs(); draw(); }
+    return;
+  }
+  if(k==='Escape'){
+    if(pendingMotif){ pendingMotif = null; pendingRotation = 0; buildMotifs(); draw(); }
     return;
   }
   if(k==='a' || k==='A' || k==='s' || k==='S'){
@@ -2419,8 +2477,15 @@ function buildPalette(){
     b.addEventListener('click', () => {
       activeColor = hex;
       setMode('knot');
+      // Picking a plain color is how you say "just a knot, no motif" --
+      // an armed motif shouldn't need a separate hunt for "Clear guides"
+      // to escape.
+      pendingMotif = null;
+      pendingRotation = 0;
       buildPalette();
+      buildMotifs();
       updateLoomCursor(hex);
+      draw();
     });
     paletteGroup.appendChild(b);
   });
@@ -2698,6 +2763,7 @@ document.getElementById('finishGiftBtn').addEventListener('click', () => {
 
 function openGiftForm(){
   document.getElementById('giftForm').reset();
+  updateGiftSelfToggle();
   document.getElementById('giftFormModal').hidden = false;
 }
 function closeGiftForm(){ document.getElementById('giftFormModal').hidden = true; }
@@ -2709,6 +2775,12 @@ document.getElementById('giftFormBack').addEventListener('click', () => {
   closeGiftForm();
   openFinishModal();
 });
+function updateGiftSelfToggle(){
+  const isSelf = document.getElementById('giftIsSelf').checked;
+  document.getElementById('giftRecipientFields').hidden = isSelf;
+  document.getElementById('giftSelfNote').hidden = !isSelf;
+}
+document.getElementById('giftIsSelf').addEventListener('change', updateGiftSelfToggle);
 
 async function insertGift(body){
   const resp = await fetch(SUPABASE_URL+'gifts', {
@@ -2729,50 +2801,107 @@ function giftLinkFor(id){
   return location.origin + location.pathname + '?gift=' + id;
 }
 
-// Draws a region's first motif into a wax-seal element as a single-tone
-// "pressed" impression: a dark offset shadow plus a light offset highlight
-// around each filled cell fakes an engraved indentation, sitting on the
-// CSS radial-gradient wax color behind the (otherwise transparent) canvas.
-function renderWaxSeal(sealEl, regionId){
+// A wax seal, not tied to the gift's own region -- picking a random motif
+// from the whole pool each time is part of the surprise. Aims for a
+// photographed impression rather than a flat digital stamp: a mottled,
+// uneven wax pour (radial gradient plus scattered blotches, never a flat
+// color), the motif pressed in slightly rotated and softened (a real seal
+// is never perfectly axis-aligned or crisp-edged), and a glossy vignette
+// on top the way light catches a rounded wax surface.
+function renderWaxSeal(sealEl){
   let cnv = sealEl.querySelector('canvas');
   if(!cnv){ cnv = document.createElement('canvas'); sealEl.appendChild(cnv); }
-  const region = REGIONS.find(r => r.id === regionId) || REGIONS[0];
-  const motifId = region.motifs && region.motifs[0];
-  const motif = MOTIFS.find(m => m.id === motifId);
+  const motif = MOTIFS[Math.floor(Math.random()*MOTIFS.length)];
   const size = 220;
   cnv.width = size; cnv.height = size;
-  const ctx = cnv.getContext('2d');
-  ctx.clearRect(0,0,size,size);
-  if(!motif) return;
-  const rows = motif.rows;
-  const n = rows.length;
-  const inset = size*0.24;
-  const cellPx = (size - inset*2) / n;
-  for(let r=0;r<n;r++){
-    const row = rows[r];
-    for(let c=0;c<row.length;c++){
-      if(row[c]==='.') continue;
-      const x = inset + c*cellPx, y = inset + r*cellPx;
-      ctx.fillStyle = 'rgba(0,0,0,0.5)';
-      ctx.fillRect(x+1.2, y+1.2, cellPx+0.6, cellPx+0.6);
-      ctx.fillStyle = 'rgba(255,205,170,0.22)';
-      ctx.fillRect(x-0.8, y-0.8, cellPx+0.6, cellPx+0.6);
-      ctx.fillStyle = 'rgba(0,0,0,0.28)';
-      ctx.fillRect(x, y, cellPx, cellPx);
-    }
+  const c2 = cnv.getContext('2d');
+  c2.clearRect(0,0,size,size);
+
+  // Drawn a little smaller than the element's own clip-path, so a rim of
+  // the CSS wax color shows just outside it -- the raised, uneven lip a
+  // real pressed seal has, versus the smoothly-stamped inner impression.
+  const edge = size*0.4;
+  const base = c2.createRadialGradient(size*0.38,size*0.32,size*0.04,size*0.5,size*0.5,edge*1.3);
+  base.addColorStop(0,'#a5342c');
+  base.addColorStop(0.45,'#8a231d');
+  base.addColorStop(0.75,'#6e1a17');
+  base.addColorStop(1,'#460e0c');
+  c2.fillStyle = base;
+  c2.beginPath();
+  c2.arc(size/2, size/2, edge, 0, Math.PI*2);
+  c2.fill();
+
+  c2.save();
+  c2.beginPath();
+  c2.arc(size/2, size/2, edge, 0, Math.PI*2);
+  c2.clip();
+
+  // a poured wax surface is never perfectly smooth -- scatter faint
+  // darker pools and lighter bubbles across it
+  for(let i=0;i<16;i++){
+    const bx = size*0.5 + (Math.random()-0.5)*size*0.75;
+    const by = size*0.5 + (Math.random()-0.5)*size*0.75;
+    const br = size*(0.02+Math.random()*0.05);
+    c2.fillStyle = Math.random()<0.5 ? 'rgba(0,0,0,0.10)' : 'rgba(255,150,120,0.09)';
+    c2.beginPath(); c2.arc(bx,by,br,0,Math.PI*2); c2.fill();
   }
+
+  if(motif){
+    c2.translate(size/2, size/2);
+    c2.rotate((Math.random()-0.5)*0.3);
+    c2.translate(-size/2, -size/2);
+    const rows = motif.rows;
+    const n = rows.length;
+    const inset = size*0.26;
+    const cellPx = (size - inset*2) / n;
+    c2.filter = 'blur(0.7px)';
+    for(let r=0;r<n;r++){
+      const row = rows[r];
+      for(let c=0;c<row.length;c++){
+        if(row[c]==='.') continue;
+        const j = (hashUnit(r,c)-0.5)*0.14;
+        const x = inset + c*cellPx, y = inset + r*cellPx;
+        c2.fillStyle = 'rgba(20,4,2,'+(0.5+j)+')';
+        c2.fillRect(x+1.3, y+1.3, cellPx+0.7, cellPx+0.7);
+        c2.fillStyle = 'rgba(255,190,150,'+(0.24+j*0.5)+')';
+        c2.fillRect(x-1, y-1, cellPx+0.7, cellPx+0.7);
+        c2.fillStyle = 'rgba(20,4,2,'+(0.24+j*0.3)+')';
+        c2.fillRect(x, y, cellPx, cellPx);
+      }
+    }
+    c2.filter = 'none';
+  }
+
+  // glossy highlight + edge falloff, like light on a rounded wax surface
+  const sheen = c2.createRadialGradient(size*0.35,size*0.28,0,size*0.5,size*0.5,edge*1.15);
+  sheen.addColorStop(0,'rgba(255,255,255,0.3)');
+  sheen.addColorStop(0.3,'rgba(255,255,255,0.06)');
+  sheen.addColorStop(0.7,'rgba(0,0,0,0)');
+  sheen.addColorStop(1,'rgba(0,0,0,0.4)');
+  c2.setTransform(1,0,0,1,0,0);
+  c2.fillStyle = sheen;
+  c2.fillRect(0,0,size,size);
+  c2.restore();
+
+  // a thin bright catch-light right at the pressed impression's true
+  // edge, where the raised, uneven rim of wax outside it would catch
+  // the light differently than the flatter stamped center
+  c2.strokeStyle = 'rgba(255,205,175,0.4)';
+  c2.lineWidth = size*0.012;
+  c2.beginPath();
+  c2.arc(size/2, size/2, edge - size*0.01, 0, Math.PI*2);
+  c2.stroke();
 }
 
 document.getElementById('giftForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const captured = captureWovenSparseGrid();
   if(!captured){ closeGiftForm(); return; }
-  const recipientName = document.getElementById('giftRecipientName').value.trim().slice(0,60);
-  const recipientEmail = document.getElementById('giftRecipientEmail').value.trim();
-  const senderName = document.getElementById('giftSenderName').value.trim().slice(0,60);
-  const senderEmail = document.getElementById('giftSenderEmail').value.trim();
-  const message = document.getElementById('giftMessage').value.trim().slice(0,500);
-  const isSelfGift = recipientEmail.length>0 && recipientEmail.toLowerCase() === senderEmail.toLowerCase();
+  const isSelfGift = document.getElementById('giftIsSelf').checked;
+  const recipientName = isSelfGift ? '' : document.getElementById('giftRecipientName').value.trim().slice(0,60);
+  const recipientEmail = isSelfGift ? '' : document.getElementById('giftRecipientEmail').value.trim();
+  const senderName = isSelfGift ? '' : document.getElementById('giftSenderName').value.trim().slice(0,60);
+  const message = isSelfGift ? '' : document.getElementById('giftMessage').value.trim().slice(0,500);
   const body = {
     recipient_name: recipientName || null,
     sender_name: senderName || null,
@@ -2785,35 +2914,41 @@ document.getElementById('giftForm').addEventListener('submit', async (e) => {
     is_self_gift: isSelfGift,
   };
   const submitBtn = document.getElementById('giftWrapSubmitBtn');
+  const submitLabel = document.getElementById('giftWrapSubmitLabel');
   submitBtn.disabled = true;
-  submitBtn.textContent = 'Wrapping…';
+  submitLabel.textContent = 'Wrapping…';
   try{
     const [saved] = await insertGift(body);
     closeGiftForm();
-    showGiftDone(saved, recipientName, recipientEmail, message);
+    showGiftDone(saved, recipientName, recipientEmail, message, isSelfGift);
   }catch(err){
     flashWarning('Could not wrap your gift — try again in a moment.');
   }finally{
     submitBtn.disabled = false;
-    submitBtn.textContent = 'Wrap it 🎁';
+    submitLabel.textContent = 'Wrap it';
   }
 });
 
-function showGiftDone(saved, recipientName, recipientEmail, message){
+function showGiftDone(saved, recipientName, recipientEmail, message, isSelfGift){
   const link = giftLinkFor(saved.id);
-  document.getElementById('giftDoneRecipient').textContent = recipientName || 'them';
+  document.getElementById('giftDoneRecipient').textContent = isSelfGift ? 'yourself' : (recipientName || 'them');
   document.getElementById('giftDoneLink').value = link;
-  renderWaxSeal(document.getElementById('giftDoneSeal'), current.id);
+  renderWaxSeal(document.getElementById('giftDoneSeal'));
   const previewCanvas = document.getElementById('giftDonePreview');
   const built = buildWovenPieceCanvas();
   if(built){
     previewCanvas.width = built.width; previewCanvas.height = built.height;
     previewCanvas.getContext('2d').drawImage(built,0,0);
   }
-  const subject = encodeURIComponent('A carpet, woven for you');
-  const bodyText = (message ? message+'\n\n' : '') + 'Unroll it here: ' + link;
-  document.getElementById('giftMailtoBtn').href =
-    'mailto:'+encodeURIComponent(recipientEmail)+'?subject='+subject+'&body='+encodeURIComponent(bodyText);
+  const mailtoBtn = document.getElementById('giftMailtoBtn');
+  if(recipientEmail){
+    const subject = encodeURIComponent('A carpet, woven for you');
+    const bodyText = (message ? message+'\n\n' : '') + 'Unroll it here: ' + link;
+    mailtoBtn.href = 'mailto:'+encodeURIComponent(recipientEmail)+'?subject='+subject+'&body='+encodeURIComponent(bodyText);
+    mailtoBtn.hidden = false;
+  } else {
+    mailtoBtn.hidden = true;
+  }
   document.getElementById('giftDoneModal').hidden = false;
 }
 document.getElementById('giftDoneClose').addEventListener('click', () => {
@@ -2858,7 +2993,7 @@ async function initGiftReveal(giftId){
     errorEl.textContent = 'This gift link doesn\'t match anything — check that you copied the whole link.';
     return;
   }
-  renderWaxSeal(sealEl, gift.region_id);
+  renderWaxSeal(sealEl);
   sealEl.addEventListener('click', () => breakSeal(gift), { once:true });
 }
 function breakSeal(gift){
@@ -2877,7 +3012,7 @@ function unrollGift(gift){
   const roll = document.getElementById('giftRugRoll');
   const cnv = document.getElementById('giftRugCanvas');
   stage.hidden = false;
-  renderSparseGridCanvas(cnv, gift, 420, 60);
+  renderTexturedRugCanvas(cnv, gift, 380, 32);
   const targetWidth = cnv.width;
   wrapEl.style.height = cnv.height + 'px';
   wrapEl.style.width = '0px';
@@ -3040,6 +3175,81 @@ function renderSparseGridCanvas(canvas, piece, target, maxPx){
 }
 function renderQuiltPieceCanvas(canvas, piece){
   renderSparseGridCanvas(canvas, piece, 140, 24);
+}
+
+// The gift reveal is a single hero image, not one of many small board
+// thumbnails, so it earns the same rendering the live loom itself uses --
+// per-knot fiber texture, silk sheen where the region calls for it, and
+// dangling warp-end fringe top and bottom -- reconstructed from the
+// stored sparse grid instead of the live canvas state. The stored data
+// doesn't carry each knot's symmetric/asymmetric structure (only its
+// color), so every knot renders with the more common symmetric mark.
+function renderTexturedRugCanvas(canvas, piece, target, maxPx){
+  const cellPx = Math.min(maxPx, Math.max(4, Math.round(target/Math.max(piece.width,piece.height))));
+  const region = REGIONS.find(r => r.id === piece.region_id);
+  const isSilk = !!(region && region.material && region.material.toLowerCase().includes('silk'));
+  const fringeLen = cellPx*1.4;
+  canvas.width = piece.width*cellPx;
+  canvas.height = piece.height*cellPx + fringeLen*2;
+  const c2 = canvas.getContext('2d');
+  const cellMap = new Map();
+  (piece.grid||[]).forEach(cellData => cellMap.set(cellData[0]+','+cellData[1], cellData[2]));
+
+  for(let r=0;r<piece.height;r++){
+    for(let c=0;c<piece.width;c++){
+      const hex = cellMap.get(r+','+c);
+      if(!hex) continue;
+      const x = c*cellPx, y = r*cellPx + fringeLen, pad = cellPx*0.11;
+      const full = cellPx - 2*pad;
+      const radius = Math.min(3, cellPx*0.15);
+      c2.fillStyle = jitterHex(hex, (hashUnit(r,c)-0.5)*0.16);
+      roundRect(c2, x+pad, y+pad, full, full, radius);
+      c2.fill();
+
+      c2.save();
+      roundRect(c2, x+pad, y+pad, full, full, radius);
+      c2.clip();
+      c2.globalAlpha = 0.22;
+      c2.globalCompositeOperation = 'overlay';
+      c2.fillStyle = fiberNoise;
+      c2.fillRect(x+pad, y+pad, full, full);
+      c2.globalCompositeOperation = 'source-over';
+      if(isSilk){
+        const sheen = c2.createLinearGradient(x+pad, y+pad, x+pad+full, y+pad+full);
+        sheen.addColorStop(0, 'rgba(255,255,255,0)');
+        sheen.addColorStop(0.45, 'rgba(255,255,255,0.28)');
+        sheen.addColorStop(0.6, 'rgba(255,255,255,0)');
+        c2.globalAlpha = 1;
+        c2.fillStyle = sheen;
+        c2.fillRect(x+pad, y+pad, full, full);
+      }
+      c2.restore();
+
+      c2.fillStyle = 'rgba(0,0,0,0.28)';
+      c2.fillRect(x+cellPx*0.18, y+pad+full*0.62, cellPx*0.64, Math.max(1,cellPx*0.1));
+    }
+  }
+
+  c2.strokeStyle = '#cfc0a0';
+  c2.lineWidth = Math.max(1, cellPx*0.1);
+  c2.lineCap = 'round';
+  for(let c=0;c<piece.width;c++){
+    const xMid = c*cellPx + cellPx/2;
+    const wig = (c%2===0 ? 1 : -1) * cellPx*0.08;
+    if(cellMap.has('0,'+c)){
+      c2.beginPath();
+      c2.moveTo(xMid, fringeLen);
+      c2.quadraticCurveTo(xMid+wig, fringeLen*0.5, xMid, 0);
+      c2.stroke();
+    }
+    if(cellMap.has((piece.height-1)+','+c)){
+      const yBase = fringeLen + piece.height*cellPx;
+      c2.beginPath();
+      c2.moveTo(xMid, yBase);
+      c2.quadraticCurveTo(xMid+wig, yBase+fringeLen*0.5, xMid, yBase+fringeLen);
+      c2.stroke();
+    }
+  }
 }
 
 function renderQuiltBoard(){
