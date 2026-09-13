@@ -8,7 +8,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Karla:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #201a1c;
     --bg-deep: #171213;
     --panel: #2a2224;
     --panel-line: #3c3235;
@@ -21,7 +20,22 @@
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
-    background:var(--bg);
+    background-color:#0f3733;
+    /* a mottled turquoise-stone ground: a few soft color pools for the
+       natural blotching, darker matrix veins, a fine grain layer (an SVG
+       noise filter) for an old-film close-up feel, and a gentle vignette. */
+    background-image:
+      radial-gradient(ellipse 90% 70% at 12% 8%, rgba(120,214,196,0.4), transparent 55%),
+      radial-gradient(ellipse 80% 65% at 88% 20%, rgba(58,140,126,0.45), transparent 55%),
+      radial-gradient(circle at 30% 75%, rgba(6,30,28,0.6), transparent 45%),
+      radial-gradient(circle at 70% 85%, rgba(84,178,161,0.3), transparent 42%),
+      radial-gradient(circle at 50% 45%, rgba(18,74,68,0.5), transparent 60%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch' result='t'/><feColorMatrix in='t' type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"),
+      radial-gradient(ellipse 120% 100% at 50% 50%, transparent 45%, rgba(0,0,0,0.5) 100%);
+    background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat, no-repeat;
+    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 170px 170px, 100% 100%;
+    background-blend-mode: normal, normal, normal, normal, normal, overlay, normal;
+    background-attachment: fixed, fixed, fixed, fixed, fixed, fixed, fixed;
     color:var(--ink);
     font-family:'Karla', sans-serif;
     min-height:100vh;
@@ -49,6 +63,107 @@
     font-size:15px;
     max-width:62ch;
     line-height:1.55;
+  }
+  .view-toggle{
+    display:flex;
+    gap:8px;
+    margin-top:16px;
+  }
+  .view-toggle-btn{
+    background:transparent;
+    border:1px solid var(--panel-line);
+    color:var(--ink-dim);
+    padding:8px 16px;
+    border-radius:5px;
+    font-family:'Karla',sans-serif;
+    font-size:13.5px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .view-toggle-btn.active{
+    background:var(--gold);
+    color:#231a0e;
+    border-color:var(--gold);
+  }
+  #quiltView{margin-top:8px;}
+  .quilt-toolbar{
+    background:var(--panel);
+    border:1px solid var(--panel-line);
+    border-radius:6px;
+    padding:14px 16px;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:14px;
+    justify-content:space-between;
+  }
+  .quilt-intro{
+    margin:0;
+    font-size:13px;
+    color:var(--ink-dim);
+    max-width:70ch;
+    line-height:1.5;
+  }
+  .quilt-actions{display:flex; align-items:center; gap:10px; flex:none;}
+  .quilt-status{font-size:12px; color:var(--wool-dim);}
+  .quilt-placement-banner{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:10px;
+    background:rgba(201,162,75,0.12);
+    border:1px solid var(--gold);
+    border-radius:6px;
+    padding:12px 16px;
+    margin-top:10px;
+    font-size:13px;
+    color:var(--ink);
+  }
+  .quilt-placement-banner[hidden]{display:none;}
+  .quilt-placement-banner input{
+    background:var(--bg-deep);
+    border:1px solid var(--panel-line);
+    color:var(--ink);
+    padding:7px 10px;
+    border-radius:4px;
+    font-family:'Karla',sans-serif;
+    font-size:13px;
+  }
+  .quilt-board-wrap{
+    margin-top:16px;
+    background:var(--bg-deep);
+    border-radius:6px;
+    padding:20px;
+    overflow:auto;
+    max-height:70vh;
+  }
+  .quilt-board{
+    position:relative;
+    min-width:100%;
+    min-height:300px;
+  }
+  .quilt-piece{
+    position:absolute;
+    border:2px solid var(--panel-line);
+    border-radius:4px;
+    cursor:pointer;
+    background:var(--bg-deep);
+    transition:border-color .12s, transform .12s;
+  }
+  .quilt-piece:hover{border-color:var(--wool-dim); transform:scale(1.04); z-index:5;}
+  .quilt-piece.selected{border-color:var(--gold); box-shadow:0 0 0 2px var(--gold); z-index:6;}
+  .quilt-piece canvas{display:block; width:100%; height:100%;}
+  .quilt-piece .quilt-piece-name{
+    position:absolute;
+    bottom:-16px;
+    left:0;
+    right:0;
+    text-align:center;
+    font-size:9px;
+    color:var(--wool-dim);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
   }
   .layout{
     display:grid;
@@ -104,6 +219,29 @@
     color:var(--wool-dim);
     font-weight:400;
   }
+  .iran-map{
+    margin-top:16px;
+    padding-top:14px;
+    border-top:1px solid var(--panel-line);
+  }
+  .iran-map svg{width:100%; height:auto; display:block; overflow:visible;}
+  .iran-map .province{
+    fill:rgba(228,214,184,0.05);
+    stroke:var(--panel-line);
+    stroke-width:1;
+    vector-effect:non-scaling-stroke;
+    transition:fill .15s, stroke .15s;
+  }
+  .iran-map .province.has-region{
+    cursor:pointer;
+    stroke:rgba(201,162,75,0.5);
+  }
+  .iran-map .province.has-region:hover{fill:rgba(201,162,75,0.16);}
+  .iran-map .province.active{
+    fill:rgba(201,162,75,0.6);
+    stroke:var(--gold);
+    stroke-width:2;
+  }
 
   /* toolbar */
   .toolbar{
@@ -116,6 +254,10 @@
     border-radius:6px;
     padding:14px 16px;
     margin-bottom:0;
+    position:sticky;
+    top:8px;
+    z-index:20;
+    box-shadow:0 6px 14px rgba(0,0,0,0.35);
   }
   .tool-group{display:flex; align-items:center; gap:8px;}
   .tool-label{font-size:11px; color:var(--wool-dim); letter-spacing:.04em; margin-right:2px;}
@@ -130,6 +272,22 @@
     cursor:pointer;
   }
   .mode-btn.active{
+    background:var(--gold);
+    color:#231a0e;
+    border-color:var(--gold);
+    font-weight:700;
+  }
+  .density-btn{
+    background:transparent;
+    border:1px solid var(--panel-line);
+    color:var(--ink-dim);
+    padding:6px 10px;
+    border-radius:4px;
+    font-family:'Karla',sans-serif;
+    font-size:12px;
+    cursor:pointer;
+  }
+  .density-btn.active{
     background:var(--gold);
     color:#231a0e;
     border-color:var(--gold);
@@ -187,6 +345,20 @@
   }
   .beat-btn:active{transform:scale(0.94);}
   .beat-status{font-size:12px; color:var(--wool-dim);}
+  .row-indicator{font-size:12.5px; color:var(--wool-dim); margin-right:2px;}
+  .beat-btn.secondary{
+    background:var(--panel);
+    color:var(--ink);
+    border:1px solid var(--gold);
+  }
+  .tension-warn{
+    font-size:12px;
+    color:#e0736b;
+    font-weight:700;
+    opacity:0;
+    transition:opacity .15s;
+  }
+  .tension-warn.show{opacity:1;}
 
   /* loom */
   .loom-frame{
@@ -204,15 +376,67 @@
     width:100%;
     overflow:hidden;
     touch-action:none;
+    /* the real cursor artwork (two ink-drawn hands, one holding the
+       active thread color, one holding the cutting blade) is set from
+       JS via updateLoomCursor() so the thread always matches whatever
+       color is currently armed. This is just the pre-JS fallback. */
     cursor:crosshair;
   }
-  #loom{display:block; width:100%;}
+  #loom{display:block; margin:0 auto;}
 
   .caption{
     font-size:12px;
     color:var(--wool-dim);
     padding:10px 2px 6px;
     line-height:1.5;
+  }
+  .howto{padding:12px 2px 4px;}
+  .steps{
+    counter-reset:step;
+    margin:0 0 10px;
+    padding:0;
+    list-style:none;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+    gap:7px 20px;
+  }
+  .steps li{
+    position:relative;
+    padding-left:22px;
+    font-size:12.5px;
+    color:var(--ink-dim);
+    line-height:1.45;
+    counter-increment:step;
+  }
+  .steps li::before{
+    content:counter(step);
+    position:absolute;
+    left:0; top:0;
+    width:15px; height:15px;
+    border-radius:50%;
+    background:var(--panel-line);
+    color:var(--ink);
+    font-size:10px;
+    font-weight:700;
+    line-height:15px;
+    text-align:center;
+  }
+  .keys{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px 14px;
+    font-size:11.5px;
+    color:var(--wool-dim);
+  }
+  .keys kbd{
+    background:var(--bg-deep);
+    border:1px solid var(--panel-line);
+    border-radius:3px;
+    padding:1px 5px;
+    margin-right:2px;
+    font-family:'Karla',sans-serif;
+    font-size:10.5px;
+    color:var(--ink);
   }
   .legend{
     display:flex;
@@ -267,6 +491,31 @@
     margin-bottom:16px;
   }
   .ref-link:hover{border-bottom-color:var(--gold);}
+  .chant-row{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:-6px 0 16px;
+  }
+  .chant-btn{
+    display:inline-block;
+    background:none;
+    border:1px solid var(--panel-line);
+    color:var(--gold);
+    padding:5px 11px;
+    border-radius:4px;
+    font-family:'Karla',sans-serif;
+    font-size:12.5px;
+    text-decoration:none;
+    cursor:pointer;
+  }
+  .chant-btn:hover{border-color:var(--gold);}
+  .chant-note{
+    font-size:11px;
+    color:var(--wool-dim);
+    font-style:italic;
+  }
   .sources{
     border-top:1px solid var(--panel-line);
     padding-top:14px;
@@ -321,10 +570,14 @@
 <div class="wrap">
   <header>
     <h1>The Loom</h1>
-    <p>Pick a region of Iran, load its documented palette and motif vocabulary, and start setting knots. Each region carries its own colors, knot structure and layout — drawn from a handful of rug-history sources as a starting scaffold, not a finished dataset.</p>
+    <p>Pick a region of Iran, load its documented palette and motif vocabulary, and start setting knots. Each region carries its own colors, knot structure and layout, drawn from a handful of rug-history sources as a starting scaffold. How will you tie the past into the future?</p>
+    <div class="view-toggle">
+      <button class="view-toggle-btn active" id="showLoomBtn">My Loom</button>
+      <button class="view-toggle-btn" id="showQuiltBtn">Community Quilt</button>
+    </div>
   </header>
 
-  <div class="layout">
+  <div class="layout" id="loomView">
     <nav class="rail" id="rail"></nav>
 
     <main>
@@ -332,17 +585,29 @@
         <div class="tool-group">
           <span class="tool-label">mode</span>
           <button class="mode-btn" data-mode="knot">Knot</button>
-          <button class="mode-btn" data-mode="stamp">Stamp</button>
           <button class="mode-btn" data-mode="erase">Erase</button>
+        </div>
+        <div class="tool-group">
+          <span class="tool-label">weave</span>
+          <button class="density-btn" data-density="coarse" title="Coarse village weave: fewer, larger knots">Coarse</button>
+          <button class="density-btn active" data-density="medium" title="Medium">Medium</button>
+          <button class="density-btn" data-density="fine" title="Fine city weave: more, smaller knots">Fine</button>
+        </div>
+        <div class="tool-group">
+          <span class="tool-label">material</span>
+          <button class="density-btn" id="materialBtn" title="Toggle a simulated wool/silk texture with organic imperfection">Flat</button>
         </div>
         <div class="tool-group" id="paletteGroup">
           <span class="tool-label">color</span>
         </div>
-        <div class="tool-group" id="motifGroup" style="display:none;">
-          <span class="tool-label">motif</span>
+        <div class="tool-group" id="motifGroup">
+          <span class="tool-label">motif guide</span>
         </div>
+        <button class="ghost-btn" id="rotateBtn" style="display:none;">⤾ Rotate</button>
+        <button class="ghost-btn" id="clearGuideBtn" style="display:none;">Clear guides</button>
         <button class="ghost-btn" id="clearBtn">Clear</button>
         <button class="ghost-btn" id="saveBtn">Save PNG</button>
+        <button class="ghost-btn" id="addToQuiltBtn" title="Attach your piece to the community quilt">🧵 Add to Quilt</button>
       </div>
 
       <div class="loom-frame">
@@ -352,31 +617,76 @@
       </div>
 
       <div class="beat-panel">
+        <span class="row-indicator" id="rowIndicator"></span>
+        <button class="beat-btn secondary" id="weftBtn">
+          <svg width="20" height="20" viewBox="0 0 20 20" style="color:var(--ink)"><polyline points="1,10 5,14 9,10 13,14 17,10" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+          <span>Pass weft</span>
+        </button>
         <button class="beat-btn" id="beatBtn">
           <svg width="20" height="20" viewBox="0 0 20 20"><path d="M4 2v16M8 2v16M12 2v16M16 2v16" stroke="#231a0e" stroke-width="1.6"/><rect x="2" y="1" width="16" height="4" rx="1" fill="#231a0e"/></svg>
           <span id="beatLabel">Beat with comb</span>
         </button>
+        <button class="beat-btn secondary" id="advanceBtn" style="display:none;">
+          <svg width="20" height="20" viewBox="0 0 20 20" style="color:var(--ink)"><polyline points="1,10 5,6 9,10 13,6 17,10" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+          <span>Advance row</span>
+        </button>
         <span class="beat-status" id="beatStatus"></span>
+        <span class="tension-warn" id="tensionWarn"></span>
       </div>
-      <p class="caption">Drag in Knot mode to lay a run of knots; in Stamp mode, click to set a whole motif — a motif is still just a cluster of individually tied knots. The small mark on each knot (a bar vs. an offset tick) shows symmetric vs. asymmetric structure for whichever region was active when it was tied. The stamp set changes per region and per style family: curvilinear court regions get rounded, lobed shapes; geometric village and nomadic regions get hard-stepped ones built from the same knot grid at a coarser scale — that stepping is how real curves get approximated in a hand-knotted rug too, not a simplification unique to this tool. Newly tied knots sit loose with visible gaps until you beat that row — the Beat button uses whichever tool the selected region actually uses to pack a row tight before the next one starts.</p>
+      <div class="howto">
+        <ol class="steps">
+          <li>Click a warp cell to tie a knot. Already got one right below? Keep building straight up that column too.</li>
+          <li>Pass weft once the row has knots in it.</li>
+          <li>Beat to lock the row in. Beat again for a tighter weave.</li>
+          <li>Advance when you're ready for the next row up.</li>
+          <li>Pick a motif, click to stamp it, click again for another copy. Rotate it first if you want it turned.</li>
+        </ol>
+        <div class="keys">
+          <span><kbd>A</kbd><kbd>S</kbd> tie</span>
+          <span><kbd>W</kbd> weft</span>
+          <span><kbd>Space</kbd> beat</span>
+          <span><kbd>Enter</kbd> advance</span>
+          <span><kbd>R</kbd> rotate</span>
+        </div>
+      </div>
       <div class="legend">
         <div class="legend-item">
           <svg width="34" height="22" viewBox="0 0 34 22"><g stroke="#e4d6b8" stroke-width="1.4" opacity="0.7"><line x1="7" y1="0" x2="7" y2="22"/><line x1="17" y1="0" x2="17" y2="22"/><line x1="27" y1="0" x2="27" y2="22"/></g></svg>
-          <span><strong>Warp</strong> — the loom's bare threads, never colored</span>
+          <span><strong>Warp:</strong> the loom's bare threads, never colored</span>
         </div>
         <div class="legend-item">
           <svg width="34" height="22" viewBox="0 0 34 22"><polyline points="1,7 7,15 13,7 19,15 25,7 31,15" fill="none" stroke="#e4d6b8" stroke-width="2"/></svg>
-          <span><strong>Weft</strong> — the over-under pass that locks a finished row</span>
+          <span><strong>Weft:</strong> locks a finished row. Fine city rugs pass it as a tighter double line, village rugs as one looser pass.</span>
         </div>
         <div class="legend-item">
           <svg width="34" height="22" viewBox="0 0 34 22"><rect x="6" y="3" width="16" height="16" rx="2" fill="#c9a24b"/><rect x="16" y="4" width="2.5" height="12" fill="rgba(0,0,0,0.3)"/></svg>
-          <span><strong>Knot</strong> — one hand-tied loop; this is the entire pattern</span>
+          <span><strong>Knot:</strong> one hand-tied loop. This is the entire pattern.</span>
         </div>
       </div>
 
       <section class="spec" id="spec"></section>
     </main>
   </div>
+
+  <section id="quiltView" hidden>
+    <div class="quilt-toolbar">
+      <p class="quilt-intro">Every piece here was woven by someone using this loom, then attached next to a piece they liked. Nobody can edit or remove another person's square once it's placed — the quilt only ever grows.</p>
+      <div class="quilt-actions">
+        <button class="ghost-btn" id="quiltRefreshBtn">↻ Refresh</button>
+        <span class="quilt-status" id="quiltStatus"></span>
+      </div>
+    </div>
+    <div class="quilt-placement-banner" id="quiltPlacementBanner" hidden>
+      <span id="quiltPlacementText">Click a piece below to attach yours next to it, or place it as a new corner.</span>
+      <input type="text" id="quiltNameInput" placeholder="Sign it (optional)" maxlength="40">
+      <button class="beat-btn secondary" id="quiltPlaceCornerBtn">Place as new corner</button>
+      <button class="beat-btn" id="quiltConfirmBtn" disabled>Attach here</button>
+      <button class="ghost-btn" id="quiltCancelBtn">Cancel</button>
+    </div>
+    <div class="quilt-board-wrap">
+      <div class="quilt-board" id="quiltBoard"></div>
+    </div>
+  </section>
 </div>
 
 <script>
@@ -386,215 +696,251 @@ const REGIONS = [
     knot:'Symmetric (Turkish/Ghiordes) — see note below', raj:'~45–55 raj (fine, indicative)',
     material:'Wool pile on cotton foundation, often double-wefted; fine pieces in silk',
     dye:'Historically natural (madder, walnut); some 19th-c. aniline synthetics',
-    layout:'Lechak-Toranj and Mihrabi medallions, but also pictorial Shikargah (hunting scene) and Chahar-Bagh (four seasons) designs thick with animals and figures',
+    layout:'Two distinct Tabriz traditions, kept as separate stamp sets rather than blended: (1) a classic lobed, pointed-oval medallion with angular quarter-palmette spandrels and a turtle-palmette Herati border; (2) the historic "Bagh" garden-panel format — a grid of small compartment cartouches with no central medallion and no corner spandrel at all, often carrying confronting-bird or cypress vignettes inside each panel',
     loom:'Fixed vertical workshop loom',
     family:'Curvilinear court style, with a pictorial/narrative streak',
-    motifs:['toranj_fine','lechak','animal_fine'],
-    palette:['#7A2E28','#C9A24B','#A3352B','#EDE0C4','#2E3B49'],
-    blurb:'Tabriz has an unusually wide range for a single city — curvilinear medallion florals alongside hunting scenes and four-seasons pictorials full of animals and figures — tied with the tight, upright Turkish knot rather than the Persian knot most other Persian cities use.',
+    motifs:['tabriz_medallion_geo','tabriz_herati_border','tabriz_spandrel_geo','tabriz_confronting_camels','tabriz_bagh_panel','tabriz_bagh_border','tabriz_cypress'],
+    palette:['#7A2E28','#C9A24B','#A3352B','#EDE0C4','#2E3B49','#6B4A2E','#241A14'],
+    blurb:'Tabriz has an unusually wide range for a single city — curvilinear medallion florals alongside hunting scenes and four-seasons pictorials full of animals and figures — tied with the tight, upright Turkish knot rather than the Persian knot most other Persian cities use. The stamp set below deliberately keeps its two structural traditions apart: a classic medallion carpet, and the older paneled "Bagh" garden-carpet format that has no medallion or corner spandrel at all.',
     beatTool:'comb',
+    weftType:'depressed-double',
+    refUrl:'https://www.little-persia.com/pages/tabriz-rug-history-origin-guide',
+    refLabel:'Tabriz rug history & real pieces — Little-Persia',
     sources:[
       {label:'Knot type — symmetric/Turkish (majority view)', url:'https://losangeleshomeofrugs.com/blog/the-art-of-tabriz-rugs-a-masterpiece-of-persian-weaving/'},
       {label:'Knot type — asymmetric/Persian (minority view)', url:'https://alrug.com/blogs/rug-digest/how-to-identify-tabriz-rugs'},
-      {label:'Pictorial hunting-scene rugs — image-verified, no single article source', url:''}
+      {label:'Pictorial hunting-scene rugs — image-verified, no single article source', url:''},
+      {label:'Motif detail (medallion shape, Herati border, Bagh garden-panel format, confronting animals) — visual survey of the Qajar Dynasty Iranian Carpet Dataset (Kaggle), Tabriz-tagged pieces', url:'https://www.kaggle.com/datasets/mahdisarbazi/qajar-dynasty-iranian-carpet-dataset'}
     ],
   },
   { id:'heriz', name:'Heriz', zone:'Northwest — Azerbaijan', kind:'Village',
     knot:'Asymmetric (Persian)', raj:'~24–30 raj (village, indicative)',
     material:'Wool pile, cotton foundation',
     dye:'Mixed natural and early synthetic, depending on age',
-    layout:'Toranj — single large angular medallion',
+    layout:'Toranj — large angular lobed medallion with pendant points, ivory corner spandrels whose angular motif echoes the medallion’s own stepped outline, and a wide indigo Herati (turtle-palmette) border on an open, comparatively uncluttered field; rare older pieces carry a "vaq-vaq" talking-tree motif with animal or bird heads at the branch tips',
     loom:'Fixed vertical village loom',
     family:'Bold geometric, large-block style',
-    motifs:['toranj_geo'],
-    palette:['#8C2E22','#1F3A5C','#EDE0C4','#B5622F','#3A2A1E'],
-    blurb:'Heriz weavers favor one oversized medallion drawn in bold, angular lines on a brick-red field, with navy and ivory carrying the border.',
+    motifs:['heriz_medallion_geo','heriz_herati_border','spandrel_geo','heriz_vaqvaq'],
+    palette:['#8C2E22','#1F3A5C','#EDE0C4','#B5622F','#3A2A1E','#14273D','#A85A4A'],
+    blurb:'Heriz weavers favor one oversized medallion drawn in bold, angular lines on a brick-red field, with navy and ivory carrying the border. The ivory corner spandrels are not generic fillers — they carry an angular motif that deliberately echoes the medallion’s own stepped, pendant-tipped silhouette.',
     beatTool:'comb',
+    weftType:'single',
+    refUrl:'https://www.little-persia.com/pages/heriz-rug-history-origin-guide',
+    refLabel:'Heriz rug history & real pieces — Little-Persia',
     sources:[
       {label:'Regional style guide — Heriz medallion drawing', url:'https://rugtherock.com/blogs/magazine/types-of-persian-rugs'},
-      {label:'Regional style guide — Heriz construction', url:'https://www.mattcamron.com/rug-guides/persian-rugs'}
+      {label:'Regional style guide — Heriz construction', url:'https://www.mattcamron.com/rug-guides/persian-rugs'},
+      {label:'Motif detail (pendant medallion, spandrel-echoes-medallion, Herati border, vaq-vaq variant) — web research: Wikimedia Commons carpet photos + dealer/collector guides, no Kaggle coverage for this region', url:'https://commons.wikimedia.org/wiki/Category:Rugs_and_carpets_of_Heris'}
     ],
   },
   { id:'zanjan', name:'Zanjan', zone:'Northwest', kind:'Village, tribal-influenced',
     knot:'Mixed — both Turkish and Persian knots by tribe', raj:'~26–32 raj (indicative)',
     material:'Wool or cotton foundation, single-wefted at center',
     dye:'Natural base tones with gray, green, brown, camel and blue accents',
-    layout:'Afshan-style allover field with a central and secondary medallion',
+    layout:'Either a small angular diamond medallion enclosed within a much larger hexagonal medallion frame stretching nearly the full field, or — in runner formats — a vertical chain of three or more stacked hooked-diamond medallions running the rug’s length instead of one central shape. No formal spandrel: borders simply miter-turn at the corner, occasionally marked with a small rosette rather than a filled corner shape',
     loom:'Fixed vertical village loom',
     family:'Bold geometric, village style',
-    motifs:['toranj_geo','star_geo','herati_geo'],
-    palette:['#8C2A2A','#243A5E','#EDE0C4','#5C6E4A','#8A6A3A'],
-    blurb:'Zanjan designs pair a central medallion with a smaller inner one, surrounded by star and flower-head motifs, birds, fish and paisley, in red and dark blue on ivory.',
+    motifs:['zanjan_medallion_geo','zanjan_folk_border','zanjan_stacked_diamonds'],
+    palette:['#8C2A2A','#243A5E','#EDE0C4','#5C6E4A','#8A6A3A','#8A8A7A','#1C2E48'],
+    blurb:'Zanjan designs pair a central medallion with a smaller inner one, surrounded by star and flower-head motifs, birds, fish and paisley, in red and dark blue on ivory. Runners often trade the single medallion for a vertical chain of stacked hooked diamonds instead, and there’s no true corner spandrel here — the border just turns the corner.',
     beatTool:'comb',
+    weftType:'single',
+    refUrl:'https://www.catalinarug.com/product-category/persian-rugs/zanjan/',
+    refLabel:'Real Zanjan rugs — Catalina Rug',
     sources:[
-      {label:'Zanjan motifs, palette and knot mix', url:'https://www.catalinarug.com/rug-encyclopedia/origins-of-rugs/part-2-types-of-persian-rugs/'}
+      {label:'Zanjan motifs, palette and knot mix', url:'https://www.catalinarug.com/rug-encyclopedia/origins-of-rugs/part-2-types-of-persian-rugs/'},
+      {label:'Motif detail (nested hexagon medallion, stacked-diamond runner chain, no corner spandrel) — web research: 1stDibs listing photos + regional guides, no Kaggle coverage for this region', url:'https://www.1stdibs.com/buy/zanjan-persian/'}
     ],
   },
   { id:'kerman', name:'Kerman', zone:'South-Central', kind:'City workshop',
     knot:'Asymmetric (Persian)', raj:'~50–65 raj (fine, indicative)',
     material:'Fine kork wool pile on cotton; some silk-and-wool',
     dye:'Distinct master-dye recipes specific to Kerman workshops',
-    layout:'Mihrabi — curvilinear floral, vase and garden scenes',
+    layout:'Mihrabi — curvilinear floral, vase and garden scenes, typically built around an elongated pointed-oval cartouche medallion that often encloses a small calligraphic accent, framed by a fine floral vine-and-rosette border and quarter-medallion corner spandrels. Kerman is also Persia’s best-documented source of pictorial "picture rugs" — coronation and hunting scenes, and peacock/phoenix figures flanking a cartouche in the border',
     loom:'Fixed vertical workshop loom',
     family:'Curvilinear court style',
-    motifs:['gol_fine','toranj_fine'],
-    palette:['#C0546B','#4A6B8A','#EDE0C4','#7C8A5A','#3A2A2E'],
-    blurb:'Kerman is known for an unusually wide range of designs and color combinations, built on fine local kork wool and dye recipes specific to its master weavers.',
+    motifs:['kerman_medallion_fine','kerman_vine_border','lechak','kerman_pictorial_pair','kerman_boteh','kerman_vase_palmette'],
+    palette:['#C0546B','#4A6B8A','#EDE0C4','#7C8A5A','#3A2A2E','#1F3A6B','#D89AA0'],
+    blurb:'Kerman is known for an unusually wide range of designs and color combinations, built on fine local kork wool and dye recipes specific to its master weavers. Its most distinctive specialty is pictorial: coronation scenes, hunting tableaux, and confronting peacocks or phoenixes flanking a cartouche, alongside the more familiar elongated medallion-and-vine formula. Two more Kerman traits get their own stamps: the boteh (paisley), which Kerman weavers carried over from their own shawl industry once carpet production took off in the 1880s, and the palmette-and-vase format that defines the historic 16th-17th-century "Kerman vase carpets."',
     beatTool:'saber',
+    weftType:'depressed-double',
+    refUrl:'https://www.little-persia.com/pages/kerman-rug-history-origin-guide',
+    refLabel:'Kerman rug history & real pieces — Little-Persia',
     sources:[
       {label:'Kerman design range and kork wool', url:'https://www.catalinarug.com/rug-encyclopedia/origins-of-rugs/part-2-types-of-persian-rugs/'},
       {label:'Kerman’s saber-blade beating tool', url:'https://www.catalinarug.com/blog/persian-rugs-anatomy/'},
-      {label:'Saber-blade tool, second source', url:'https://mjrug.com/tools-used-in-weaving-a-persian-rug/'}
+      {label:'Saber-blade tool, second source', url:'https://mjrug.com/tools-used-in-weaving-a-persian-rug/'},
+      {label:'Motif detail (elongated cartouche medallion, vine border, pictorial peacock/phoenix pieces, pictorial-vs-ornamental sorting) — visual survey of the Qajar Dynasty Iranian Carpet Dataset (Kaggle), Kerman-tagged pieces', url:'https://www.kaggle.com/datasets/mahdisarbazi/qajar-dynasty-iranian-carpet-dataset'},
+      {label:'Boteh motif — Kerman shawl industry carried into carpet production from the 1880s', url:'https://www.little-persia.com/blogs/rug-chronicles/boteh-motif-paisley'},
+      {label:'Kerman "vase carpets" — 16th-17th-c. palmette-and-vase format', url:'https://www.araratrugs.com/kerman-vase-technique-carpet-5'}
     ],
   },
   { id:'esfahan', name:'Esfahan', zone:'Central', kind:'City workshop',
     knot:'Asymmetric (Persian)', raj:'~55–70 raj (fine, indicative)',
     material:'Wool and silk on cotton foundation',
     dye:'Signature terracotta-crimson, historically from cochineal insect dye',
-    layout:'Lechak-Toranj / Mihrabi — refined curvilinear florals',
+    layout:'Lechak-Toranj / Mihrabi — the most rounded medallion of any region in this tool: circular, finely layered concentric rings compressed near the center and widening outward, framed by a broad curvilinear Shah-Abbasi palmette-and-vine border, several thin secondary guard bands, and a smooth quarter-round corner spandrel that mirrors the medallion’s own scrollwork exactly',
     loom:'Fixed vertical workshop loom',
     family:'Curvilinear court style',
-    motifs:['toranj_fine','lechak','gol_fine'],
-    palette:['#B5432C','#243A5E','#EDE0C4','#C9A24B','#5C2E28'],
-    blurb:'Esfahan work is defined by a distinctive terracotta-crimson accent historically drawn from cochineal dye, set into finely drawn medallion and floral fields.',
+    motifs:['esfahan_medallion_fine','esfahan_border_fine','lechak','esfahan_palmette'],
+    palette:['#B5432C','#243A5E','#EDE0C4','#C9A24B','#5C2E28','#7A2018','#B8ACA0'],
+    blurb:'Esfahan work is defined by a distinctive terracotta-crimson accent historically drawn from cochineal dye, set into finely drawn medallion and floral fields. Of every region in this tool, Esfahan is the most purely rounded and polished — no angularity anywhere, down to a corner spandrel that mirrors the medallion’s curves exactly.',
     beatTool:'comb',
+    weftType:'depressed-double',
+    refUrl:'https://www.uniqrugs.com/oriental-rugs/isfahan-rugs-c-32',
+    refLabel:'Real Isfahan rugs — Uniq Rugs',
     sources:[
-      {label:'Esfahan cochineal red and medallion florals', url:'https://www.mattcamron.com/rug-guides/persian-rugs'}
+      {label:'Esfahan cochineal red and medallion florals', url:'https://www.mattcamron.com/rug-guides/persian-rugs'},
+      {label:'Motif detail (round layered medallion, Shah-Abbasi border, smooth quarter-round spandrel) — web research: 1stDibs listing photos + regional guides, no Kaggle coverage for this region', url:'https://www.1stdibs.com/buy/isfahan-persian-rug/'}
     ],
   },
   { id:'bakshayesh', name:'Bakshayesh', zone:'Northwest — Azerbaijan', kind:'Village (among Iran\u2019s oldest weaving villages)',
     knot:'Asymmetric (Persian)', raj:'~18–24 raj (coarser, large-format, indicative)',
     material:'Wool',
     dye:'Natural, muted and aged in tone',
-    layout:'Rustic, asymmetrical folk motifs rather than strict medallion symmetry',
+    layout:'Rustic, asymmetrical folk motifs rather than strict medallion symmetry — a large, loosely-drawn lozenge medallion is often deliberately placed off-center, since weavers favored dynamic asymmetry over perfect centering. Corner spandrels are frequently omitted entirely, left open to the border with no fill shape at all, which is why this tool doesn’t force one into existence for this region either. Some pieces fill the whole field with a repeating vertical column of stylized cypress trees instead of a medallion',
     loom:'Fixed vertical village loom',
     family:'Bold geometric / folk style',
-    motifs:['boteh_geo','animal_geo'],
-    palette:['#E4D6B8','#CFC3A0','#8C7A52','#9E8A5A','#6B5A3A'],
-    blurb:'Bakshayesh produces oversized rugs in muted ivory, beige and warm metallic tones, with folkloric figures and loose, asymmetrical drawing rather than formal medallion symmetry.',
+    motifs:['bakshayesh_medallion_geo','bakshayesh_wandering_border','bakshayesh_tree_column','bakshayesh_flaming_palmette','bakshayesh_minakhani_loose'],
+    palette:['#E4D6B8','#CFC3A0','#8C7A52','#9E8A5A','#6B5A3A','#B08070','#8A9070'],
+    blurb:'Bakshayesh produces oversized rugs in muted ivory, beige and warm metallic tones, with folkloric figures and loose, asymmetrical drawing rather than formal medallion symmetry. There’s no corner-spandrel stamp for this region on purpose — many real Bakshayesh carpets simply don’t have one, leaving the field open right to the border. Its rarest signature is the oversized "flaming palmette," documented as appearing on only a small number of real Bakshaish pieces; the rosette-trellis stamp keeps the same loose, never-twice-the-same irregularity as its other motifs.',
     beatTool:'comb',
+    weftType:'single',
+    refUrl:'https://www.claremontrug.com/antique-rugs-information/antique-persian-rug-guide/antique-persian-bakshaish-rugs/',
+    refLabel:'Bakshaish rug guide & real pieces — Claremont Rug Co.',
     sources:[
-      {label:'Bakshayesh village weaving and palette', url:'https://therugdecor.com/blogs/blog/an-insight-into-types-of-persian-rugs'}
+      {label:'Bakshayesh village weaving and palette', url:'https://therugdecor.com/blogs/blog/an-insight-into-types-of-persian-rugs'},
+      {label:'Motif detail (off-center loose medallion, omitted spandrels, tree-column field) — web research: Wikimedia Commons carpet photos + Claremont Rug Co. guide, no Kaggle coverage for this region', url:'https://commons.wikimedia.org/wiki/Category:Bakshaish_carpets'},
+      {label:'Large-scale "flaming palmette" — a rare, documented Bakshaish signature shape', url:'https://www.claremontrug.com/antique-rugs-information/antique-persian-rug-guide/the-magic-of-bakshaish-artistry/'},
+      {label:'Minakhani (rosette-linked trellis) listed among notable Bakshaish designs', url:'https://www.claremontrug.com/antique-rugs-information/antique-persian-rug-guide/collectible-antique-persian-bakshaish-rugs-full-article/'}
     ],
   },
   { id:'mashhad', name:'Mashhad', zone:'Khorasan — Northeast', kind:'City workshop',
     knot:'Asymmetric (Persian)', raj:'~40–50 raj (large format, indicative)',
     material:'Wool pile on cotton foundation',
     dye:'Mixed natural and synthetic depending on era',
-    layout:'Mihrabi — one oversized medallion on an elaborate floral field',
+    layout:'Mihrabi — one oversized round medallion, often with smaller cartouches nested inside it, on a dense field packed with boteh and Herati filler. Mashhad’s real signature is the corner: spandrels are dramatically elongated, stretching so far along the border that they nearly meet at the midpoint of each side — unlike the contained quarter-spandrels of Kerman, Kashan or Esfahan',
     loom:'Fixed vertical workshop loom',
     family:'Curvilinear court style',
-    motifs:['toranj_fine'],
-    palette:['#7A2530','#1F3A5C','#C9A24B','#EDE0C4','#3A2A2E'],
-    blurb:'Mashhad rugs are usually large, built around a single oversized medallion set into a dense, curvilinear floral field.',
+    motifs:['mashhad_medallion_fine','mashhad_boteh_border','mashhad_spandrel_elongated','mashhad_boteh_fill'],
+    palette:['#7A2530','#1F3A5C','#C9A24B','#EDE0C4','#3A2A2E','#4A1820','#B8863A'],
+    blurb:'Mashhad rugs are usually large, built around a single oversized medallion set into a dense, curvilinear floral field. What actually sets Mashhad apart from its curvilinear cousins isn’t the medallion — it’s the corner spandrel, stretched so long it nearly reaches the middle of each border.',
     beatTool:'comb',
+    weftType:'depressed-double',
+    refUrl:'https://www.little-persia.com/pages/mashad-rug-history-origin-guide',
+    refLabel:'Mashhad rug history & real pieces — Little-Persia',
     sources:[
-      {label:'Mashhad medallion scale and knot range', url:'https://www.catalinarug.com/blog/beginners-guide-to-traditional-persian-rugs/'}
+      {label:'Mashhad medallion scale and knot range', url:'https://www.catalinarug.com/blog/beginners-guide-to-traditional-persian-rugs/'},
+      {label:'Motif detail (nested cartouche medallion, elongated corner spandrel, boteh/Herati filler) — web research: 1stDibs listing photos, no Kaggle coverage for this region', url:'https://www.1stdibs.com/buy/antique-persian-mashhad-rug/'}
     ],
   },
   { id:'qashqai', name:'Qashqai', zone:'Fars — South', kind:'Nomadic / tribal (also traded as "Shiraz")',
     knot:'Symmetric (Turkish), varies by clan', raj:'~14–22 raj (hand-spun, indicative)',
     material:'All-wool — pile, warp and weft',
     dye:'Natural dyes historically: madder, indigo, safflower',
-    layout:'Afshan — allover geometric lattice, stacked diamond medallions, and scattered stylized animals (birds, goats, camels) rather than one formal medallion',
+    layout:'Afshan — an angular diamond medallion (the most authentic Qashqai shape) with a small nested hooked diamond inside it, surrounded by four hook marks; medallion counts run odd by rug size, and larger pieces sometimes render this as three vertically stacked diamonds instead of one. No smooth spandrel — small triangular "mountain/tree" shapes sometimes anchor the field’s short ends instead of a rounded corner treatment',
     loom:'Portable horizontal ground loom',
     family:'Bold geometric, nomadic style',
-    motifs:['toranj_geo','animal_geo','boteh_geo'],
-    palette:['#8C2A2A','#243A5E','#B5622F','#EDE0C4','#3A2A1E'],
-    blurb:'Qashqai weaving is nomadic: the weaver designs from memory rather than a workshop pattern, producing geometric diamond medallions and stylized animal silhouettes scattered across an allover field.',
+    motifs:['qashqai_medallion_geo','qashqai_hook_border','qashqai_triple_diamond','qashqai_bird','qashqai_animal'],
+    palette:['#8C2A2A','#243A5E','#B5622F','#EDE0C4','#3A2A1E','#D4A73C','#16283F'],
+    blurb:'Qashqai weaving is nomadic: the weaver designs from memory rather than a workshop pattern, producing geometric diamond medallions and stylized animal silhouettes scattered across an allover field. There’s no corner-spandrel stamp for this region — Qashqai corners aren’t a smooth filled shape, they’re just where the angular field and border meet.',
     beatTool:'comb',
+    weftType:'single',
+    refUrl:'https://www.little-persia.com/pages/qashqai-rug-history-origin-guide',
+    refLabel:'Qashqai rug history & real pieces — Little-Persia',
     sources:[
       {label:'Tribal/nomadic geometric weaving overview', url:'https://stylebyemilyhenderson.com/the-ultimate-guide-to-persian-rugs-what-makes-them-so-dang-good-desirable-valuable'},
-      {label:'Stacked-diamond medallion — image-verified, no single article source', url:''}
+      {label:'Stacked-diamond medallion — image-verified, no single article source', url:''},
+      {label:'Motif detail (nested hooked diamond, odd medallion counts, triple-stacked variant, no spandrel) — web research: 1stDibs listing photos + regional guides, no Kaggle coverage for this region', url:'https://www.1stdibs.com/buy/qashqai-rugs/'},
+      {label:'Small bird and animal figures scattered across the field — a documented Qashqai storytelling hallmark', url:'https://www.little-persia.com/pages/qashqai-rug-history-origin-guide'}
     ],
   },
   { id:'kashan', name:'Kashan', zone:'Central', kind:'City workshop (royal tradition)',
     knot:'Asymmetric (Persian)', raj:'~45–70 raj (fine, indicative)',
     material:'Wool or silk pile on cotton foundation',
     dye:'Historically natural dyes; Kashan has a centuries-old dyeing tradition tied to the city',
-    layout:'Lechak-Toranj — quarter-medallions framing each corner around a central medallion; dense allover florals and weeping-willow motifs',
+    layout:'Lechak-Toranj — a rounded, hooked-star medallion often carrying a single hanging pendant, quarter-medallions framing each corner, dense allover florals and weeping-willow motifs, and — a genuine recurring Kashan trait, not a one-off — an occasional confronting-animal border of paired gazelles or deer flanking a small tree',
     loom:'Fixed vertical workshop loom',
     family:'Curvilinear court style',
-    motifs:['lechak','toranj_fine','willow'],
-    palette:['#7A1E22','#EDE0C4','#16213A','#C9A24B','#3A2A1E'],
-    blurb:'Kashan work is built on dense, all-over floral fields — weeping willows, teardrop medallions, quarter-medallions framing each corner — usually on a deep red field against ivory or midnight-blue borders.',
+    motifs:['kashan_medallion_fine','kashan_gazelle_border','lechak','willow'],
+    palette:['#7A1E22','#EDE0C4','#16213A','#C9A24B','#3A2A1E','#0D1830','#3A5240'],
+    blurb:'Kashan work is built on dense, all-over floral fields — weeping willows, teardrop medallions, quarter-medallions framing each corner — usually on a deep red field against ivory or midnight-blue borders. Its confronting-gazelle border is a real, recurring trait documented across multiple pieces, not an isolated example.',
     beatTool:'comb',
+    weftType:'depressed-double',
+    refUrl:'https://www.little-persia.com/pages/kashan-rug-history-origin-guide',
+    refLabel:'Kashan rug history & real pieces — Little-Persia',
     sources:[
       {label:'Kashan red-field medallion and knot range', url:'https://www.catalinarug.com/blog/beginners-guide-to-traditional-persian-rugs/'},
-      {label:'Kashan grouped among core regional styles', url:'https://rugtherock.com/blogs/magazine/persian-rugs-vs-oriental-rugs'}
+      {label:'Kashan grouped among core regional styles', url:'https://rugtherock.com/blogs/magazine/persian-rugs-vs-oriental-rugs'},
+      {label:'Motif detail (hooked-star pendant medallion, confronting-gazelle border) — visual survey of the Qajar Dynasty Iranian Carpet Dataset (Kaggle), Kashan-tagged pieces', url:'https://www.kaggle.com/datasets/mahdisarbazi/qajar-dynasty-iranian-carpet-dataset'}
     ],
   },
   { id:'qom', name:'Qom', zone:'Central', kind:'City workshop (silk)',
     knot:'Asymmetric (Persian)', raj:'~60–90 raj (very fine silk, indicative)',
     material:'Silk pile, sometimes wool-silk blend, on silk or cotton foundation',
     dye:'Fine dyes chosen for how they catch light in silk',
-    layout:'Highly varied — tree-of-life, Shah-Abbasi florals, hunting scenes, vase designs, mehrabi arches and pictorial portraits, often borrowing from Isfahan, Tabriz and Kerman',
+    layout:'Highly varied — a curvilinear, multi-layered medallion radiating outward is the closest thing to an original Qom composition, surrounded by unusually dense floral cartouche work (very high knot count). Its strongest and most consistently documented specialty is pictorial: genuine garden-of-paradise animal/bird scenes and tree-of-life designs with birds perched in the canopy, often borrowing from Isfahan, Tabriz and Kerman otherwise',
     loom:'Fixed vertical workshop loom',
     family:'Pictorial / narrative style',
-    motifs:['animal_fine','gol_fine','toranj_fine'],
-    palette:['#0E7C86','#8C1F3B','#C9A24B','#EDE0C4','#1F3A5C'],
-    blurb:'Qom weavers work almost entirely in silk and draw on a wide range of borrowed designs — tree-of-life scenes, hunting tableaux, vase and arch motifs — in saturated jewel tones that read differently in silk than in wool.',
+    motifs:['qom_medallion_fine','qom_border_fine','lechak','qom_tree_of_life'],
+    palette:['#0E7C86','#8C1F3B','#C9A24B','#EDE0C4','#1F3A5C','#0F5C42','#5C2E6E'],
+    blurb:'Qom weavers work almost entirely in silk and draw on a wide range of borrowed designs — tree-of-life scenes, hunting tableaux, vase and arch motifs — in saturated jewel tones that read differently in silk than in wool. The tree-of-life-with-birds design in particular is a genuine, well-documented Qom specialty, not an occasional borrowing.',
     beatTool:'spike',
+    weftType:'depressed-double',
+    refUrl:'https://jewelrugs.com/collections/persian-qum-rugs',
+    refLabel:'Real Persian Qum rugs — Jewel Rugs',
     sources:[
       {label:'Qom silk designs — tree of life, hunting, vase, mehrabi', url:'https://www.rugman.com/carpet-design/qum-rugs/'},
       {label:'Qom silk, jewel-tone palette', url:'https://jewelrugs.com/collections/persian-qum-rugs'},
-      {label:'Qom’s nail-tool compacting method', url:'https://mjrug.com/tools-used-in-weaving-a-persian-rug/'}
+      {label:'Qom’s nail-tool compacting method', url:'https://mjrug.com/tools-used-in-weaving-a-persian-rug/'},
+      {label:'Motif detail (radiating medallion, dense cartouche border, tree-of-life-with-birds) — web research: 1stDibs listing photos, no Kaggle coverage for this region', url:'https://www.1stdibs.com/buy/qom-rug/'}
     ],
   },
   { id:'turkmen', name:'Turkmen', zone:'Northeast — Turkmen Sahra', kind:'Nomadic / tribal',
     knot:'Asymmetric (Persian/Senneh) for most groups', raj:'~16–24 raj (hand-spun, indicative)',
     material:'Wool, largely on a wool foundation',
     dye:'Natural dyes historically; madder-based reds dominate',
-    layout:'Repeating gol — an octagonal tribal emblem stamped in rows across the whole field, with no central medallion or floral border. Each Turkmen tribe has its own named gul (the Tekke gul is the best known: a quartered octagon with small hooked elements); this tool models one generic version, not the tribal variants',
+    layout:'Two structurally different formats, kept as separate stamp sets: (1) the main carpet — a tight grid of a repeating octagonal gol (the Tekke gul is the best known: a quartered octagon with small hooked elements) alternating with a smaller "minor gul", framed by a near-universal serrated dog-tooth/diamond-chain guard stripe, with no spandrel concept at all — the grid simply runs to the border and gets cropped at the corner; (2) the "ensi" tent-door rug — a completely different four-quadrant paneled layout, each quadrant its own filler pattern, bordered by chevron/zigzag multi-band stripes. Each Turkmen tribe has its own named gul; this tool models one generic version, not every tribal variant',
     loom:'Portable horizontal ground loom',
     family:'Monochrome, red-dominated style',
-    motifs:['octagon'],
-    palette:['#6E1A1A','#8C2A2A','#1A1418','#EDE0C4','#2E2A2A'],
-    blurb:'Turkmen weaving is dominated almost entirely by shades of deep red, patterned with rows of a repeating gol — an octagonal tribal emblem — instead of a bordered medallion field. Every tribe (Tekke, Ersari, Salor, Saryk, Yomut) has its own named gul, so "Turkmen" here is a composite, not one specific tribal style.',
+    motifs:['octagon','turkmen_gul_minor','turkmen_guard_border','turkmen_ensi_panel','turkmen_ensi_border'],
+    palette:['#6E1A1A','#8C2A2A','#1A1418','#EDE0C4','#2E2A2A','#4A1010','#8A6A48'],
+    blurb:'Turkmen weaving is dominated almost entirely by shades of deep red, patterned with rows of a repeating gol — an octagonal tribal emblem — instead of a bordered medallion field. Every tribe (Tekke, Ersari, Salor, Saryk, Yomut) has its own named gul, so "Turkmen" here is a composite, not one specific tribal style. The stamp set also keeps the "ensi" door-rug format separate — it isn’t a variation on the gul-grid main carpet, it’s a structurally different four-panel layout entirely.',
     beatTool:'comb',
+    weftType:'single',
+    refUrl:'https://www.little-persia.com/pages/turkmen-rug-history-origin-guide',
+    refLabel:'Turkmen rug history & real pieces — Little-Persia',
     sources:[
       {label:'Gul/gol motif — definition and tribal variation', url:'https://en.wikipedia.org/wiki/Gul_(design)'},
       {label:'Turkoman red field and gul construction', url:'https://www.catalinarug.com/product-category/persian-rugs/turkoman/'},
-      {label:'Tekke gul — quartered, hooked design', url:'https://jewelrugs.com/collections/turkoman-rugs'}
+      {label:'Tekke gul — quartered, hooked design', url:'https://jewelrugs.com/collections/turkoman-rugs'},
+      {label:'Motif detail (minor gul alternation, dog-tooth guard stripe, ensi four-panel format) — web research: 1stDibs listing photos, no Kaggle coverage for this region', url:'https://www.1stdibs.com/buy/tekke-rug/'}
     ],
   },
   { id:'bidjar', name:'Bidjar', zone:'Kurdistan — Northwest', kind:'Village ("Iron Rugs of Persia")',
     knot:'Asymmetric (Persian/Senneh), per most sources', raj:'~28–36 raj (very dense, indicative)',
     material:'Wool pile on wool or cotton foundation, wet-woven',
     dye:'Natural dyes historically; deep saturated tones typical of Kurdish weaving',
-    layout:'Herati and Mina Khani allover florals, or a single bold medallion — design varies, but the construction is the constant signature',
+    layout:'Two traditions kept as separate stamp entries: (1) an angular hooked-diamond medallion — latch-hook nubs at the tips, never a rounded shape — with a dense micro-floret diaper border, and no corner spandrel at all (the diamond\u2019s point meets the border directly); (2) Herati and Mina Khani allover florals with no medallion whatsoever, which is traditional for this region rather than a simplification. Kaggle\u2019s "Kurdistan" tag is the closest available proxy for Bidjar — the dataset has no Bidjar-specific label, only the broader region',
     loom:'Fixed vertical village loom',
     family:'Bold geometric / extreme-density village style',
-    motifs:['toranj_geo','herati_geo'],
-    palette:['#7A2020','#1F3550','#C9A24B','#EDE0C4','#3A2A1E'],
-    blurb:'Bidjar rugs are woven wet — the warp, weft and yarn are dampened through the whole process — then packed with a heavy nail-like spike instead of a comb, which is why finished Bidjars are so rigid they\u2019re nicknamed the "iron rugs of Persia."',
+    motifs:['bidjar_medallion_hooked','bidjar_diaper_border','bidjar_allover_diaper','herati_geo','bidjar_minakhani'],
+    palette:['#7A2020','#1F3550','#C9A24B','#EDE0C4','#3A2A1E','#4A1F3A','#2E4A2E'],
+    blurb:'Bidjar rugs are woven wet — the warp, weft and yarn are dampened through the whole process — then packed with a heavy nail-like spike instead of a comb, which is why finished Bidjars are so rigid they\u2019re nicknamed the "iron rugs of Persia." Design-wise this is the clearest visual opposite of Kerman or Kashan\u2019s curvilinear delicacy in this tool: hooked, angular, and just as often skipping the medallion entirely for a dense allover diaper field.',
     beatTool:'spike',
+    weftType:'depressed-double',
+    refUrl:'https://nazmiyalantiquerugs.com/bidjar-rugs/',
+    refLabel:'Real Bidjar rugs — Nazmiyal Antique Rugs',
     sources:[
       {label:'Bidjar wet-weaving and nail-tool compacting', url:'https://www.catalinarug.com/blog/persian-rugs-anatomy/'},
-      {label:'Bidjar nail-shaped compacting tool, second source', url:'https://eramrugs.co.uk/blogs/news/process-and-weaving-techniques-of-persian-rugs'}
+      {label:'Bidjar nail-shaped compacting tool, second source', url:'https://eramrugs.co.uk/blogs/news/process-and-weaving-techniques-of-persian-rugs'},
+      {label:'Motif detail (hooked-diamond medallion, no-spandrel corner, allover-diaper alternative) — visual survey of the Qajar Dynasty Iranian Carpet Dataset (Kaggle), Kurdistan-tagged pieces (closest available proxy for Bidjar — no Bidjar-specific tag exists)', url:'https://www.kaggle.com/datasets/mahdisarbazi/qajar-dynasty-iranian-carpet-dataset'},
+      {label:'Mina Khani — among the most popular Kurdish allover patterns, used in Bidjar production', url:'https://www.araratrugs.com/ART00493'}
     ],
   },
 ];
 
 const MOTIFS = [
-  { id:'toranj_fine', name:'Toranj — rounded medallion', rows:[
-    '....212....','..2111112..','.211111112.','.211111112.',
-    '21111111112','21111111112','21111111112','.211111112.',
-    '.211111112.','..2111112..','....212....' ]},
-  { id:'toranj_geo', name:'Toranj — stepped medallion', rows:[
-    '....2....','...212...','..21112..','.2111112.',
-    '211111112','.2111112.','..21112..','...212...','....2....' ]},
-  { id:'boteh_fine', name:'Boteh — curved paisley', rows:[
-    '.......2...','........2..','.......212.','......212..',
-    '.....21112.','....21112..','...2111112.','..2111112..',
-    '.211111112.','.211111112.','.211111112.' ]},
-  { id:'boteh_geo', name:'Boteh — hooked paisley', rows:[
-    '......2','....212','..21112','2111112','.21112.','..212..','...2...' ]},
-  { id:'gol_fine', name:'Gol-e Farang — rounded rosette', rows:[
-    '....2....','...212...','..21112..','.2111112.',
-    '211111112','.2111112.','..21112..','...212...','....2....' ]},
-  { id:'star_geo', name:'Star — Zanjan', rows:[
-    '..2.2..','.2.1.2.','2.111.2','.11111.','2.111.2','.2.1.2.','..2.2..' ]},
   { id:'herati_geo', name:'Herati — fish/rosette unit', rows:[
     '...2...','..212..','3.1112.','2111113','3.1112.','..212..','...2...' ]},
   { id:'lechak', name:'Lechak — corner medallion', rows:[
@@ -605,24 +951,234 @@ const MOTIFS = [
     '...111...','..1.1.1..','.2..1..2.','1.......1','.1.....1.' ]},
   { id:'octagon', name:'Gol — Turkmen emblem (quartered)', rows:[
     '..222..','.21212.','2112112','2222222','2112112','.21212.','..222..' ]},
-  { id:'animal_fine', name:'Stag — pictorial (fine)', rows:[
-    '1.......1','.1..2..1.','..1.1.1..','...222...',
-    '..21112..','.2111112.','211111112','1.11.11.1','1.1...1.1' ]},
-  { id:'animal_geo', name:'Stag — tribal (block)', rows:[
-    '1.....1','.1...1.','..1.1..','...2...','..111..','.11111.','1111111' ]},
+
+  /* --- batch 1: Tabriz, Heriz, Zanjan, Kerman — see report in conversation history --- */
+  { id:'heriz_medallion_geo', name:'Toranj — angular pendant medallion (Heriz)', rows:[
+    '....3....','...212...','..21112..','.2111112.','212111212',
+    '.2111112.','..21112..','...212...','....3....' ]},
+  { id:'heriz_herati_border', name:'Herati — turtle-palmette border unit (Heriz)', rows:[
+    '...2...','..212..','.31113.','3111113','.31113.','..212..','...2...' ]},
+  { id:'spandrel_geo', name:'Spandrel — hooked corner, echoes medallion (Heriz)', rows:[
+    '311111112','111111112','11111112.','1111112..','111112...',
+    '1112.....','112......','12.......','2........' ]},
+  { id:'heriz_vaqvaq', name:'Vaq-vaq — talking tree with animal heads (Heriz, rare)', rows:[
+    '3..1.1..3','.3.1.1.3.','..2.1.2..','...212...','...111...',
+    '...212...','..21112..','.2111112.','211111112' ]},
+
+  { id:'zanjan_medallion_geo', name:'Toranj — small diamond in hexagon frame (Zanjan)', rows:[
+    '....2....','...2.2...','..2...2..','.2..1..2.','2..111..2',
+    '.2..1..2.','..2...2..','...2.2...','....2....' ]},
+  { id:'zanjan_folk_border', name:'Rosette with icon dots — guard stripe unit (Zanjan)', rows:[
+    '.3...3.','..212..','.21112.','2111112','.21112.','..212..','.3...3.' ]},
+  { id:'zanjan_stacked_diamonds', name:'Stacked hooked diamonds — runner chain (Zanjan)', rows:[
+    '....1....','...111...','....1....','....2....','...212...',
+    '.3.111.3.','....2....','...111...','....1....' ]},
+
+  { id:'kerman_medallion_fine', name:'Toranj — elongated cartouche with calligraphy accent (Kerman)', rows:[
+    '....212....','..2111112..','.211111112.','21111111112','21111111112',
+    '21111311112','21111111112','21111111112','.211111112.','..2111112..','....212....' ]},
+  { id:'kerman_vine_border', name:'Rosette with vine tendrils — border chain unit (Kerman)', rows:[
+    '....2....','...212...','..21112..','321111123','211111112',
+    '321111123','..21112..','...212...','....2....' ]},
+  { id:'kerman_pictorial_pair', name:'Confronting peacocks flanking a cartouche (Kerman)', rows:[
+    '1.......1','.1.....1.','..1...1..','1.1.2.1.1','.1.111.1.',
+    '1.1.2.1.1','..1...1..','.1.....1.','1.......1' ]},
+
+  { id:'tabriz_medallion_geo', name:'Toranj — lobed pointed-oval medallion (Tabriz, classic)', rows:[
+    '....2....','...212...','.3.111.3.','.2111112.','211111112',
+    '.2111112.','.3.111.3.','...212...','....2....' ]},
+  { id:'tabriz_herati_border', name:'Herati — rosette with diagonal leaf curls (Tabriz, classic)', rows:[
+    '3.....3','.2...2.','..212..','.11111.','..212..','.2...2.','3.....3' ]},
+  { id:'tabriz_spandrel_geo', name:'Spandrel — angular quarter-palmette, echoes lobed medallion (Tabriz, classic)', rows:[
+    '111111112','111111112','11111312.','1111112..','111112...',
+    '1112.....','112......','12.......','2........' ]},
+  { id:'tabriz_confronting_camels', name:'Confronting camels in border cartouche (Tabriz, classic)', rows:[
+    '1.......1','.11...11.','..1.2.1..','.1.111.1.','1.11111.1',
+    '.1.111.1.','..1.2.1..','.11...11.','1.......1' ]},
+  { id:'tabriz_bagh_panel', name:'Garden panel — one compartment of the Bagh grid, no medallion (Tabriz, garden-panel)', rows:[
+    '222222222','2.......2','2..1.1..2','2...1...2','2..111..2',
+    '2.......2','2.......2','2.......2','222222222' ]},
+  { id:'tabriz_bagh_border', name:'Confronting birds — garden-panel register border (Tabriz, garden-panel)', rows:[
+    '1.....1','.1...1.','..1.1..','...2...','..1.1..','.1...1.','1.....1' ]},
+  { id:'tabriz_cypress', name:'Cypress tree — garden-panel secondary motif (Tabriz, garden-panel)', rows:[
+    '....1....','....1....','...111...','...111...','..11111..',
+    '..11111..','.1111111.','....2....','...222...' ]},
+
+  /* --- batch 2: Esfahan, Bakshayesh, Mashhad, Qashqai — see report in conversation history --- */
+  { id:'esfahan_medallion_fine', name:'Toranj — round, layered concentric medallion (Esfahan)', rows:[
+    '....212....','..2111112..','.211111112.','.231111132.','21111111112','21111311112','21111111112','.231111132.','.211111112.','..2111112..','....212....' ]},
+  { id:'esfahan_border_fine', name:'Shah-Abbasi rosette with curling vine tendrils — border unit (Esfahan)', rows:[
+    '....2....','...212...','.3211123.','.2111112.','211111112','.2111112.','.3211123.','...212...','....2....' ]},
+  { id:'esfahan_palmette', name:'Shah-Abbasi palmette on a curling stem — allover vine-fill unit (Esfahan)', rows:[
+    '....1....','...111...','..11111..','...2.2...','....2....','...23....','..2...3..','.2.....3.','2.......3' ]},
+  { id:'bakshayesh_medallion_geo', name:'Lozenge medallion, deliberately off-center and loosely drawn (Bakshayesh)', rows:[
+    '...2.....','..2.2....','.2...2...','2..1..2..','.2...2...','..2.2....','...2.....','.........','.........' ]},
+  { id:'bakshayesh_wandering_border', name:'Wandering, irregular-width guard band (Bakshayesh)', rows:[
+    '1.......1','.2.....2.','..1...1..','...2.2...','....1....','...2.2...','..1...1..','.2.....2.','1.......1' ]},
+  { id:'bakshayesh_tree_column', name:'Tree-column — repeating vertical cypress fill (Bakshayesh)', rows:[
+    '....1....','....1....','...111...','....1....','...111...','....1....','..11111..','....2....','...222...' ]},
+  { id:'mashhad_medallion_fine', name:'Toranj — round medallion with nested inner cartouche (Mashhad)', rows:[
+    '....2....','...212...','..21112..','.2113112.','211313112','.2113112.','..21112..','...212...','....2....' ]},
+  { id:'mashhad_boteh_border', name:'Confronting boteh (paisley) pair — border unit (Mashhad)', rows:[
+    '1.....2','11...21','111.211','1112111','111.211','11...21','1.....2' ]},
+  { id:'mashhad_spandrel_elongated', name:'Spandrel — dramatically elongated, nearly reaching the border midpoint (Mashhad)', rows:[
+    '111111111','111111111','111111111','111111112','11111112.','1111112..','111112...','11112....','1112.....' ]},
+  { id:'mashhad_boteh_fill', name:'Boteh — dense paisley field filler, curled tail (Mashhad)', rows:[
+    '........2','.......21','......211','.....2111','....21111','...211111','..2111111','.21111111','311111111' ]},
+  { id:'qashqai_medallion_geo', name:'Diamond medallion with nested hooked diamond (Qashqai)', rows:[
+    '....2....','...212...','..21112..','.2311132.','213111312','.2311132.','..21112..','...212...','....2....' ]},
+  { id:'qashqai_hook_border', name:'Diagonal hook rosette — tribal guard-stripe unit (Qashqai)', rows:[
+    '3.....3','.21.12.','..212..','.11111.','..212..','.21.12.','3.....3' ]},
+  { id:'qashqai_triple_diamond', name:'Three vertically stacked diamonds (Qashqai)', rows:[
+    '....1....','...111...','....1....','....2....','...111...','....2....','....1....','...111...','....1....' ]},
+
+  /* --- batch 3: Kashan, Qom, Turkmen, Bidjar — see report in conversation history --- */
+  { id:'kashan_medallion_fine', name:'Toranj — hooked-star medallion with hanging pendant (Kashan)', rows:[
+    '....2....','...212...','.3211123.','.2111112.','211111112','.2111112.','.3211123.','...212...','....3....' ]},
+  { id:'kashan_gazelle_border', name:'Confronting gazelles flanking a tree — border/panel unit (Kashan)', rows:[
+    '1.......1','.1.....1.','..1...1..','1.1.2.1.1','.111.111.','.1.....1.','.1.....1.','.1.....1.','1.......1' ]},
+  { id:'qom_medallion_fine', name:'Toranj — multi-layered medallion radiating outward (Qom)', rows:[
+    '....2....','...212...','..23132..','.2111112.','211111112','.2111112.','..23132..','...212...','....2....' ]},
+  { id:'qom_border_fine', name:'Dense double-ring floral cartouche — border unit (Qom)', rows:[
+    '....2....','..32123..','.3211123.','.2111112.','211111112','.2111112.','.3211123.','..32123..','....2....' ]},
+  { id:'qom_tree_of_life', name:'Tree of life with birds in the canopy (Qom)', rows:[
+    '3.1.1.1.3','.11.1.11.','..1.1.1..','...212...','...111...','...111...','..21112..','.2111112.','211111112' ]},
+  { id:'turkmen_gul_minor', name:'Minor gul — smaller alternating tribal emblem (Turkmen, main-carpet)', rows:[
+    '...2...','..212..','.21112.','2113112','.21112.','..212..','...2...' ]},
+  { id:'turkmen_guard_border', name:'Dog-tooth diamond-chain guard stripe (Turkmen, main-carpet)', rows:[
+    '1.1.1.1','.2.2.2.','1.1.1.1','.2.2.2.','1.1.1.1','.2.2.2.','1.1.1.1' ]},
+  { id:'turkmen_ensi_panel', name:'Ensi — four-quadrant door-rug panel layout (Turkmen, ensi)', rows:[
+    '....2....','.1..2..3.','..1.2.3..','....2....','222222222','....2....','..3.2.1..','.3..2.1..','....2....' ]},
+  { id:'turkmen_ensi_border', name:'Chevron/zigzag multi-band border (Turkmen, ensi)', rows:[
+    '2.....2','12...21','.12.21.','..121..','...1...','.......','.......' ]},
+  { id:'bidjar_medallion_hooked', name:'Angular hooked-diamond medallion with latch-hook nubs (Bidjar)', rows:[
+    '....2....','..32123..','..21112..','.2111112.','211111112','.2111112.','..21112..','..32123..','....2....' ]},
+  { id:'bidjar_diaper_border', name:'Dense micro-floret diaper — border unit (Bidjar)', rows:[
+    '1.2.1.2','.......','2.1.2.1','.......','1.2.1.2','.......','2.1.2.1' ]},
+  { id:'bidjar_allover_diaper', name:'Allover diaper field — no medallion (Bidjar, allover tradition)', rows:[
+    '1.2.1.2.1','.........','2.1.2.1.2','.........','1.2.1.2.1','.........','2.1.2.1.2','.........','1.2.1.2.1' ]},
+
+  /* --- batch 4: real region-specific motifs added on request — see sources on each region --- */
+  { id:'kerman_boteh', name:'Boteh — the curling paisley Kerman shawl-weavers carried into carpets', rows:[
+    '......2..','.....22..','....212..','...2112..','..21112..',
+    '.211112..','.2113112.','.2111112.','.2222222.' ]},
+  { id:'kerman_vase_palmette', name:'Vase-and-palmette — the 17th-c. Kerman "vase carpet" format', rows:[
+    '....212....','...21112...','..2111112..','.211131112.','.211111112.',
+    '..2111112..','...21112...','...21112...','..2111112..','.211111112.','..2222222..' ]},
+  { id:'qashqai_bird', name:'Small stylized bird — field-scatter figure (Qashqai)', rows:[
+    '...2...','..232..','.21112.','2111112','.11.11.','..1.1..','.......' ]},
+  { id:'qashqai_animal', name:'Small stylized quadruped — field-scatter figure (Qashqai)', rows:[
+    '......3','..2222.','.211112','2111112','.1.11.1','.1....1','.......' ]},
+  { id:'bidjar_minakhani', name:'Mina Khani trellis unit, rendered in Bidjar’s dense hooked style', rows:[
+    '1.......1','.2.....2.','..2.1.2..','...212...','1..2.2..1',
+    '...212...','..2.1.2..','.2.....2.','1.......1' ]},
+  { id:'bakshayesh_flaming_palmette', name:'Flaming palmette — the rare, oversized Bakshaish signature shape', rows:[
+    '..2.1.2..','.1..1..1.','..1...1..','...131...','....1....',
+    '....1....','....1....','.........','.........' ]},
+  { id:'bakshayesh_minakhani_loose', name:'Rosette-linked trellis, drawn loose and off-center (Bakshaish)', rows:[
+    '..212....','.21112...','..212....','....2....','.....2...',
+    '......2..','.......2.','........1','.........' ]},
 ];
 
+// A real outline of Iran by province (Highcharts public admin-1 boundary
+// data for Iran), used to build a clickable map under the region rail.
+// Coordinates are pre-projected map units, not raw lon/lat.
+const IRAN_VIEWBOX = '-999 33 10850 9818';
+const IRAN_FLIP_TRANSLATE = -9884;
+const PROVINCES = [
+  ['Hormozgan','','M4306,817 4251,816 4219,845 4297,855 4306,817ZM3906,1020 3810,1017 3784,1055 3879,1037 3906,1020ZM5572,1118 5520,1035 5442,974 5399,1004 5297,969 5177,900 5055,863 5045,940 5086,933 5336,1038 5324,1143 5408,1113 5493,1162 5571,1182 5641,1152 5572,1118ZM7467,205 7330,180 7265,251 7197,281 6956,302 6808,251 6732,268 6678,345 6564,302 6538,376 6409,368 6291,386 6242,506 6186,595 6213,644 6163,707 6124,828 6128,943 6084,1097 5972,1219 5995,1240 5948,1285 5813,1289 5675,1318 5539,1286 5431,1194 5280,1174 5235,1140 5205,1044 5163,1014 5035,1028 4997,983 4936,965 4758,827 4649,832 4613,882 4510,894 4460,967 4366,961 4273,985 4169,954 4106,959 3971,1055 3923,1147 3720,1215 3485,1365 3513,1392 3625,1387 3659,1405 3719,1332 3852,1321 3945,1265 4004,1277 4186,1246 4248,1280 4277,1422 4364,1477 4523,1493 4587,1480 4670,1506 4829,1487 4937,1544 4977,1641 5057,1686 5177,1718 5189,1773 5109,1858 5140,2092 5124,2133 4943,2300 4957,2365 4921,2465 5078,2435 5158,2363 5241,2342 5356,2434 5441,2470 5459,2447 5477,2193 5478,2078 5533,2012 5647,1932 5718,1924 5824,1968 5929,2076 6024,2048 6052,1866 6123,1825 6219,1702 6199,1633 6267,1523 6295,1273 6308,1235 6557,1112 6622,1178 6661,1178 6750,1120 6801,1032 6763,1053 6728,698 6910,715 7005,691 7022,606 7103,606 7137,631 7213,581 7197,526 7347,415 7468,254 7467,205Z'],
+  ['Bushehr','','M2280,3256 2294,3173 2357,3071 2519,3046 2598,3020 2744,2799 2842,2734 3102,2238 3115,2178 3200,1935 3305,1836 3385,1657 3540,1490 3659,1405 3625,1387 3513,1392 3485,1365 3426,1411 3485,1433 3419,1510 3333,1581 3227,1604 3089,1705 3000,1715 2918,1701 2837,1718 2717,1814 2650,1927 2650,2001 2579,2088 2539,2198 2533,2312 2486,2367 2426,2378 2390,2434 2397,2488 2435,2451 2461,2510 2408,2584 2293,2588 2322,2685 2304,2791 2276,2805 2190,2917 2155,2931 2069,3074 2013,3123 2005,3245 1962,3304 2059,3330 2182,3307 2249,3281 2270,3265 2280,3257 2280,3256Z'],
+  ['Kohgiluyeh and Buyer Ahmad','','M2280,3256 2249,3281 2182,3307 2174,3412 2142,3512 2177,3590 2168,3625 2082,3680 2015,3755 1917,3745 1925,3840 1901,3934 1926,4014 1991,4046 2100,4155 2239,4087 2287,4086 2497,3894 2582,3884 2642,3924 2699,3929 2733,3802 2795,3736 2886,3666 2903,3551 2824,3505 2763,3521 2648,3587 2593,3590 2630,3415 2616,3355 2461,3267 2339,3271 2280,3256Z'],
+  ['Fars','qashqai','M2339,3271 2461,3267 2616,3355 2630,3415 2593,3590 2648,3587 2763,3521 2824,3505 2903,3551 2886,3666 2946,3678 2946,3797 2995,3917 3021,4030 3005,4075 2925,4114 2897,4184 2995,4176 3177,4291 3227,4186 3397,4158 3593,4214 3738,4159 3825,4080 3899,3992 4036,3655 4134,3485 4253,3329 4292,3144 4383,3078 4502,3020 4519,2954 4602,2795 4629,2779 4797,2756 4921,2465 4957,2365 4943,2300 5124,2133 5140,2092 5109,1858 5189,1773 5177,1718 5057,1686 4977,1641 4937,1544 4829,1487 4670,1506 4587,1480 4523,1493 4364,1477 4277,1422 4248,1280 4186,1246 4004,1277 3945,1265 3852,1321 3719,1332 3659,1405 3540,1490 3385,1657 3305,1836 3200,1935 3115,2178 3102,2238 2842,2734 2744,2799 2598,3020 2519,3046 2357,3071 2294,3173 2280,3256 2280,3257 2339,3271Z'],
+  ['Esfahan','esfahan,kashan','M2886,3666 2795,3736 2733,3802 2699,3929 2707,4004 2657,4177 2649,4289 2693,4312 2664,4375 2708,4446 2670,4570 2504,4708 2503,4809 2431,4928 2370,4903 2274,4899 2210,4859 2102,4860 2035,4909 1933,4899 1820,4842 1849,4909 1826,4942 1691,4980 1666,5048 1691,5092 1762,5124 1775,5203 1808,5240 1892,5261 1970,5409 1986,5500 2123,5588 2357,5644 2424,5690 2491,5700 2569,5893 2542,5931 2561,6062 2642,6124 2804,6133 2991,6179 3097,6121 3151,6112 3340,6115 3604,6033 4924,6092 4974,6066 4974,6065 4992,5614 4933,5482 4804,5422 4774,5384 4751,5272 4714,5181 4625,5108 4031,4894 3852,4933 3757,4910 3599,4819 3611,4592 3583,4456 3568,4312 3593,4214 3397,4158 3227,4186 3177,4291 2995,4176 2897,4184 2925,4114 3005,4075 3021,4030 2995,3917 2946,3797 2946,3678 2886,3666Z'],
+  ['Semnan','','M4924,6092 3604,6033 3340,6115 3151,6112 3097,6121 2991,6179 3049,6320 3044,6401 3099,6568 3013,6695 3031,6855 3102,6847 3231,6760 3435,6709 3479,6707 3596,6757 3682,6836 3700,6896 3675,7038 3826,7085 3912,7093 3974,7135 4005,7188 4081,7263 4100,7358 4159,7436 4258,7480 4443,7487 4518,7524 4640,7634 4733,7690 4778,7697 4971,7676 4998,7689 5023,7809 5064,7909 5179,8084 5264,7979 5350,7949 5298,7901 5297,7772 5374,7683 5437,7633 5547,7608 5628,7625 5678,7616 5694,7564 5662,7459 5657,7386 5673,7261 5710,7144 5881,7006 5875,6959 5750,6723 5636,6675 5507,6568 5423,6456 5236,6116 5176,6083 5034,6082 4974,6066 4974,6065 4924,6092Z'],
+  ['Golestan','turkmen','M4032,7698 4130,7684 4197,7703 4206,7789 4144,7994 4139,8051 4284,8040 4378,8068 4467,8122 4512,8118 4599,8176 4599,8266 4634,8339 4713,8396 4776,8471 4823,8484 4928,8558 5078,8591 5222,8561 5321,8574 5333,8441 5326,8367 5393,8319 5404,8279 5377,8237 5232,8170 5179,8084 5064,7909 5023,7809 4998,7689 4971,7676 4778,7697 4733,7690 4640,7634 4518,7524 4443,7487 4258,7480 4177,7571 4058,7641 4032,7698Z'],
+  ['Mazandaran','','M2355,7822 2627,7648 2776,7617 3067,7540 3166,7553 3255,7585 3535,7644 3715,7699 3917,7745 4128,7759 4192,7791 4191,7766 4092,7738 3980,7738 4032,7698 4058,7641 4177,7571 4258,7480 4159,7436 4100,7358 4081,7263 4005,7188 3974,7135 3912,7093 3826,7085 3675,7038 3602,7077 3556,7062 3453,7104 3329,7134 3209,7011 3171,6995 3085,7018 2980,7160 2907,7189 2824,7197 2766,7232 2731,7274 2620,7305 2590,7338 2467,7372 2461,7404 2345,7488 2205,7612 2267,7688 2280,7743 2355,7822Z'],
+  ['Tehran','','M3675,7038 3700,6896 3682,6836 3596,6757 3479,6707 3435,6709 3231,6760 3102,6847 3031,6855 3013,6695 3099,6568 3044,6401 2733,6590 2602,6632 2445,6638 2445,6638 2495,6790 2495,6836 2457,6896 2537,6984 2553,7024 2601,7026 2611,7101 2644,7138 2763,7166 2766,7232 2824,7197 2907,7189 2980,7160 3085,7018 3171,6995 3209,7011 3329,7134 3453,7104 3556,7062 3602,7077 3675,7038Z'],
+  ['Markazi','','M2445,6638 2409,6565 2391,6437 2092,6354 2095,6281 2037,6219 2090,6161 2164,6123 2181,6042 2242,5979 2385,5963 2441,5930 2569,5893 2491,5700 2424,5690 2357,5644 2123,5588 1986,5500 1894,5615 1845,5555 1746,5644 1762,5700 1693,5767 1609,5729 1588,5672 1531,5634 1453,5648 1382,5695 1415,5776 1422,5845 1494,5923 1476,6040 1439,6118 1414,6269 1508,6251 1504,6349 1537,6456 1684,6448 1692,6373 1730,6330 1769,6353 1759,6426 1721,6491 1634,6524 1597,6559 1683,6610 1645,6728 1678,6749 1726,6720 1713,6803 1809,6802 1850,6856 2031,6904 2130,6944 2178,6942 2310,6915 2354,6878 2339,6928 2377,6945 2401,6860 2457,6896 2495,6836 2495,6790 2445,6638 2445,6636 2445,6638Z'],
+  ['Yazd','','M4502,3020 4383,3078 4292,3144 4253,3329 4134,3485 4036,3655 3899,3992 3825,4080 3738,4159 3593,4214 3568,4312 3583,4456 3611,4592 3599,4819 3757,4910 3852,4933 4031,4894 4625,5108 4714,5181 4751,5272 4774,5384 4804,5422 4933,5482 4992,5614 4974,6065 4974,6066 5034,6082 5176,6083 5236,6116 5423,6456 5645,6523 5859,6635 5995,6677 6057,6664 6223,6549 6239,6465 6188,6410 5977,6246 5943,6176 5882,5964 5882,5851 5925,5660 5953,5620 6065,5611 6206,5651 6256,5580 6311,5300 6352,5219 6502,5142 6566,5063 6546,4941 6624,4801 6602,4662 6532,4556 6426,4312 5803,4548 5730,4558 5693,4509 5577,4439 5538,4395 5240,4226 5217,4171 5208,3914 5112,3869 5004,3851 4883,3861 4561,3797 4486,3689 4476,3607 4545,3459 4559,3392 4597,3357 4594,3141 4610,3058 4502,3020Z'],
+  ['Chahar Mahall and Bakhtiari','','M2699,3929 2642,3924 2582,3884 2497,3894 2287,4086 2239,4087 2100,4155 2153,4232 2139,4300 2053,4399 1990,4551 1928,4599 1830,4781 1820,4842 1933,4899 2035,4909 2102,4860 2210,4859 2274,4899 2370,4903 2431,4928 2503,4809 2504,4708 2670,4570 2708,4446 2664,4375 2693,4312 2649,4289 2657,4177 2707,4004 2699,3929Z'],
+  ['Khuzestan','','M1666,5048 1691,4980 1826,4942 1849,4909 1820,4842 1830,4781 1928,4599 1990,4551 2053,4399 2139,4300 2153,4232 2100,4155 1991,4046 1926,4014 1901,3934 1925,3840 1917,3745 2015,3755 2082,3680 2168,3625 2177,3590 2142,3512 2174,3412 2182,3307 2059,3330 1962,3304 1883,3303 1698,3192 1658,3188 1630,3278 1494,3282 1483,3354 1447,3328 1358,3388 1328,3450 1393,3453 1474,3410 1506,3459 1482,3516 1349,3526 1368,3458 1320,3462 1276,3415 1308,3350 1313,3236 1278,3201 1177,3209 1122,3161 1031,3194 994,3299 1004,3341 934,3413 893,3414 871,3484 788,3512 803,3854 796,3867 607,3875 623,4151 720,4383 635,4555 588,4618 686,4691 682,4768 726,4824 783,4942 816,4986 902,5185 934,5206 1173,5223 1293,5162 1417,5145 1545,5051 1666,5048Z'],
+  ['Lorestan','','M1986,5500 1970,5409 1892,5261 1808,5240 1775,5203 1762,5124 1691,5092 1666,5048 1545,5051 1417,5145 1293,5162 1173,5223 934,5206 902,5185 816,4986 783,4942 684,5160 557,5326 436,5394 371,5457 319,5477 310,5523 213,5614 225,5649 295,5714 493,5758 559,5820 542,5915 553,5997 654,6024 658,6112 723,6115 1001,5908 1161,5883 1192,5912 1272,5915 1422,5845 1415,5776 1382,5695 1453,5648 1531,5634 1588,5672 1609,5729 1693,5767 1762,5700 1746,5644 1845,5555 1894,5615 1986,5500Z'],
+  ['Ilam','','M783,4942 726,4824 682,4768 686,4691 588,4618 539,4650 549,4684 490,4779 504,4805 465,4862 413,4882 339,4870 304,4894 120,5079 -8,5177 -122,5229 -221,5232 -204,5303 -252,5336 -173,5373 -176,5435 -238,5511 -298,5627 -311,5692 -398,5666 -401,5699 -344,5871 -330,5951 -210,5953 -129,5913 -40,5894 35,5831 173,5778 237,5769 334,5788 421,5779 444,5844 423,5905 542,5915 559,5820 493,5758 295,5714 225,5649 213,5614 310,5523 319,5477 371,5457 436,5394 557,5326 684,5160 783,4942Z'],
+  ['Ardebil','','M536,9367 587,9446 688,9487 734,9536 829,9575 987,9675 1044,9687 1091,9646 1231,9458 1117,9409 1122,9331 1187,9279 1204,9236 1168,9190 1071,9177 1034,9141 1043,9094 1143,9027 1150,8982 1191,8938 1247,8948 1255,8915 1344,8795 1410,8713 1285,8576 1246,8454 1289,8317 1371,8175 1449,8092 1454,7992 1419,8013 1334,8003 1302,7966 1226,8016 1096,8104 1082,8186 964,8257 952,8331 979,8434 902,8540 865,8711 829,8731 710,8720 672,8747 612,8736 612,8791 657,8862 724,8912 824,8929 789,8979 819,9067 792,9144 798,9282 778,9291 644,9223 578,9122 592,9108 507,9035 430,9062 321,9027 283,9081 337,9165 384,9157 400,9211 434,9189 511,9205 577,9273 536,9367Z'],
+  ['Qom','qom','M3044,6401 3049,6320 2991,6179 2804,6133 2642,6124 2561,6062 2542,5931 2569,5893 2441,5930 2385,5963 2242,5979 2181,6042 2164,6123 2090,6161 2037,6219 2095,6281 2092,6354 2391,6437 2409,6565 2445,6638 2445,6636 2602,6632 2733,6590 3044,6401Z'],
+  ['Hamadan','','M1422,5845 1272,5915 1192,5912 1161,5883 1001,5908 723,6115 755,6163 872,6149 898,6237 883,6281 795,6222 775,6272 703,6309 672,6360 754,6379 829,6513 918,6559 946,6508 999,6603 986,6665 909,6747 857,6881 821,6939 873,6987 913,6927 987,6960 959,7040 1057,6997 1098,6946 1215,6937 1307,6896 1370,6947 1455,6954 1519,6900 1538,6845 1623,6835 1713,6803 1726,6720 1678,6749 1645,6728 1683,6610 1597,6559 1634,6524 1721,6491 1759,6426 1769,6353 1730,6330 1692,6373 1684,6448 1537,6456 1504,6349 1508,6251 1414,6269 1439,6118 1476,6040 1494,5923 1422,5845Z'],
+  ['Zanjan','zanjan','M1370,6947 1307,6896 1215,6937 1098,6946 1057,6997 1033,7040 888,7138 914,7201 931,7317 921,7403 884,7482 615,7551 600,7567 535,7738 546,7812 656,7926 778,7999 947,8010 1160,7984 1226,8016 1302,7966 1334,8003 1419,8013 1454,7992 1532,7938 1611,7835 1639,7725 1534,7674 1520,7582 1581,7473 1657,7431 1702,7323 1695,7234 1595,7211 1505,7145 1501,7112 1453,7136 1276,7101 1265,7073 1370,6947Z'],
+  ['Qazvin','','M2205,7612 2345,7488 2461,7404 2467,7372 2339,7388 2261,7361 2308,7305 2370,7271 2318,7136 2157,7040 2178,6942 2130,6944 2031,6904 1850,6856 1809,6802 1713,6803 1623,6835 1538,6845 1519,6900 1455,6954 1370,6947 1265,7073 1276,7101 1453,7136 1501,7112 1505,7145 1595,7211 1695,7234 1702,7323 1657,7431 1581,7473 1520,7582 1534,7674 1639,7725 1756,7594 1934,7547 2087,7613 2205,7612Z'],
+  ['West Azarbaijan','','M535,7738 600,7567 532,7477 490,7462 374,7489 319,7550 38,7542 -97,7570 -145,7555 -190,7470 -280,7448 -371,7325 -413,7295 -492,7282 -515,7306 -492,7356 -532,7477 -535,7572 -605,7577 -662,7670 -628,7745 -649,7808 -735,7849 -701,7910 -695,8003 -759,8068 -723,8186 -840,8300 -822,8402 -843,8425 -808,8478 -852,8525 -883,8519 -916,8581 -999,8602 -992,8665 -908,8778 -896,8846 -845,8890 -860,8928 -931,8938 -913,9099 -938,9126 -911,9248 -951,9283 -972,9355 -938,9454 -991,9496 -987,9631 -880,9609 -807,9637 -762,9811 -703,9851 -576,9747 -553,9743 -520,9612 -453,9543 -431,9455 -332,9414 -265,9286 -331,9226 -366,9129 -351,9054 -377,8987 -474,8901 -511,8802 -469,8730 -472,8419 -416,8304 -429,8222 -406,8153 -258,8039 -132,8017 -55,7926 55,7848 112,7916 249,7957 328,7901 336,7770 406,7730 535,7738Z'],
+  ['East Azarbaijan','tabriz,heriz,bakshayesh','M535,7738 406,7730 336,7770 328,7901 249,7957 112,7916 55,7848 -55,7926 -132,8017 -258,8039 -406,8153 -429,8222 -416,8304 -472,8419 -469,8730 -511,8802 -474,8901 -377,8987 -351,9054 -366,9129 -331,9226 -265,9286 -5,9209 58,9181 200,9212 272,9180 390,9278 458,9358 536,9367 577,9273 511,9205 434,9189 400,9211 384,9157 337,9165 283,9081 321,9027 430,9062 507,9035 592,9108 578,9122 644,9223 778,9291 798,9282 792,9144 819,9067 789,8979 824,8929 724,8912 657,8862 612,8791 612,8736 672,8747 710,8720 829,8731 865,8711 902,8540 979,8434 952,8331 964,8257 1082,8186 1096,8104 1226,8016 1160,7984 947,8010 778,7999 656,7926 546,7812 535,7738Z'],
+  ['Kermanshah','','M723,6115 658,6112 654,6024 553,5997 542,5915 423,5905 444,5844 421,5779 334,5788 237,5769 173,5778 35,5831 -40,5894 -129,5913 -210,5953 -330,5951 -344,5871 -401,5699 -436,5735 -521,5913 -578,5941 -485,6038 -463,6128 -506,6175 -535,6254 -485,6284 -482,6349 -376,6314 -385,6409 -405,6431 -374,6494 -335,6507 -326,6552 -283,6536 -265,6623 -231,6665 -180,6644 -104,6665 -85,6742 -106,6790 8,6695 129,6506 164,6489 176,6408 318,6414 374,6498 432,6537 500,6542 512,6598 591,6599 627,6668 709,6617 789,6518 829,6513 754,6379 672,6360 703,6309 775,6272 795,6222 883,6281 898,6237 872,6149 755,6163 723,6115Z'],
+  ['Gilan','','M2355,7822 2280,7743 2267,7688 2205,7612 2087,7613 1934,7547 1756,7594 1639,7725 1611,7835 1532,7938 1454,7992 1449,8092 1371,8175 1289,8317 1246,8454 1285,8576 1410,8713 1344,8795 1432,8824 1482,8814 1475,8736 1504,8473 1538,8347 1598,8268 1759,8176 1963,8142 2021,8140 2134,8104 2172,8053 2222,7934 2355,7822Z'],
+  ['Kordestan','bidjar','M1057,6997 959,7040 987,6960 913,6927 873,6987 821,6939 857,6881 909,6747 986,6665 999,6603 946,6508 918,6559 829,6513 789,6518 709,6617 627,6668 591,6599 512,6598 500,6542 432,6537 374,6498 318,6414 176,6408 164,6489 129,6506 8,6695 -106,6790 -185,6935 -160,7044 -136,7065 -26,7073 18,7108 3,7147 -51,7130 -116,7174 -241,7152 -303,7168 -337,7241 -413,7295 -371,7325 -280,7448 -190,7470 -145,7555 -97,7570 38,7542 319,7550 374,7489 490,7462 532,7477 600,7567 615,7551 884,7482 921,7403 931,7317 914,7201 888,7138 1033,7040 1057,6997Z'],
+  ['South Khorasan','','M7821,6039 7856,5881 7839,5792 7857,5744 7942,5698 8068,5700 8041,5601 8009,5573 7913,5421 7927,5316 8109,4828 8105,4708 8088,4677 8142,4322 8319,4305 8331,4186 8281,3994 8288,3767 8328,3639 8320,3604 8222,3586 8172,3623 8071,3746 7996,3793 7874,3837 7430,3676 7180,3996 7094,4053 6426,4312 6532,4556 6602,4662 6624,4801 6546,4941 6566,5063 6602,5124 6616,5204 6688,5326 6858,5453 6923,5577 6835,5634 6792,5691 6811,5943 6790,6014 6819,6027 6966,6007 6995,6038 7159,6073 7265,6131 7357,6023 7432,6002 7778,6029 7821,6039Z'],
+  ['Razavi Khorasan','mashhad','M6155,8491 6396,8422 6414,8359 6503,8332 6576,8377 6679,8353 6729,8389 6862,8348 6955,8285 7031,8275 7049,8160 7164,8077 7287,8038 7345,8001 7411,7989 7480,7892 7605,7743 8000,7784 8049,7781 8064,7742 8056,7626 8111,7436 8091,7359 8139,7276 8143,7138 8182,7058 8138,6934 8098,6869 8097,6811 8130,6753 8115,6723 8101,6557 8048,6490 8046,6433 7915,6340 8032,6216 7896,6197 7821,6078 7821,6039 7778,6029 7432,6002 7357,6023 7265,6131 7159,6073 6995,6038 6966,6007 6819,6027 6790,6014 6811,5943 6792,5691 6835,5634 6923,5577 6858,5453 6688,5326 6616,5204 6602,5124 6566,5063 6502,5142 6352,5219 6311,5300 6256,5580 6206,5651 6065,5611 5953,5620 5925,5660 5882,5851 5882,5964 5943,6176 5977,6246 6188,6410 6239,6465 6223,6549 6057,6664 5995,6677 5859,6635 5645,6523 5423,6456 5507,6568 5636,6675 5750,6723 5875,6959 5881,7006 5710,7144 5673,7261 5657,7386 5662,7459 5694,7564 5678,7616 5628,7625 5627,7697 5656,7740 5781,7850 5867,7850 6232,7671 6383,7657 6442,7689 6457,7742 6424,7783 6456,7838 6417,7894 6390,7867 6336,7917 6405,8138 6428,8178 6407,8234 6356,8276 6323,8337 6085,8336 6064,8349 6074,8427 6155,8491Z'],
+  ['North Khorasan','','M5628,7625 5547,7608 5437,7633 5374,7683 5297,7772 5298,7901 5350,7949 5264,7979 5179,8084 5232,8170 5377,8237 5404,8279 5393,8319 5326,8367 5333,8441 5321,8574 5391,8577 5387,8634 5458,8696 5537,8686 5617,8713 5665,8685 5777,8665 5841,8728 5870,8722 5942,8602 5950,8527 6028,8500 6155,8491 6074,8427 6064,8349 6085,8336 6323,8337 6356,8276 6407,8234 6428,8178 6405,8138 6336,7917 6390,7867 6417,7894 6456,7838 6424,7783 6457,7742 6442,7689 6383,7657 6232,7671 5867,7850 5781,7850 5656,7740 5627,7697 5628,7625Z'],
+  ['Sistan and Baluchestan','','M7467,205 7468,254 7347,415 7197,526 7213,581 7223,677 7254,768 7213,856 7245,911 7212,965 7242,1047 7159,1159 7120,1394 7175,1665 7179,1742 7163,1974 7227,2066 7242,2128 7145,2227 7244,2274 7377,2361 7419,2403 7391,2488 7382,2631 7427,2709 7440,2834 7411,2974 7342,3061 7344,3117 7430,3676 7874,3837 7996,3793 8071,3746 8172,3623 8222,3586 8320,3604 8328,3639 8288,3767 8281,3994 8331,4186 8319,4305 8631,4285 8686,4236 8685,4193 8745,4060 8733,3922 8236,3227 8513,2943 8549,2924 8558,2844 8652,2734 8709,2597 8766,2524 8920,2391 9015,2361 9205,2331 9342,2213 9438,2241 9457,2211 9451,2064 9487,1955 9526,1732 9499,1630 9533,1550 9605,1549 9751,1591 9804,1568 9851,1504 9801,1456 9831,1348 9785,1303 9772,1163 9536,1157 9444,1106 9343,1088 9265,1039 9243,935 9169,946 9154,905 9014,845 8989,793 8975,569 8917,519 8915,193 8835,125 8847,80 8798,33 8657,66 8646,93 8559,118 8314,147 8289,234 8256,259 8165,207 8212,151 8120,173 8089,204 8054,162 7974,189 7867,158 7787,194 7642,193 7589,232 7467,205Z'],
+  ['Kerman','kerman','M6426,4312 7094,4053 7180,3996 7430,3676 7344,3117 7342,3061 7411,2974 7440,2834 7427,2709 7382,2631 7391,2488 7419,2403 7377,2361 7244,2274 7145,2227 7242,2128 7227,2066 7163,1974 7179,1742 7175,1665 7120,1394 7159,1159 7242,1047 7212,965 7245,911 7213,856 7254,768 7223,677 7213,581 7137,631 7103,606 7022,606 7005,691 6910,715 6728,698 6763,1053 6801,1032 6750,1120 6661,1178 6622,1178 6557,1112 6308,1235 6295,1273 6267,1523 6199,1633 6219,1702 6123,1825 6052,1866 6024,2048 5929,2076 5824,1968 5718,1924 5647,1932 5533,2012 5478,2078 5477,2193 5459,2447 5441,2470 5356,2434 5241,2342 5158,2363 5078,2435 4921,2465 4797,2756 4629,2779 4602,2795 4519,2954 4502,3020 4610,3058 4594,3141 4597,3357 4559,3392 4545,3459 4476,3607 4486,3689 4561,3797 4883,3861 5004,3851 5112,3869 5208,3914 5217,4171 5240,4226 5538,4395 5577,4439 5693,4509 5730,4558 5803,4548 6426,4312Z'],
+  ['Alborz','','M2467,7372 2590,7338 2620,7305 2731,7274 2766,7232 2763,7166 2644,7138 2611,7101 2601,7026 2553,7024 2537,6984 2457,6896 2401,6860 2377,6945 2339,6928 2354,6878 2310,6915 2178,6942 2157,7040 2318,7136 2370,7271 2308,7305 2261,7361 2339,7388 2467,7372Z']
+];
+
+
+// The loom's own cursor: two ink-drawn hands seen from directly overhead,
+// the way you'd look down at your own hands cutting food with a knife and
+// fork. The right hand always holds a plain blade; the left hand's thread
+// is recolored to match whatever knot color is currently armed, so the
+// cursor always shows the thread you're actually about to tie.
+const CURSOR_SVG_TEMPLATE = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 76" width="110" height="59"><defs><g id="handShapeL"><path d="M 6,72 C 2,60 2,50 6,40 C 5,34 7,28 9,20 Q 10,13 13,12 Q 16,13 16,20 C 17,26 17,30 18,33 C 18,27 19,20 21,14 Q 23,6 26,6 Q 29,7 28,14 C 27,20 27,26 27,31 C 28,25 30,17 33,11 Q 36,4 39,5 Q 41,7 39,14 C 38,20 37,25 36,30 C 37,25 39,19 42,15 Q 45,10 47,12 Q 48,16 46,21 C 44,28 42,34 41,40 C 45,50 45,60 41,72 Z" style="fill:%238b5cf6;stroke:%232e1a5e;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round;"/><path d="M 38,46 C 46,42 54,42 58,48 C 60,52 58,56 52,57 C 46,58 40,55 37,52 Z" style="fill:%238b5cf6;stroke:%232e1a5e;stroke-width:1.6;stroke-linejoin:round;"/><path d="M 5.0,37.5 Q 20.0,19.7 35.0,37.5" style="fill:none;stroke:%231b1712;stroke-width:0.55;opacity:0.8;"/><path d="M 6.9,38.5 Q 20.0,23.0 33.1,38.5" style="fill:none;stroke:%231b1712;stroke-width:0.55;opacity:0.8;"/><path d="M 8.9,39.4 Q 20.0,26.3 31.1,39.4" style="fill:none;stroke:%231b1712;stroke-width:0.55;opacity:0.8;"/><path d="M 10.8,40.4 Q 20.0,29.6 29.2,40.4" style="fill:none;stroke:%231b1712;stroke-width:0.55;opacity:0.8;"/><path d="M 12.8,41.4 Q 20.0,32.9 27.2,41.4" style="fill:none;stroke:%231b1712;stroke-width:0.55;opacity:0.8;"/><path d="M 14.7,42.4 Q 20.0,36.1 25.3,42.4" style="fill:none;stroke:%231b1712;stroke-width:0.55;opacity:0.8;"/><path d="M 51.1,56.1 Q 39.5,56.5 39.9,44.9" style="fill:none;stroke:%231b1712;stroke-width:0.55;opacity:0.8;"/><path d="M 50.3,55.1 Q 40.5,55.5 40.9,45.7" style="fill:none;stroke:%231b1712;stroke-width:0.55;opacity:0.8;"/><path d="M 49.5,54.2 Q 41.6,54.4 41.8,46.5" style="fill:none;stroke:%231b1712;stroke-width:0.55;opacity:0.8;"/><path d="M 10,26 Q 13,24 16,26" style="fill:none;stroke:%23171310;stroke-width:0.7;opacity:0.85;"/><path d="M 20,22 Q 23,20 27,22" style="fill:none;stroke:%23171310;stroke-width:0.7;opacity:0.85;"/><path d="M 31,18 Q 35,15 39,18" style="fill:none;stroke:%23171310;stroke-width:0.7;opacity:0.85;"/><path d="M 8,18 Q 10,15 12,17" style="fill:none;stroke:%23171310;stroke-width:0.5;opacity:0.7;"/><path d="M 19,13 Q 22,10 25,13" style="fill:none;stroke:%23171310;stroke-width:0.5;opacity:0.7;"/><path d="M 32,10 Q 35,7 38,10" style="fill:none;stroke:%23171310;stroke-width:0.5;opacity:0.7;"/><path d="M 42,20 Q 44,17 46,19" style="fill:none;stroke:%23171310;stroke-width:0.6;opacity:0.75;"/></g><g id="handShapeR"><path d="M 42.00,72 C 46.00,60 46.00,50 42.00,40 C 43.00,34 41.00,28 39.00,20 Q 38.00,13 35.00,12 Q 32.00,13 32.00,20 C 31.00,26 31.00,30 30.00,33 C 30.00,27 29.00,20 27.00,14 Q 25.00,6 22.00,6 Q 19.00,7 20.00,14 C 21.00,20 21.00,26 21.00,31 C 20.00,25 18.00,17 15.00,11 Q 12.00,4 9.00,5 Q 7.00,7 9.00,14 C 10.00,20 11.00,25 12.00,30 C 11.00,25 9.00,19 6.00,15 Q 3.00,10 1.00,12 Q 0.00,16 2.00,21 C 4.00,28 6.00,34 7.00,40 C 3.00,50 3.00,60 7.00,72 Z" style="fill:%238b5cf6;stroke:%232e1a5e;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round;"/><path d="M 10.00,46 C 2.00,42 -6.00,42 -10.00,48 C -12.00,52 -10.00,56 -4.00,57 C 2.00,58 8.00,55 11.00,52 Z" style="fill:%238b5cf6;stroke:%232e1a5e;stroke-width:1.6;stroke-linejoin:round;"/><path d="M 43.00,37.5 Q 28.00,19.7 13.00,37.5" style="fill:none;stroke:%231b1712;stroke-width:0.55;opacity:0.8;"/><path d="M 41.10,38.5 Q 28.00,23.0 14.90,38.5" style="fill:none;stroke:%231b1712;stroke-width:0.55;opacity:0.8;"/><path d="M 39.10,39.4 Q 28.00,26.3 16.90,39.4" style="fill:none;stroke:%231b1712;stroke-width:0.55;opacity:0.8;"/><path d="M 37.20,40.4 Q 28.00,29.6 18.80,40.4" style="fill:none;stroke:%231b1712;stroke-width:0.55;opacity:0.8;"/><path d="M 35.20,41.4 Q 28.00,32.9 20.80,41.4" style="fill:none;stroke:%231b1712;stroke-width:0.55;opacity:0.8;"/><path d="M 33.30,42.4 Q 28.00,36.1 22.70,42.4" style="fill:none;stroke:%231b1712;stroke-width:0.55;opacity:0.8;"/><path d="M -3.10,56.1 Q 8.50,56.5 8.10,44.9" style="fill:none;stroke:%231b1712;stroke-width:0.55;opacity:0.8;"/><path d="M -2.30,55.1 Q 7.50,55.5 7.10,45.7" style="fill:none;stroke:%231b1712;stroke-width:0.55;opacity:0.8;"/><path d="M -1.50,54.2 Q 6.40,54.4 6.20,46.5" style="fill:none;stroke:%231b1712;stroke-width:0.55;opacity:0.8;"/><path d="M 38.00,26 Q 35.00,24 32.00,26" style="fill:none;stroke:%23171310;stroke-width:0.7;opacity:0.85;"/><path d="M 28.00,22 Q 25.00,20 21.00,22" style="fill:none;stroke:%23171310;stroke-width:0.7;opacity:0.85;"/><path d="M 17.00,18 Q 13.00,15 9.00,18" style="fill:none;stroke:%23171310;stroke-width:0.7;opacity:0.85;"/><path d="M 40.00,18 Q 38.00,15 36.00,17" style="fill:none;stroke:%23171310;stroke-width:0.5;opacity:0.7;"/><path d="M 29.00,13 Q 26.00,10 23.00,13" style="fill:none;stroke:%23171310;stroke-width:0.5;opacity:0.7;"/><path d="M 16.00,10 Q 13.00,7 10.00,10" style="fill:none;stroke:%23171310;stroke-width:0.5;opacity:0.7;"/><path d="M 6.00,20 Q 4.00,17 2.00,19" style="fill:none;stroke:%23171310;stroke-width:0.6;opacity:0.75;"/></g></defs><use href="%23handShapeL" transform="translate(6.0,12.0) scale(0.55)"/><use href="%23handShapeR" transform="translate(107.6,12.0) scale(0.55)"/><g transform="translate(107.6,12.0) scale(0.55)"><rect x="28" y="39" width="28" height="10" rx="3.4" transform="rotate(24 42 44)" style="fill:%232a2018;stroke:%230c0906;stroke-width:1;"/><path d="M -4.00,36 L -36.00,16 L -39.00,20 L -8.00,42 Z" style="fill:%23dfe1e6;stroke:%23171310;stroke-width:1.1;stroke-linejoin:round;"/><path d="M -9.00,36 L -35.00,20" style="fill:none;stroke:%23171310;stroke-width:0.6;opacity:0.8;"/></g><g transform="translate(6.0,12.0) scale(0.55)"><path d="M 46,36 C 62,40 76,46 82,58 C 85,64 83,70 76,72" style="fill:none;stroke:TTHREADHEXX;stroke-width:2.2;stroke-linecap:round;"/><circle cx="76" cy="72" r="1.4" fill="TTHREADHEXX"/></g><g style="stroke:%23171310;stroke-width:1.3;"><line x1="70.0" y1="14.0" x2="70.0" y2="26.0"/><line x1="64.0" y1="20.0" x2="76.0" y2="20.0"/></g><circle cx="70.0" cy="20.0" r="1.3" fill="%23171310"/></svg>';
+function updateLoomCursor(hex){
+  const svg = CURSOR_SVG_TEMPLATE.split('TTHREADHEXX').join(hex.replace('#','%23'));
+  const wrap = document.getElementById('loomWrap');
+  if(wrap) wrap.style.cursor = "url('data:image/svg+xml;charset=utf-8," + svg + "') 55 16, crosshair";
+}
+
 /* ---------- state ---------- */
-const COLS = 40, ROWS = 50;
+// Real rugs vary a lot in knot density (KPSI, knots per square inch) --
+// coarse nomadic/village weaves pack far fewer, chunkier knots per inch
+// than a fine city workshop piece. DENSITY_PRESETS models that as three
+// grid resolutions rather than trying to simulate literal inch counts.
+const DENSITY_PRESETS = {
+  coarse: { cols:24, rows:30, label:'Coarse (village)' },
+  medium: { cols:40, rows:50, label:'Medium' },
+  fine:   { cols:60, rows:75, label:'Fine (city)' },
+};
+let density = 'medium';
+let COLS = DENSITY_PRESETS[density].cols, ROWS = DENSITY_PRESETS[density].rows;
 let current = REGIONS[0];
 let mode = 'knot';
 let activeColor = current.palette[0];
-let activeMotif = MOTIFS[0];
 let grid = makeGrid();
-let beatenRows = new Array(ROWS).fill(false);
-let beatAnim = null; // {row, start}
+let beatAnim = null;      // {row, start}
+let weftAnim = null;      // {row, start}
+let cutAnim = null;       // {start} — the finishing scissors flourish on Save PNG
+let tieAnims = new Map(); // "r,c" -> tie start time, for the tactile tie-pop
+let hoverCell = null;
 let cell = 14;
-let painting = false;
+
+// Sequential, row-locked weaving: a real loom is worked strictly bottom-up,
+// one row at a time — you cannot jump to an arbitrary point on the canvas
+// the way the old free-form Stamp mode did. activeRow starts at the bottom
+// of the canvas (highest index) and decrements toward 0 as each row is
+// finished, mirroring how a rug grows upward on a vertical loom.
+let activeRow = ROWS - 1;
+// 'tying' -> 'wefted' -> 'beaten' (beat locks it at least once; another beat
+// packs it tighter still, or Advance moves on and resets to 'tying').
+let rowPhase = 'tying';
+let loomComplete = false;
+let beatCounts = new Array(ROWS).fill(0); // how many times each row has been beaten — more beats, tighter pack
+
+// A motif guide previews one documented regional shape's row-by-row slice.
+// It never fills a cell for you — it just tells you which color a cell
+// wants once you hand-tie it, background cells included.
+let pendingMotif = null;   // armed, waiting for an anchor click
+let pendingRotation = 0;   // 0/90/180/270 — rotation applied to pendingMotif before it's anchored
+let motifGuides = [];      // {motif, baseRow, anchorCol, rotatedRows}[] — every guide anchored so
+                            // far, e.g. a medallion in the middle and a border motif on each
+                            // side, all visible and all still live at once. Picking a new
+                            // motif thumbnail only arms it as pending; it never clears the
+                            // ones already placed. baseRow need not be the active row — a
+                            // shape can be anchored higher up the grid, ahead of where you're
+                            // currently tying, as a shadow to work toward.
 
 function makeGrid(){
   return Array.from({length:ROWS}, () => Array(COLS).fill(null));
@@ -634,27 +1190,149 @@ function knotFlag(region){
   return 'sym';
 }
 
+function resetLoom(){
+  grid = makeGrid();
+  beatAnim = null;
+  weftAnim = null;
+  tieAnims.clear();
+  activeRow = ROWS - 1;
+  rowPhase = 'tying';
+  loomComplete = false;
+  beatCounts = new Array(ROWS).fill(0);
+  pendingMotif = null;
+  pendingRotation = 0;
+  motifGuides = [];
+  draw();
+  updateBeatUI();
+}
+
+// Changing the weave density changes the grid resolution itself, not just
+// how it's drawn, so (unlike a region switch) it starts the piece over --
+// there's no honest way to keep existing knots lined up on a differently
+// sized grid.
+function setDensity(key){
+  if(!DENSITY_PRESETS[key] || key===density) return;
+  density = key;
+  COLS = DENSITY_PRESETS[key].cols;
+  ROWS = DENSITY_PRESETS[key].rows;
+  document.querySelectorAll('.density-btn').forEach(b => b.classList.toggle('active', b.dataset.density===key));
+  resetLoom();
+  resizeCanvas();
+}
+
 /* ---------- canvas ---------- */
 const canvas = document.getElementById('loom');
 const ctx = canvas.getContext('2d');
+
+// Live material rendering: off by default (flat pixel blocks); toggled on,
+// knots pick up a fine fiber-noise texture, a little per-knot color
+// variance (real hand-spun yarn is never perfectly uniform), and a soft
+// diagonal sheen for silk regions that wool regions don't get.
+let materialMode = false;
+const fiberNoise = (() => {
+  const n = document.createElement('canvas');
+  n.width = 48; n.height = 48;
+  const nctx = n.getContext('2d');
+  const img = nctx.createImageData(48,48);
+  for(let i=0;i<img.data.length;i+=4){
+    const v = 128 + (Math.random()-0.5)*90;
+    img.data[i]=img.data[i+1]=img.data[i+2]=v;
+    img.data[i+3]=255;
+  }
+  nctx.putImageData(img,0,0);
+  return ctx.createPattern(n, 'repeat');
+})();
+function hashUnit(r,c){
+  const h = Math.sin(r*127.1 + c*311.7) * 43758.5453;
+  return h - Math.floor(h);
+}
+function jitterHex(hex, amt){
+  const n = parseInt(hex.slice(1),16);
+  const clamp = v => Math.max(0, Math.min(255, v));
+  const adj = ch => clamp(Math.round(ch + amt*255));
+  const r = adj((n>>16)&255), g = adj((n>>8)&255), b = adj(n&255);
+  return '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('');
+}
 
 function resizeCanvas(){
   const w = document.getElementById('loomWrap').clientWidth;
   cell = Math.max(7, Math.floor(w / COLS));
   canvas.width = cell * COLS;
   canvas.height = cell * ROWS;
+  // Pin the CSS box to the same pixel size as the drawing buffer. Flooring
+  // `cell` above almost never divides clientWidth evenly, so the old
+  // width:100% rule silently upscaled a slightly-too-small buffer to fill
+  // the container — a few percent of blur, and (more importantly) a
+  // click-to-cell mapping that could land one column off, which matters
+  // now that tying is a precise discrete click rather than a forgiving drag.
+  canvas.style.width = (cell*COLS) + 'px';
   canvas.style.height = (cell*ROWS) + 'px';
   draw();
 }
 
-function roundRect(x,y,w,h,r){
-  ctx.beginPath();
-  ctx.moveTo(x+r,y);
-  ctx.arcTo(x+w,y,x+w,y+h,r);
-  ctx.arcTo(x+w,y+h,x,y+h,r);
-  ctx.arcTo(x,y+h,x,y,r);
-  ctx.arcTo(x,y,x+w,y,r);
-  ctx.closePath();
+function roundRect(context,x,y,w,h,r){
+  context.beginPath();
+  context.moveTo(x+r,y);
+  context.arcTo(x+w,y,x+w,y+h,r);
+  context.arcTo(x+w,y+h,x,y+h,r);
+  context.arcTo(x,y+h,x,y,r);
+  context.arcTo(x,y,x+w,y,r);
+  context.closePath();
+}
+
+function motifCharColor(ch, palette){
+  const colorIdx = ch==='1' ? 0 : ch==='2' ? 1 : 2;
+  return palette[colorIdx] || palette[1];
+}
+
+// Rotate a square ASCII motif grid 90° clockwise, as many times as `steps`
+// (0-3) asks for. Used both to preview an armed motif's rotation before
+// anchoring it, and to bake the chosen rotation into a guide once anchored.
+function rotateRows90(rows){
+  const n = rows.length;
+  const out = [];
+  for(let i=0;i<n;i++){
+    let row = '';
+    for(let j=0;j<n;j++) row += rows[n-1-j][i];
+    out.push(row);
+  }
+  return out;
+}
+function getRotatedRows(motif, rotationDeg){
+  let rows = motif.rows;
+  const steps = ((rotationDeg/90)%4 + 4) % 4;
+  for(let i=0;i<steps;i++) rows = rotateRows90(rows);
+  return rows;
+}
+
+// The guide covering loom row `r` / column `c`, or null if none does.
+// Searched most-recently-anchored first, so a deliberately overlapped
+// placement wins. Returns the resolved color from THAT guide's own frozen
+// palette (captured when it was anchored), not whatever region happens to
+// be selected right now, so switching regions never repaints a shadow or a
+// pattern you've already laid down.
+function guideAtRow(r, c){
+  for(let i=motifGuides.length-1;i>=0;i--){
+    const g = motifGuides[i];
+    const rows = g.rotatedRows || g.motif.rows;
+    const n = rows.length, half = Math.floor(n/2);
+    const rowIdx = (n-1) - (g.baseRow - r);
+    if(rowIdx < 0 || rowIdx >= n) continue;
+    const gc = c - g.anchorCol + half;
+    if(gc < 0 || gc >= n) continue;
+    const ch = rows[rowIdx][gc];
+    if(ch === '.') continue;
+    return { ch, hex: motifCharColor(ch, g.palette) };
+  }
+  return null;
+}
+
+function pulseFor(r,c,now){
+  const t = tieAnims.get(r+','+c);
+  if(t===undefined) return 0;
+  const el = now - t;
+  if(el > 160){ tieAnims.delete(r+','+c); return 0; }
+  return 1 - el/160;
 }
 
 function draw(){
@@ -674,74 +1352,411 @@ function draw(){
     ctx.stroke();
   }
 
-  // weft: after every row that has at least one knot tied, a weft thread is
-  // passed over-under across the alternated warp. It starts pale and loose;
-  // beating it (with the region's actual tool — comb, saber or spike) is
-  // what locks it tight, which is why it darkens and thickens once beaten.
-  for(let r=0;r<ROWS;r++){
+  // rows above the active one haven't been reached yet on a real loom —
+  // bare warp only, dimmed to show they're not yet part of the working area.
+  if(activeRow > 0){
+    ctx.fillStyle = 'rgba(0,0,0,0.32)';
+    ctx.fillRect(0,0,canvas.width, activeRow*cell);
+  }
+
+  // a soft highlight band marks the one row currently being worked.
+  if(!loomComplete){
+    ctx.fillStyle = 'rgba(201,162,75,0.07)';
+    ctx.fillRect(0, activeRow*cell, canvas.width, cell);
+  }
+
+  // weft: passed once a row's knots are in, loose until beaten. Fine
+  // city-workshop regions (weftType 'depressed-double') pull a pair of
+  // wefts tight enough to displace alternating warps onto two levels —
+  // "depressed warp" — which is what lets them pack knots far denser than a
+  // single-weft nomadic/village structure. Drawn here as two tighter,
+  // closer-set passes instead of one looser single pass. See the sources
+  // panel below for where that construction detail comes from.
+  const isDepressed = current.weftType === 'depressed-double';
+  for(let r=activeRow;r<ROWS;r++){
+    const isActive = r === activeRow;
+    if(isActive && rowPhase==='tying') continue; // not thrown yet
     if(!grid[r].some(Boolean)) continue;
     const t = rowTightness(r, now);
     const y = (r+1)*cell;
-    ctx.strokeStyle = 'rgba(228,214,184,'+(0.30+0.5*Math.min(t,1))+')';
-    ctx.lineWidth = Math.max(1, cell*(0.08+0.16*Math.min(t,1)));
+    const alpha = 0.30+0.5*Math.min(t,1);
+    const lw = Math.max(1, cell*(0.08+0.16*Math.min(t,1)));
+    const passes = isDepressed
+      ? [{dy:-cell*0.17, amp:cell*0.06}, {dy:cell*0.17, amp:cell*0.06}]
+      : [{dy:0, amp:cell*0.12}];
+    passes.forEach(p => {
+      ctx.strokeStyle = 'rgba(228,214,184,'+alpha+')';
+      ctx.lineWidth = isDepressed ? Math.max(1, lw*0.6) : lw;
+      ctx.beginPath();
+      for(let c=0;c<COLS;c++){
+        const xMid = c*cell + cell/2;
+        const over = c % 2 === 0;
+        const yy = y + p.dy;
+        ctx.moveTo(xMid - cell/2, yy + (over ? -p.amp : p.amp));
+        ctx.lineTo(xMid + cell/2, yy + (over ? p.amp : -p.amp));
+      }
+      ctx.stroke();
+    });
+  }
+
+  // the weft-pass sweep: a bright leading edge crossing the active row once
+  // Pass Weft is triggered, before it settles into the loose weft above.
+  if(weftAnim && weftAnim.row===activeRow){
+    const dur = 380;
+    const elapsed = now - weftAnim.start;
+    const p = Math.min(1, elapsed/dur);
+    const y = (activeRow+1)*cell;
+    ctx.strokeStyle = 'rgba(228,214,184,0.9)';
+    ctx.lineWidth = Math.max(2, cell*0.16);
     ctx.beginPath();
-    for(let c=0;c<COLS;c++){
-      const xMid = c*cell + cell/2;
-      const over = c % 2 === 0;
-      ctx.moveTo(xMid - cell/2, y + (over ? -cell*0.12 : cell*0.12));
-      ctx.lineTo(xMid + cell/2, y + (over ? cell*0.12 : -cell*0.12));
-    }
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width*p, y);
     ctx.stroke();
   }
 
-  // knots: each one hand-tied around a pair of warp threads. Unbeaten knots
-  // sit loose with visible gaps; once the row is beaten they pack edge to edge.
+  // motif guides: a cast shadow of every armed shape still in progress, not
+  // just one at a time — you can anchor a medallion in the middle and a
+  // border motif on each side and see all of them at once, the way a real
+  // weaver would work from a full cartoon rather than one shape at a time.
+  // The active row's slice reads clearly enough to tie against; everything
+  // still above it (not yet reached) shows as a fainter preview of what's
+  // coming. Still never fills a cell for you — it only ever suggests a color.
+  if(motifGuides.length && !loomComplete){
+    const topRow = motifGuides.reduce((min,g) => Math.min(min, g.baseRow - (g.motif.rows.length-1)), activeRow);
+    for(let r=Math.max(0,topRow); r<=activeRow; r++){
+      const isActiveRow = r===activeRow;
+      for(let c=0;c<COLS;c++){
+        if(grid[r][c]) continue;
+        const hit = guideAtRow(r, c);
+        if(!hit) continue;
+        ctx.fillStyle = hit.hex + (isActiveRow ? '55' : '26');
+        const x = c*cell, y = r*cell;
+        roundRect(ctx, x+cell*0.22, y+cell*0.22, cell*0.56, cell*0.56, 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  // a live preview of an armed-but-not-yet-anchored motif at the hovered
+  // cell, rotation included — so "turn motifs" is actually visible before
+  // you commit to a placement, not just a silent flag. Works anywhere from
+  // the active row up to the top of the grid, since a shadow can be planted
+  // ahead of where you're currently tying.
+  if(pendingMotif && hoverCell && !loomComplete && hoverCell.r<=activeRow){
+    const rows = getRotatedRows(pendingMotif, pendingRotation);
+    const n = rows.length, half = Math.floor(n/2);
+    for(let ri=0; ri<n; ri++){
+      const rr = hoverCell.r - (n-1) + ri;
+      if(rr<0 || rr>activeRow) continue;
+      for(let ci=0; ci<n; ci++){
+        const ch = rows[ri][ci];
+        if(ch==='.') continue;
+        const cc = hoverCell.c - half + ci;
+        if(cc<0 || cc>=COLS) continue;
+        if(grid[rr][cc]) continue;
+        ctx.fillStyle = motifCharColor(ch, current.palette) + '40';
+        roundRect(ctx, cc*cell+cell*0.22, rr*cell+cell*0.22, cell*0.56, cell*0.56, 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  // knots: each one hand-tied around a pair of warp threads. A freshly tied
+  // knot pops slightly larger for an instant then settles — standing in for
+  // the catch/wrap/pull gesture instead of an instant paint fill. Unbeaten
+  // knots sit loose with visible gaps; once the row is beaten they pack
+  // edge to edge.
   for(let r=0;r<ROWS;r++){
     const t = rowTightness(r, now);
     for(let c=0;c<COLS;c++){
       const k = grid[r][c];
-      if(k) drawKnot(c,r,k,t);
+      if(k) drawKnot(c,r,k,t,pulseFor(r,c,now));
     }
+  }
+
+  // hover cue: the active row is always workable. A row above it lights up
+  // too, either because a motif is armed (planting a shadow ahead) or
+  // because that column already has a foundation to build straight up on.
+  const hoverHasFoundation = hoverCell && hoverCell.r<activeRow && grid[hoverCell.r+1] && grid[hoverCell.r+1][hoverCell.c];
+  if(hoverCell && !loomComplete && (hoverCell.r===activeRow || (pendingMotif && hoverCell.r<activeRow) || hoverHasFoundation)){
+    ctx.strokeStyle = 'rgba(228,214,184,0.55)';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(hoverCell.c*cell+1, hoverCell.r*cell+1, cell-2, cell-2);
+  }
+
+  drawBeatTool(now);
+  drawCutAnim(now);
+}
+
+// The finishing flourish on Save PNG: a pair of scissors travels across the
+// canvas snipping the finished piece free of the loom, before the actual
+// file save happens. Purely decorative — doSavePNG() runs right after it.
+function drawCutAnim(now){
+  if(!cutAnim) return;
+  const dur = 900;
+  const elapsed = now - cutAnim.start;
+  const p = Math.min(1, elapsed/dur);
+  const y = activeRow*cell + cell/2;
+  const x = p*(canvas.width+80) - 40;
+
+  ctx.save();
+  ctx.strokeStyle = 'rgba(228,214,184,0.9)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6,5]);
+  ctx.beginPath();
+  ctx.moveTo(0, y);
+  ctx.lineTo(Math.max(0,x), y);
+  ctx.stroke();
+  ctx.restore();
+
+  const snipPhase = (elapsed % 280) / 280;
+  const openAngle = Math.sin(snipPhase*Math.PI*2) * 0.4;
+  const bladeLen = Math.max(28, cell*2.6);
+  const handleLen = bladeLen*0.55;
+  const handleR = Math.max(5, cell*0.4);
+
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.fillStyle = '#e6c273';
+  ctx.strokeStyle = '#e6c273';
+  ctx.lineWidth = Math.max(3, cell*0.24);
+  ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.arc(0,0, Math.max(3,cell*0.16), 0, Math.PI*2); ctx.fill();
+
+  ctx.save(); ctx.rotate(openAngle);
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(bladeLen, -bladeLen*0.22); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-handleLen*0.7, handleLen*0.35); ctx.stroke();
+  ctx.beginPath(); ctx.arc(-handleLen*0.85, handleLen*0.42, handleR, 0, Math.PI*2); ctx.stroke();
+  ctx.restore();
+
+  ctx.save(); ctx.rotate(-openAngle);
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(bladeLen, bladeLen*0.22); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-handleLen*0.7, -handleLen*0.35); ctx.stroke();
+  ctx.beginPath(); ctx.arc(-handleLen*0.85, -handleLen*0.42, handleR, 0, Math.PI*2); ctx.stroke();
+  ctx.restore();
+
+  ctx.restore();
+}
+
+function playSnip(){
+  try{
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if(!Ctx) return;
+    const actx = new Ctx();
+    const osc = actx.createOscillator();
+    const gain = actx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(2200, actx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(700, actx.currentTime+0.045);
+    gain.gain.setValueAtTime(0.22, actx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime+0.06);
+    osc.connect(gain); gain.connect(actx.destination);
+    osc.start(); osc.stop(actx.currentTime+0.07);
+  }catch(e){}
+}
+
+// The actual beater — drawn as the region's real tool (comb/kirkit, saber
+// blade, or iron spike), swinging down from above and slamming onto the
+// active row in sync with the thump sound and the tightening effect, then
+// gone once the beat completes. Not just a screen-space "packing" effect —
+// something you can see land.
+function drawBeatTool(now){
+  if(!beatAnim) return;
+  const dur = 280;
+  const elapsed = now - beatAnim.start;
+  const p = Math.min(1, elapsed/dur);
+  const row = beatAnim.row;
+
+  // fast downswing that reaches the row by 70% of the animation, then a
+  // small springy bounce-back off the impact for the rest of it.
+  const swingP = p < 0.7 ? (p/0.7) : 1;
+  const bounce = p >= 0.7 ? Math.sin((p-0.7)/0.3*Math.PI) * 0.05 * (1-(p-0.7)/0.3) : 0;
+  const travelRows = Math.min(4, row);
+  const startY = (row - travelRows) * cell;
+  const endY = row * cell;
+  const easedSwing = 1 - Math.pow(1-swingP, 3); // ease-out: fast start, settles into the hit
+  const y = startY + (endY-startY)*easedSwing - bounce*cell;
+
+  const toolH = Math.max(7, cell*1.05);
+  ctx.save();
+  const tool = current.beatTool;
+  if(tool==='comb'){
+    // the kirkit/daffeh: a solid bar with a row of teeth biting into the weave
+    ctx.fillStyle = '#c9a24b';
+    ctx.fillRect(0, y-toolH, canvas.width, toolH*0.55);
+    ctx.fillStyle = '#a6813a';
+    for(let c=0;c<COLS;c++){
+      ctx.fillRect(c*cell+cell*0.12, y-toolH*0.45, cell*0.76, toolH*0.45);
+    }
+  } else if(tool==='saber'){
+    // Kerman's saber blade: one long angled edge
+    ctx.fillStyle = '#c9a24b';
+    ctx.beginPath();
+    ctx.moveTo(0, y-toolH);
+    ctx.lineTo(canvas.width, y-toolH*0.35);
+    ctx.lineTo(canvas.width, y-toolH*0.08);
+    ctx.lineTo(0, y-toolH*0.7);
+    ctx.closePath();
+    ctx.fill();
+  } else {
+    // the iron spike used to compact Bidjar and Qom's denser weave
+    ctx.fillStyle = '#c9a24b';
+    ctx.fillRect(0, y-toolH, canvas.width, toolH*0.3);
+    ctx.fillStyle = '#a6813a';
+    for(let c=0;c<COLS;c++){
+      const cx = c*cell + cell*0.5;
+      ctx.beginPath();
+      ctx.moveTo(cx-cell*0.28, y-toolH*0.7);
+      ctx.lineTo(cx+cell*0.28, y-toolH*0.7);
+      ctx.lineTo(cx, y-toolH*0.1);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+
+  // impact flash right as the tool lands
+  if(p > 0.62 && p < 0.82){
+    const flashAlpha = 1 - Math.abs(p-0.7)/0.12;
+    ctx.fillStyle = 'rgba(255,255,255,'+Math.max(0,flashAlpha*0.4)+')';
+    ctx.fillRect(0, endY-cell*0.18, canvas.width, cell*0.36);
   }
 }
 
+// One beat locks a row at normal tightness; beating the same row again
+// before advancing packs it denser still, for weavers who want a more
+// compressed look — with diminishing returns, capped at the same 1.25
+// "over-tightened" ceiling drawKnot already knows how to render.
+function targetTightnessFor(count){
+  if(count<=0) return 0;
+  return Math.min(1.25, 1 + (count-1)*0.15);
+}
 function rowTightness(r, now){
   if(beatAnim && beatAnim.row===r){
     const dur = 280;
     const elapsed = now - beatAnim.start;
-    if(elapsed>=dur) return 1;
+    const from = targetTightnessFor(beatCounts[r]);
+    const to = targetTightnessFor(beatCounts[r]+1);
+    if(elapsed>=dur) return to;
     const p = elapsed/dur;
-    const overshoot = Math.sin(p*Math.PI) * 0.4 * (1-p);
-    return p + overshoot;
+    const overshoot = Math.sin(p*Math.PI) * 0.4 * (1-p) * Math.max(0.4, to-from);
+    return from + (to-from)*p + overshoot;
   }
-  return beatenRows[r] ? 1 : 0;
+  return targetTightnessFor(beatCounts[r]);
 }
 
-function drawKnot(c,r,k,t){
+function drawKnot(c,r,k,t,pulse){
   const tt = Math.max(0, Math.min(1.25, t));
-  const pad = cell * (0.22 - 0.17*Math.min(tt,1)) - (tt>1 ? cell*0.05*(tt-1) : 0);
+  const looseness = Math.max(0, 1 - Math.min(tt,1)); // 1 = just tied, loose; 0 = packed tight
+  const over = Math.max(0, tt-1); // extra squish from beating the same row more than once
+
+  let pad = cell * (0.22 - 0.17*Math.min(tt,1));
+  pad -= cell*0.07*(pulse||0);
   const x=c*cell, y=r*cell;
-  ctx.fillStyle = k.hex;
-  roundRect(x+pad, y+pad, cell-2*pad, cell-2*pad, Math.min(3,cell*(0.3-0.15*Math.min(tt,1))));
+  const full = cell - 2*pad;
+  const squish = over * 1.6;
+  const h = full * (1 - squish);
+  const by = y + pad + (full - h); // pressed down toward the bottom of its cell as it's squished
+
+  const radius = Math.min(3, cell*(0.3-0.15*Math.min(tt,1))) + looseness*cell*0.12;
+  const fillHex = materialMode ? jitterHex(k.hex, (hashUnit(r,c)-0.5)*0.16) : k.hex;
+  ctx.fillStyle = fillHex;
+  roundRect(ctx, x+pad, by, full, h, radius);
   ctx.fill();
+
+  if(materialMode){
+    ctx.save();
+    roundRect(ctx, x+pad, by, full, h, radius);
+    ctx.clip();
+    ctx.globalAlpha = 0.22;
+    ctx.globalCompositeOperation = 'overlay';
+    ctx.fillStyle = fiberNoise;
+    ctx.fillRect(x+pad, by, full, h);
+    ctx.globalCompositeOperation = 'source-over';
+    if(current.material && current.material.toLowerCase().includes('silk')){
+      const sheen = ctx.createLinearGradient(x+pad, by, x+pad+full, by+h);
+      sheen.addColorStop(0, 'rgba(255,255,255,0)');
+      sheen.addColorStop(0.45, 'rgba(255,255,255,0.28)');
+      sheen.addColorStop(0.6, 'rgba(255,255,255,0)');
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = sheen;
+      ctx.fillRect(x+pad, by, full, h);
+    }
+    ctx.restore();
+  }
+
+  // a freshly tied knot is loose yarn, not a solid block yet: two cut ends
+  // curl up off the top, shrinking away as the row gets beaten down.
+  if(looseness > 0.04){
+    ctx.strokeStyle = k.hex;
+    ctx.lineWidth = Math.max(1, cell*0.05);
+    ctx.lineCap = 'round';
+    const tailLen = cell*0.24*looseness;
+    [x+cell*0.37, x+cell*0.63].forEach((cx,i) => {
+      const dir = i===0 ? -1 : 1;
+      ctx.beginPath();
+      ctx.moveTo(cx, by);
+      ctx.quadraticCurveTo(cx+dir*cell*0.07, by-tailLen*0.6, cx+dir*cell*0.03, by-tailLen);
+      ctx.stroke();
+    });
+  }
+
+  // extra beats leave visible pressed creases, so compression actually
+  // reads on screen instead of just being a number in the status line.
+  if(over > 0.01){
+    ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+    ctx.lineWidth = Math.max(1, cell*0.025);
+    const lines = Math.max(1, Math.round(over/0.08));
+    for(let i=1;i<=lines;i++){
+      const ly = by + h*(i/(lines+1));
+      ctx.beginPath();
+      ctx.moveTo(x+pad+full*0.12, ly);
+      ctx.lineTo(x+pad+full*0.88, ly);
+      ctx.stroke();
+    }
+  }
+
   ctx.fillStyle = 'rgba(0,0,0,0.28)';
   if(k.knot==='sym'){
-    ctx.fillRect(x+cell*0.18, y+cell*0.72, cell*0.64, Math.max(1,cell*0.12));
+    ctx.fillRect(x+cell*0.18, by+h*0.72, cell*0.64, Math.max(1,cell*0.12*(1-squish)));
   } else {
-    ctx.fillRect(x+cell*0.58, y+cell*0.16, Math.max(1,cell*0.16), cell*0.68);
+    ctx.fillRect(x+cell*0.58, by+h*0.16, Math.max(1,cell*0.16), h*0.68);
   }
 }
 
-function beatActiveRow(){
-  let target = -1;
-  for(let r=ROWS-1;r>=0;r--){
-    if(grid[r].some(Boolean) && !beatenRows[r]){ target = r; break; }
+function runTieAnimFrame(){
+  draw();
+  if(tieAnims.size>0) requestAnimationFrame(runTieAnimFrame);
+}
+
+function attemptPassWeft(){
+  if(loomComplete) return;
+  if(rowPhase !== 'tying'){ flashWarning('The weft is already thrown for this row.'); return; }
+  if(!grid[activeRow].some(Boolean)){ flashWarning('Tie at least one knot before you pass the weft.'); return; }
+  weftAnim = {row:activeRow, start:performance.now()};
+  requestAnimationFrame(animateWeft);
+}
+
+function animateWeft(){
+  draw();
+  if(!weftAnim) return;
+  const elapsed = performance.now() - weftAnim.start;
+  if(elapsed < 380){
+    requestAnimationFrame(animateWeft);
+  } else {
+    weftAnim = null;
+    rowPhase = 'wefted';
+    draw();
+    updateBeatUI();
   }
-  if(target===-1) return false;
-  beatAnim = {row:target, start:performance.now()};
+}
+
+function attemptBeat(){
+  if(loomComplete) return;
+  if(rowPhase === 'tying'){ flashWarning('Pass the weft before you beat — nothing to compact yet.'); return; }
+  beatAnim = {row:activeRow, start:performance.now()};
   playThump();
   requestAnimationFrame(animateBeat);
-  return true;
 }
 
 function animateBeat(){
@@ -751,11 +1766,48 @@ function animateBeat(){
   if(elapsed < 280){
     requestAnimationFrame(animateBeat);
   } else {
-    beatenRows[beatAnim.row] = true;
+    const row = beatAnim.row;
     beatAnim = null;
+    beatCounts[row] += 1;
+    // a beat no longer auto-advances the row — it just locks in (or
+    // deepens) this pass's compression. Moving on is now its own explicit
+    // action, so a weaver who wants a denser row can beat it as many times
+    // as they like first.
+    rowPhase = 'beaten';
     draw();
     updateBeatUI();
   }
+}
+
+function advanceRow(){
+  if(loomComplete) return;
+  if(rowPhase !== 'beaten'){ flashWarning('Beat the row at least once before advancing.'); return; }
+  if(activeRow===0){
+    loomComplete = true;
+  } else {
+    activeRow -= 1;
+    rowPhase = 'tying';
+    // drop only the guides whose span the loom has now fully passed —
+    // the rest (and anything still pending, including ones anchored ahead
+    // of where we just were) stay exactly as placed.
+    motifGuides = motifGuides.filter(g => {
+      const n = (g.rotatedRows || g.motif.rows).length;
+      const topRow = g.baseRow - (n-1);
+      return activeRow >= topRow;
+    });
+  }
+  draw();
+  updateBeatUI();
+}
+
+let warnTimer = null;
+function flashWarning(msg){
+  const el = document.getElementById('tensionWarn');
+  if(!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(warnTimer);
+  warnTimer = setTimeout(() => el.classList.remove('show'), 1800);
 }
 
 function playThump(){
@@ -775,7 +1827,102 @@ function playThump(){
   }catch(e){}
 }
 
-/* motif preview + stamping */
+// Naqshe-khani ("pattern-singing") is a real, documented practice — a lead
+// weaver calls out the pattern (colors/knot counts) in a rhythmic chant and
+// co-weavers answer or execute in time. See the Encyclopaedia Iranica and
+// Woven Sounds/Woven Garden links in the sources panel for the genuine
+// tradition and real field recordings. What plays here is NOT a recording
+// or transcription of any real chant — it's a synthesized call-and-response
+// tone sequence illustrating only the rhythmic *structure* (a short call,
+// a pause, a shorter answer), so it can't be mistaken for ethnomusicological
+// data. The pitch is nudged per region purely for variety, not because any
+// source documents region-specific pitch.
+function regionPitchRatio(id){
+  let h = 0;
+  for(let i=0;i<id.length;i++) h = (h*31 + id.charCodeAt(i)) % 12;
+  return Math.pow(2, h/12);
+}
+// A stable string -> semitone hash, reused below to turn an actual knot
+// color into a pitch. Not a claim that any real Naqshe-khani tradition maps
+// specific colors to specific pitches — no source says that — it's just a
+// deterministic way to give each distinct color in the piece its own
+// recognizable tone, the same trick regionPitchRatio already uses for ids.
+function hashToSemitone(str, range){
+  let h = 0;
+  for(let i=0;i<str.length;i++) h = (h*31 + str.charCodeAt(i)) % range;
+  return h;
+}
+function colorPitchHz(hex, baseHz){
+  return baseHz * Math.pow(2, hashToSemitone(hex, 12)/12);
+}
+function playNaqshKhani(){
+  try{
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if(!Ctx) return;
+    const actx = new Ctx();
+    const shift = regionPitchRatio(current.id);
+    let t = actx.currentTime;
+    const note = (f, dur, peak) => {
+      const osc = actx.createOscillator();
+      const gain = actx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(f, t);
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(peak, t+0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+      osc.connect(gain); gain.connect(actx.destination);
+      osc.start(t); osc.stop(t+dur+0.02);
+    };
+
+    // gather rows that have actually been beaten in, closest to the active
+    // row first, so the demo sings the piece you've actually just woven
+    // instead of a fixed tune.
+    const wovenRows = [];
+    for(let r=ROWS-1; r>activeRow; r--){
+      if(grid[r].some(Boolean)) wovenRows.push(r);
+    }
+    const rowsToSing = wovenRows.slice(0, 4); // keep the demo short
+
+    if(rowsToSing.length === 0){
+      // nothing beaten in yet — fall back to the original structural
+      // call-and-response so there's still something illustrative to hear.
+      const callHz = [392,440,392,349,392].map(f => f*shift);
+      const answerHz = [294,294,262].map(f => f*shift);
+      callHz.forEach(f => { note(f, 0.16, 0.14); t += 0.17; });
+      t += 0.14;
+      answerHz.forEach(f => { note(f, 0.22, 0.11); t += 0.23; });
+      return;
+    }
+
+    // one "call" per row: run-length-encode its actual knot colors left to
+    // right, and sing one tone per color-run — pitch from the color, length
+    // from how many knots in a row shared it.
+    rowsToSing.forEach(r => {
+      const row = grid[r];
+      const runs = [];
+      let curHex = null, curCount = 0;
+      row.forEach(k => {
+        const hex = k ? k.hex : null;
+        if(hex === curHex){ curCount++; }
+        else {
+          if(curHex) runs.push({hex:curHex, count:curCount});
+          curHex = hex; curCount = 1;
+        }
+      });
+      if(curHex) runs.push({hex:curHex, count:curCount});
+
+      runs.forEach(run => {
+        const f = colorPitchHz(run.hex, 330) * shift;
+        const dur = Math.min(0.32, 0.1 + run.count*0.03);
+        note(f, dur, 0.13);
+        t += dur + 0.03;
+      });
+      t += 0.12; // a breath between rows, like a caller moving to the next line
+    });
+  }catch(e){}
+}
+
+/* motif preview */
 function renderMotifToCanvas(cnv, motif, palette){
   const size = motif.rows.length, px = size >= 11 ? 3 : 4;
   cnv.width = size*px; cnv.height = size*px;
@@ -786,25 +1933,8 @@ function renderMotifToCanvas(cnv, motif, palette){
     for(let cIdx=0;cIdx<size;cIdx++){
       const ch = motif.rows[r][cIdx];
       if(ch==='.') continue;
-      const colorIdx = ch==='1' ? 0 : ch==='2' ? 1 : 2;
-      c2.fillStyle = palette[colorIdx] || palette[1];
+      c2.fillStyle = motifCharColor(ch, palette);
       c2.fillRect(cIdx*px, r*px, px, px);
-    }
-  }
-}
-
-function stampMotif(rCenter, cCenter){
-  const size = activeMotif.rows.length, half = Math.floor(size/2);
-  const flag = knotFlag(current);
-  for(let r=0;r<size;r++){
-    for(let cIdx=0;cIdx<size;cIdx++){
-      const ch = activeMotif.rows[r][cIdx];
-      if(ch==='.') continue;
-      const gr = rCenter - half + r;
-      const gc = cCenter - half + cIdx;
-      if(gr<0||gr>=ROWS||gc<0||gc>=COLS) continue;
-      const colorIdx = ch==='1' ? 0 : ch==='2' ? 1 : 2;
-      grid[gr][gc] = { hex: current.palette[colorIdx] || current.palette[1], knot: flag };
     }
   }
 }
@@ -819,24 +1949,103 @@ function getCell(e){
   return { r: Math.floor(y/cell), c: Math.floor(x/cell) };
 }
 
-function paintAt(e){
-  const {r,c} = getCell(e);
-  if(r<0||r>=ROWS||c<0||c>=COLS) return;
-  if(mode==='knot'){
-    grid[r][c] = { hex: activeColor, knot: knotFlag(current) };
-  } else if(mode==='erase'){
+// A click either ties a knot (on the active row), or — if a motif is
+// armed — plants that motif's shadow as a guide, anywhere from the active
+// row up to the top of the grid. Rows you haven't reached yet can't take a
+// knot (there's no warp tension to tie against), but they can absolutely
+// take a planted shadow to work toward.
+function handleCellAction(r,c){
+  if(loomComplete || c<0 || c>=COLS) return;
+  if(r > activeRow){
+    flashWarning('Already beaten in — that row is locked.');
+    return;
+  }
+  if(r < activeRow){
+    if(pendingMotif){
+      const rotatedRows = getRotatedRows(pendingMotif, pendingRotation);
+      motifGuides.push({ motif: pendingMotif, baseRow: r, anchorCol: c, rotatedRows, palette: current.palette.slice() });
+      buildMotifs();
+      draw();
+      return;
+    }
+    // No shape armed: you can still build straight up a single column ahead
+    // of the row everyone else is on, as long as the cell right below
+    // already has a knot in it to build onto. That foundation is what
+    // makes the next knot up possible; there's no requirement to finish
+    // the whole row left-to-right first.
+    if(mode==='erase'){
+      grid[r][c] = null;
+      draw();
+      return;
+    }
+    if(!grid[r+1] || !grid[r+1][c]){
+      flashWarning('Tie a knot in the row right below first, so this one has a foundation.');
+      return;
+    }
+    const hit = guideAtRow(r, c);
+    grid[r][c] = { hex: hit ? hit.hex : activeColor, knot: knotFlag(current) };
+    tieAnims.set(r+','+c, performance.now());
+    requestAnimationFrame(runTieAnimFrame);
+    draw();
+    updateBeatUI();
+    return;
+  }
+  if(rowPhase !== 'tying'){
+    flashWarning('The weft’s already thrown — beat it down before starting fresh knots.');
+    return;
+  }
+
+  if(mode==='erase'){
     grid[r][c] = null;
   } else {
-    stampMotif(r,c);
+    if(pendingMotif){
+      const rotatedRows = getRotatedRows(pendingMotif, pendingRotation);
+      motifGuides.push({ motif: pendingMotif, baseRow: activeRow, anchorCol: c, rotatedRows, palette: current.palette.slice() });
+      buildMotifs();
+    }
+    const hit = guideAtRow(r, c);
+    const hex = hit ? hit.hex : activeColor;
+    grid[r][c] = { hex, knot: knotFlag(current) };
   }
+  tieAnims.set(r+','+c, performance.now());
+  requestAnimationFrame(runTieAnimFrame);
   draw();
   updateBeatUI();
 }
 
-canvas.addEventListener('pointerdown', e => { painting = true; paintAt(e); });
-canvas.addEventListener('pointermove', e => { if(painting && mode!=='stamp') paintAt(e); });
-window.addEventListener('pointerup', () => painting = false);
-canvas.addEventListener('click', e => { if(mode==='stamp') paintAt(e); });
+canvas.addEventListener('click', e => {
+  const {r,c} = getCell(e);
+  if(r<0||r>=ROWS||c<0||c>=COLS) return;
+  handleCellAction(r,c);
+});
+canvas.addEventListener('pointermove', e => {
+  const {r,c} = getCell(e);
+  if(r<0||r>=ROWS||c<0||c>=COLS){ if(hoverCell){ hoverCell=null; draw(); } return; }
+  if(!hoverCell || hoverCell.r!==r || hoverCell.c!==c){
+    hoverCell = {r,c};
+    draw();
+  }
+});
+canvas.addEventListener('pointerleave', () => { hoverCell=null; draw(); });
+
+// Spacebar slams the beat lever; W throws the weft; A/S mimic catching the
+// loop with either hand — both tie (or plant a shadow) at whatever's
+// currently hovered, so none of this strictly requires the mouse. Enter
+// advances to the next row once the current one's beaten, and R rotates
+// whatever motif is currently armed.
+window.addEventListener('keydown', e => {
+  const k = e.key;
+  if(k===' '){ e.preventDefault(); attemptBeat(); return; }
+  if(k==='w' || k==='W'){ e.preventDefault(); attemptPassWeft(); return; }
+  if(k==='Enter'){ e.preventDefault(); advanceRow(); return; }
+  if(k==='r' || k==='R'){
+    if(pendingMotif){ pendingRotation = (pendingRotation+90)%360; buildMotifs(); draw(); }
+    return;
+  }
+  if(k==='a' || k==='A' || k==='s' || k==='S'){
+    if(hoverCell) handleCellAction(hoverCell.r, hoverCell.c);
+  }
+});
 
 /* ---------- UI build ---------- */
 const railEl = document.getElementById('rail');
@@ -859,6 +2068,32 @@ Object.keys(zones).forEach(zoneName => {
   railEl.appendChild(zoneDiv);
 });
 
+// A real outline of Iran, province by province (Highcharts' public admin-1
+// boundary data for Iran, https://code.highcharts.com/mapdata/countries/ir/ir-all.geo.json,
+// pre-projected coordinates). Every province is drawn so the country reads
+// correctly; the ones our regions actually sit in (by real province, not
+// guesswork) are clickable and light up fully when selected. A few of our
+// regions share one real province, e.g. Tabriz/Heriz/Bakshayesh are all in
+// East Azarbaijan, and Esfahan/Kashan are both in Esfahan province.
+const REGION_TO_PROVINCE = {
+  tabriz:'East Azarbaijan', heriz:'East Azarbaijan', bakshayesh:'East Azarbaijan',
+  zanjan:'Zanjan', kerman:'Kerman', esfahan:'Esfahan', kashan:'Esfahan',
+  mashhad:'Razavi Khorasan', qashqai:'Fars', qom:'Qom', turkmen:'Golestan', bidjar:'Kordestan',
+};
+const mapWrap = document.createElement('div');
+mapWrap.className = 'iran-map';
+const provinceSvg = PROVINCES.map(([name, regions, d]) => {
+  const regionIds = regions ? regions.split(',') : [];
+  const cls = 'province' + (regionIds.length ? ' has-region' : '') + (regionIds.includes(current.id) ? ' active' : '');
+  return '<path class="'+cls+'" data-regions="'+regions+'" d="'+d+'"><title>'+name+'</title></path>';
+}).join('');
+mapWrap.innerHTML = '<svg viewBox="'+IRAN_VIEWBOX+'" aria-label="Map of Iran by province">' +
+  '<g transform="scale(1,-1) translate(0,'+IRAN_FLIP_TRANSLATE+')">' + provinceSvg + '</g></svg>';
+railEl.appendChild(mapWrap);
+mapWrap.querySelectorAll('.province.has-region').forEach(p => {
+  p.addEventListener('click', () => selectRegion(p.dataset.regions.split(',')[0]));
+});
+
 const paletteGroup = document.getElementById('paletteGroup');
 const motifGroup = document.getElementById('motifGroup');
 
@@ -872,6 +2107,7 @@ function buildPalette(){
       activeColor = hex;
       setMode('knot');
       buildPalette();
+      updateLoomCursor(hex);
     });
     paletteGroup.appendChild(b);
   });
@@ -880,34 +2116,59 @@ function buildPalette(){
 function buildMotifs(){
   motifGroup.querySelectorAll('.motif-btn').forEach(n=>n.remove());
   const available = MOTIFS.filter(m => current.motifs.includes(m.id));
-  if(!available.find(m => m.id===activeMotif.id)) activeMotif = available[0];
+  // every thumbnail that's pending OR already placed (and still in-span)
+  // shows as armed — picking a new one only ever adds to that set.
+  const armedIds = new Set(motifGuides.map(g => g.motif.id));
+  if(pendingMotif) armedIds.add(pendingMotif.id);
   available.forEach(m => {
     const b = document.createElement('button');
-    b.className = 'motif-btn' + (m.id===activeMotif.id ? ' active' : '');
+    b.className = 'motif-btn' + (armedIds.has(m.id) ? ' active' : '');
     b.title = m.name;
     const cnv = document.createElement('canvas');
     renderMotifToCanvas(cnv, m, current.palette);
     b.appendChild(cnv);
     b.addEventListener('click', () => {
-      activeMotif = m;
-      setMode('stamp');
+      pendingMotif = m;
+      pendingRotation = 0;
+      setMode('knot');
       buildMotifs();
+      updateBeatUI();
     });
     motifGroup.appendChild(b);
   });
+  const clearGuideBtn = document.getElementById('clearGuideBtn');
+  if(clearGuideBtn) clearGuideBtn.style.display = (pendingMotif || motifGuides.length) ? 'inline-block' : 'none';
+  const rotateBtn = document.getElementById('rotateBtn');
+  if(rotateBtn){
+    rotateBtn.style.display = pendingMotif ? 'inline-block' : 'none';
+    rotateBtn.textContent = '⤾ Rotate' + (pendingRotation ? ' ('+pendingRotation+'°)' : '');
+  }
 }
 
 function setMode(m){
   mode = m;
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode===m));
   paletteGroup.style.display = m==='knot' ? 'flex' : 'none';
-  motifGroup.style.display = m==='stamp' ? 'flex' : 'none';
 }
 document.querySelectorAll('.mode-btn').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+document.querySelectorAll('.density-btn[data-density]').forEach(b => b.addEventListener('click', () => setDensity(b.dataset.density)));
+
+document.getElementById('clearGuideBtn').addEventListener('click', () => {
+  pendingMotif = null;
+  pendingRotation = 0;
+  motifGuides = [];
+  buildMotifs();
+  draw();
+});
+document.getElementById('rotateBtn').addEventListener('click', () => {
+  if(!pendingMotif) return;
+  pendingRotation = (pendingRotation + 90) % 360;
+  buildMotifs();
+  draw();
+});
 
 function buildSpec(){
   const s = document.getElementById('spec');
-  const refUrl = 'https://commons.wikimedia.org/w/index.php?search=' + encodeURIComponent(current.name+' Persian rug') + '&title=Special:MediaSearch&type=image';
   const srcList = current.sources.map(src => src.url
     ? '<li><a href="'+src.url+'" target="_blank" rel="noopener">'+src.label+' ↗</a></li>'
     : '<li class="unlinked">'+src.label+'</li>'
@@ -916,11 +2177,23 @@ function buildSpec(){
     '<h2>'+current.name+'</h2>' +
     '<span class="zone-tag">'+current.zone+' · '+current.kind+' · '+current.family+'</span>' +
     '<p class="blurb">'+current.blurb+'</p>' +
-    '<a class="ref-link" href="'+refUrl+'" target="_blank" rel="noopener">See real '+current.name+' rugs on Wikimedia Commons ↗</a>' +
+    '<a class="ref-link" href="'+current.refUrl+'" target="_blank" rel="noopener">'+current.refLabel+' ↗</a>' +
+    '<div class="chant-row">'+
+      '<button class="chant-btn" type="button" onclick="playNaqshKhani()">▶ Play illustrative chant demo</button>'+
+      '<span class="chant-note">Sung from the colors and knot-counts you\'ve actually beaten in so far. Synthesized, not a real recording.</span>'+
+    '</div>' +
+    '<div class="chant-row">'+
+      '<a class="chant-btn" href="https://www.youtube.com/watch?v=zeT5EaniYPM" target="_blank" rel="noopener">🎬 Watch real Naqshe-khani (video) ↗</a>'+
+      '<span class="chant-note">Mehdi Aminian’s "The Woven Sounds" documentary. Real workshop footage, not staged for this tool.</span>'+
+    '</div>' +
     '<dl class="fields">' +
       field('origin_region', current.name+' ('+current.zone+')') +
+      field('province', REGION_TO_PROVINCE[current.id]) +
       field('knot_type', current.knot) +
       field('density_raj', current.raj) +
+      field('weft_structure', current.weftType==='depressed-double'
+        ? 'Depressed warp, double weft — paired wefts pulled tight enough to displace alternating warps onto two levels, packing knots denser (this is what the higher raj figure above is built on)'
+        : 'Single weft, warps level — the standard nomadic/village structure, wefts passed with minimal tension') +
       field('warp_weft_material', current.material) +
       field('dye_type', current.dye) +
       field('primary_motif_layout', current.layout) +
@@ -928,21 +2201,34 @@ function buildSpec(){
     '</dl>' +
     '<div class="sources"><h3>Where this came from</h3><ul>'+srcList+
       '<li><a href="https://www.catalinarug.com/blog/how-persian-oriental-rugs-are-made/" target="_blank" rel="noopener">General knot/weft/beating process ↗</a></li>'+
+      '<li><a href="https://www.abc-oriental-rug.com/Oriental-rug-construction-elements.html" target="_blank" rel="noopener">Depressed warp / double-weft construction — definition and mechanism ↗</a></li>'+
+      '<li><a href="https://www.iranicaonline.org/articles/song-carpet-weaving/" target="_blank" rel="noopener">Naqshe-khani (pattern-singing) — Encyclopaedia Iranica, "Song of carpet-weaving" ↗</a></li>'+
+      '<li><a href="https://www.oeaw.ac.at/vlach/projects/phd-projects/persian-carpet-the-woven-sounds" target="_blank" rel="noopener">Hear real Naqshe-khani recordings — Mehdi Aminian’s "The Woven Sounds" project (Univ. of Vienna / OEAW) ↗</a></li>'+
+      '<li><a href="https://dmd.uconn.edu/2025-mfa-exhibition-nooshin-farashaei" target="_blank" rel="noopener">Hear real Naqshe-khani recordings — "Woven Garden" (2025 MFA thesis project) ↗</a></li>'+
     '</ul></div>' +
-    '<p class="note">Density (Raj) figures are indicative bands, not per-region counts pulled from a dataset — swap in real numbers from the Kaggle Iranian-carpet dataset if this needs to be rigorous. Motif stamps are stylized pixel abstractions built from the sources above, not redrawn from specific archival pieces — use the Wikimedia link to check what you\u2019re weaving against actual rugs. The four family labels (curvilinear court / pictorial-narrative / bold geometric / monochrome red) are a common way rug literature groups these regions, not one citable taxonomy. Where sources disagree (Tabriz\u2019s knot type is the clearest case), both views are listed above rather than picked silently.</p>';
+    '<p class="note">Density (Raj) figures are indicative bands, not per-region counts pulled from a dataset — swap in real numbers from the Kaggle Iranian-carpet dataset if this needs to be rigorous. Motif stamps are stylized pixel abstractions built from the sources above, not redrawn from specific archival pieces — use the Wikimedia link to check what you’re weaving against actual rugs. The four family labels (curvilinear court / pictorial-narrative / bold geometric / monochrome red) are a common way rug literature groups these regions, not one citable taxonomy. Where sources disagree (Tabriz’s knot type is the clearest case), both views are listed above rather than picked silently.</p>';
 }
 function field(label, value){
   return '<div class="field"><dt>'+label+'</dt><dd>'+value+'</dd></div>';
 }
 
 function selectRegion(id){
+  // Switching regions only swaps the palette, motif set and info panel —
+  // the loom itself is the viewer's playground, not something tied to one
+  // region. Whatever's already tied, wefted or beaten stays exactly as it
+  // is; you can freely mix colors, motifs and patterns from as many
+  // regions as you like on the same piece. Clear (not a region switch) is
+  // the only thing that starts a fresh loom.
   current = REGIONS.find(r => r.id===id);
   activeColor = current.palette[0];
+  updateLoomCursor(activeColor);
   document.querySelectorAll('.region-btn').forEach(b => b.classList.toggle('active', b.dataset.id===id));
+  document.querySelectorAll('.province').forEach(p => p.classList.toggle('active', p.dataset.regions.split(',').includes(id)));
   buildPalette();
   buildMotifs();
   buildSpec();
   updateBeatUI();
+  draw();
 }
 
 const BEAT_TOOL_NAMES = {
@@ -953,30 +2239,403 @@ const BEAT_TOOL_NAMES = {
 function updateBeatUI(){
   const label = document.getElementById('beatLabel');
   const status = document.getElementById('beatStatus');
+  const rowIndicator = document.getElementById('rowIndicator');
+  const advanceBtn = document.getElementById('advanceBtn');
   label.textContent = 'Beat with ' + (BEAT_TOOL_NAMES[current.beatTool] || 'comb');
-  const tiedCount = grid.reduce((n,row) => n + (row.some(Boolean) ? 1 : 0), 0);
-  if(tiedCount === 0){
-    status.textContent = 'Nothing tied yet';
+  if(loomComplete){
+    rowIndicator.textContent = 'All '+ROWS+' rows woven and beaten tight.';
+    status.textContent = 'Finished. Clear to start a new piece.';
+    if(advanceBtn) advanceBtn.style.display = 'none';
+    return;
+  }
+  const rowNum = ROWS - activeRow; // 1-indexed, bottom row = row 1
+  const tiedHere = grid[activeRow].filter(Boolean).length;
+  let phaseLabel;
+  if(rowPhase==='tying'){
+    phaseLabel = tiedHere+' knot'+(tiedHere===1?'':'s')+' tied, pass the weft when ready';
+  } else if(rowPhase==='wefted'){
+    phaseLabel = 'weft thrown, beat it down to lock the row';
   } else {
-    const stillLoose = grid.reduce((n,row,r) => n + (row.some(Boolean) && !beatenRows[r] ? 1 : 0), 0);
-    status.textContent = stillLoose > 0 ? stillLoose + ' row' + (stillLoose===1?'':'s') + ' still loose' : 'All tied rows beaten tight';
+    phaseLabel = 'locked in, beat again for a tighter weave or advance';
+  }
+  rowIndicator.textContent = 'Row '+rowNum+' of '+ROWS+'. '+phaseLabel;
+  const doneRows = ROWS-1-activeRow;
+  status.textContent = doneRows+' row'+(doneRows===1?'':'s')+' beaten tight so far';
+  if(advanceBtn) advanceBtn.style.display = rowPhase==='beaten' ? 'inline-block' : 'none';
+}
+
+document.getElementById('weftBtn').addEventListener('click', () => attemptPassWeft());
+document.getElementById('beatBtn').addEventListener('click', () => attemptBeat());
+document.getElementById('advanceBtn').addEventListener('click', () => advanceRow());
+
+document.getElementById('clearBtn').addEventListener('click', () => { resetLoom(); });
+document.getElementById('materialBtn').addEventListener('click', () => {
+  materialMode = !materialMode;
+  const btn = document.getElementById('materialBtn');
+  btn.textContent = materialMode ? 'Textured' : 'Flat';
+  btn.classList.toggle('active', materialMode);
+  draw();
+});
+
+// Crops the export to exactly the knots you've actually tied, not the full
+// rectangular loom — so weaving just one motif (say, a lone circular one)
+// saves as that shape, transparent everywhere else, instead of a big empty
+// rectangle around it. Returns null if nothing's been tied yet.
+function buildWovenPieceCanvas(){
+  let minR=ROWS, maxR=-1, minC=COLS, maxC=-1;
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      if(grid[r][c]){
+        if(r<minR) minR=r; if(r>maxR) maxR=r;
+        if(c<minC) minC=c; if(c>maxC) maxC=c;
+      }
+    }
+  }
+  if(maxR<0) return null;
+  // A real cut piece comes off the loom with loose warp ends dangling from
+  // both raw edges, not knots floating in empty space — leave room for a
+  // fringe above and below the woven area.
+  const fringeLen = cell*1.4;
+  const off = document.createElement('canvas');
+  off.width = (maxC-minC+1)*cell;
+  off.height = (maxR-minR+1)*cell + fringeLen*2;
+  const octx = off.getContext('2d');
+  for(let r=minR;r<=maxR;r++){
+    for(let c=minC;c<=maxC;c++){
+      const k = grid[r][c];
+      if(!k) continue;
+      const x=(c-minC)*cell, y=(r-minR)*cell+fringeLen, pad=cell*0.05;
+      octx.fillStyle = k.hex;
+      roundRect(octx, x+pad, y+pad, cell-2*pad, cell-2*pad, Math.min(3,cell*0.15));
+      octx.fill();
+      octx.fillStyle = 'rgba(0,0,0,0.28)';
+      if(k.knot==='sym'){
+        octx.fillRect(x+cell*0.18, y+cell*0.72, cell*0.64, Math.max(1,cell*0.12));
+      } else {
+        octx.fillRect(x+cell*0.58, y+cell*0.16, Math.max(1,cell*0.16), cell*0.68);
+      }
+    }
+  }
+  octx.strokeStyle = '#cfc0a0';
+  octx.lineWidth = Math.max(1, cell*0.1);
+  octx.lineCap = 'round';
+  for(let c=minC;c<=maxC;c++){
+    const xMid = (c-minC)*cell + cell/2;
+    const wig = (c%2===0 ? 1 : -1) * cell*0.08;
+    if(grid[minR][c]){
+      octx.beginPath();
+      octx.moveTo(xMid, fringeLen);
+      octx.quadraticCurveTo(xMid+wig, fringeLen*0.5, xMid, 0);
+      octx.stroke();
+    }
+    if(grid[maxR][c]){
+      const yBase = fringeLen + (maxR-minR+1)*cell;
+      octx.beginPath();
+      octx.moveTo(xMid, yBase);
+      octx.quadraticCurveTo(xMid+wig, yBase+fringeLen*0.5, xMid, yBase+fringeLen);
+      octx.stroke();
+    }
+  }
+  return off;
+}
+
+function doSavePNG(){
+  const filename = current.id + '-carpet.png';
+  const sourceCanvas = buildWovenPieceCanvas() || canvas;
+  sourceCanvas.toBlob(async (blob) => {
+    if (!blob) return;
+    // Inside the Claude artifact host, a plain <a download> link is inert
+    // (the sandbox never grants that permission) — use the platform's own
+    // downloads capability there instead. Outside it (a plain file:// open,
+    // or any other browser), window.claude doesn't exist at all, so this
+    // falls straight through to the ordinary anchor-download path below.
+    if (window.claude && window.claude.use) {
+      try {
+        const downloads = await window.claude.use('downloads');
+        if (downloads) {
+          try {
+            await downloads.save({ filename, data: blob });
+          } catch (err) {
+            // viewer declined, rate-limited, etc. — no retry, no fallback prompt
+          }
+          return;
+        }
+      } catch (err) { /* fall through to the plain-browser path below */ }
+    }
+    const link = document.createElement('a');
+    link.download = filename;
+    link.href = URL.createObjectURL(blob);
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }, 'image/png');
+}
+
+document.getElementById('saveBtn').addEventListener('click', () => {
+  const hasAnything = grid.some(row => row.some(Boolean));
+  if(!hasAnything){ doSavePNG(); return; }
+  cutAnim = { start: performance.now() };
+  playSnip(); setTimeout(playSnip, 300); setTimeout(playSnip, 600);
+  requestAnimationFrame(runCutAnimFrame);
+});
+
+function runCutAnimFrame(){
+  draw();
+  if(!cutAnim) return;
+  if(performance.now() - cutAnim.start < 900){
+    requestAnimationFrame(runCutAnimFrame);
+  } else {
+    cutAnim = null;
+    draw();
+    doSavePNG();
   }
 }
 
-document.getElementById('beatBtn').addEventListener('click', () => { beatActiveRow(); });
+/* ---------- community quilt ----------
+   A public, append-only board: anyone can attach a finished piece next to
+   an existing one they like. Backed by a Supabase Postgres table with
+   public-read/public-insert row-level security and no update/delete
+   policies at all -- so once a piece is placed, nobody (not even its own
+   weaver, since there's no login) can alter or remove someone else's
+   square. This can't run inside the Claude Artifact sandbox itself (its
+   CSP blocks every outside network call except loading a script from a
+   short CDN allowlist) -- it only works from the plain hosted HTML file,
+   and degrades to an explanatory message everywhere else. */
+const SUPABASE_URL = 'https://zzgnqatnfjpjsvmpnyfr.supabase.co/rest/v1/';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6Z25xYXRuZmpwanN2bXBueWZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNzQxODgsImV4cCI6MjEwNDg1MDE4OH0.w8yuUevaR3wo3PkBv0Y7cajR1yyxi4vhAJBNKU6qug0';
+const QUILT_CELL = 150;
 
-document.getElementById('clearBtn').addEventListener('click', () => {
-  grid = makeGrid();
-  beatenRows = new Array(ROWS).fill(false);
-  beatAnim = null;
-  draw();
-  updateBeatUI();
+const quiltState = { pieces: [], positions: {}, pendingAttachTo: undefined, chosen: false };
+
+function supabaseHeaders(extra){
+  return Object.assign({ apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer '+SUPABASE_ANON_KEY }, extra||{});
+}
+async function fetchQuiltPieces(){
+  const resp = await fetch(SUPABASE_URL+'quilt_pieces?select=*&order=created_at.asc', { headers: supabaseHeaders() });
+  if(!resp.ok) throw new Error('fetch failed: '+resp.status);
+  return await resp.json();
+}
+async function insertQuiltPiece(body){
+  const resp = await fetch(SUPABASE_URL+'quilt_pieces', {
+    method: 'POST',
+    headers: supabaseHeaders({ 'Content-Type':'application/json', Prefer:'return=representation' }),
+    body: JSON.stringify(body)
+  });
+  if(!resp.ok) throw new Error('insert failed: '+resp.status);
+  return await resp.json();
+}
+
+// The rectangle actually tied, cropped the same way Save PNG crops it --
+// a quilt piece takes the shape of what you wove, not a big empty box.
+function getWovenBounds(){
+  let minR=ROWS,maxR=-1,minC=COLS,maxC=-1;
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      if(grid[r][c]){
+        if(r<minR) minR=r; if(r>maxR) maxR=r;
+        if(c<minC) minC=c; if(c>maxC) maxC=c;
+      }
+    }
+  }
+  return maxR<0 ? null : {minR,maxR,minC,maxC};
+}
+
+// A deterministic grid layout built from each piece's chosen neighbor:
+// root pieces (attached_to === null) fill row 0 left to right; every
+// other piece searches outward from its parent's cell for the closest
+// still-open slot. Every viewer processes the same pieces in the same
+// (creation) order, so everyone's browser converges on the same board.
+function layoutQuiltPositions(pieces){
+  const occupied = new Set();
+  const key = (c,r) => c+','+r;
+  const positions = {};
+  function firstOpenSlot(col,row){
+    for(let radius=1; radius<200; radius++){
+      const candidates = [];
+      for(let dc=-radius; dc<=radius; dc++){
+        for(let dr=-radius; dr<=radius; dr++){
+          if(Math.max(Math.abs(dc),Math.abs(dr)) !== radius) continue;
+          candidates.push([col+dc,row+dr]);
+        }
+      }
+      candidates.sort((a,b) => Math.hypot(a[0]-col,a[1]-row) - Math.hypot(b[0]-col,b[1]-row));
+      for(const [c,r] of candidates){ if(r>=0 && !occupied.has(key(c,r))) return {col:c,row:r}; }
+    }
+    return {col:col+radius,row};
+  }
+  pieces.forEach(p => {
+    let col, row;
+    if(p.attached_to && positions[p.attached_to]){
+      const parent = positions[p.attached_to];
+      const slot = firstOpenSlot(parent.col, parent.row);
+      col = slot.col; row = slot.row;
+    } else {
+      col = 0; row = 0;
+      while(occupied.has(key(col,row))) col++;
+    }
+    positions[p.id] = {col,row};
+    occupied.add(key(col,row));
+  });
+  // Neighbor search can drift columns negative (rows are clamped to >=0,
+  // columns aren't) -- shift everything back onto the board so nothing
+  // renders past the container's left edge, outside the scrollable area.
+  let minCol = 0;
+  for(const id in positions) minCol = Math.min(minCol, positions[id].col);
+  if(minCol < 0) for(const id in positions) positions[id].col -= minCol;
+  return positions;
+}
+
+function renderQuiltPieceCanvas(canvas, piece){
+  // Target roughly the same on-screen footprint whether a piece is a
+  // small test scrap or a full 40x50 weave, so nothing shrinks to an
+  // unclickable sliver -- only cap how large a single cell can get.
+  const px = Math.min(24, Math.max(1, Math.round(140/Math.max(piece.width,piece.height))));
+  canvas.width = piece.width*px;
+  canvas.height = piece.height*px;
+  const c2 = canvas.getContext('2d');
+  c2.fillStyle = '#171213';
+  c2.fillRect(0,0,canvas.width,canvas.height);
+  (piece.grid||[]).forEach(cell => {
+    const r=cell[0], c=cell[1], hex=cell[2];
+    c2.fillStyle = hex;
+    c2.fillRect(c*px, r*px, px, px);
+  });
+}
+
+function renderQuiltBoard(){
+  const board = document.getElementById('quiltBoard');
+  board.innerHTML = '';
+  quiltState.positions = layoutQuiltPositions(quiltState.pieces);
+  let maxCol=0, maxRow=0;
+  quiltState.pieces.forEach(p => {
+    const pos = quiltState.positions[p.id];
+    maxCol = Math.max(maxCol, pos.col); maxRow = Math.max(maxRow, pos.row);
+    const el = document.createElement('div');
+    el.className = 'quilt-piece';
+    el.style.left = (pos.col*QUILT_CELL) + 'px';
+    el.style.top = (pos.row*QUILT_CELL) + 'px';
+    el.dataset.id = p.id;
+    const cnv = document.createElement('canvas');
+    renderQuiltPieceCanvas(cnv, p);
+    cnv.style.width = cnv.width+'px';
+    cnv.style.height = cnv.height+'px';
+    el.style.width = cnv.width+'px';
+    el.style.height = cnv.height+'px';
+    el.appendChild(cnv);
+    if(p.name){
+      const label = document.createElement('div');
+      label.className = 'quilt-piece-name';
+      label.textContent = p.name;
+      el.appendChild(label);
+    }
+    el.title = (p.name ? p.name+' — ' : '') + p.region_id;
+    el.addEventListener('click', () => {
+      if(!quiltState.inPlacementMode) return;
+      quiltState.pendingAttachTo = p.id;
+      quiltState.chosen = true;
+      document.querySelectorAll('.quilt-piece').forEach(x => x.classList.toggle('selected', x.dataset.id===p.id));
+      document.getElementById('quiltConfirmBtn').disabled = false;
+      document.getElementById('quiltPlacementText').textContent = 'Attaching next to ' + (p.name || 'this piece') + '.';
+    });
+    board.appendChild(el);
+  });
+  board.style.width = ((maxCol+2)*QUILT_CELL) + 'px';
+  board.style.height = ((maxRow+2)*QUILT_CELL) + 'px';
+}
+
+async function loadQuilt(){
+  const status = document.getElementById('quiltStatus');
+  status.textContent = 'Loading…';
+  try{
+    quiltState.pieces = await fetchQuiltPieces();
+    renderQuiltBoard();
+    status.textContent = quiltState.pieces.length + ' piece' + (quiltState.pieces.length===1?'':'s') + ' woven in so far';
+  }catch(err){
+    status.textContent = '';
+    document.getElementById('quiltBoard').innerHTML =
+      '<p style="color:var(--wool-dim); font-size:13px; max-width:60ch; padding:10px;">'+
+      'The Community Quilt needs outside network access, which this preview doesn\'t have '+
+      '(the Claude Artifact sandbox blocks it, same as any offline copy would). Open the '+
+      'standalone hosted version of this file to see and add to the real quilt.</p>';
+  }
+}
+
+function showLoomView(){
+  document.getElementById('loomView').style.display = '';
+  document.getElementById('quiltView').hidden = true;
+  document.getElementById('showLoomBtn').classList.add('active');
+  document.getElementById('showQuiltBtn').classList.remove('active');
+}
+function showQuiltView(){
+  document.getElementById('loomView').style.display = 'none';
+  document.getElementById('quiltView').hidden = false;
+  document.getElementById('showLoomBtn').classList.remove('active');
+  document.getElementById('showQuiltBtn').classList.add('active');
+  loadQuilt();
+}
+function cancelQuiltPlacement(){
+  quiltState.inPlacementMode = false;
+  quiltState.pendingAttachTo = undefined;
+  quiltState.chosen = false;
+  document.getElementById('quiltPlacementBanner').hidden = true;
+  document.querySelectorAll('.quilt-piece').forEach(x => x.classList.remove('selected'));
+}
+
+document.getElementById('showLoomBtn').addEventListener('click', showLoomView);
+document.getElementById('showQuiltBtn').addEventListener('click', showQuiltView);
+document.getElementById('quiltRefreshBtn').addEventListener('click', loadQuilt);
+document.getElementById('quiltCancelBtn').addEventListener('click', cancelQuiltPlacement);
+document.getElementById('quiltPlaceCornerBtn').addEventListener('click', () => {
+  quiltState.pendingAttachTo = null;
+  quiltState.chosen = true;
+  document.querySelectorAll('.quilt-piece').forEach(x => x.classList.remove('selected'));
+  document.getElementById('quiltConfirmBtn').disabled = false;
+  document.getElementById('quiltPlacementText').textContent = 'Placing as a new corner of the quilt.';
 });
-document.getElementById('saveBtn').addEventListener('click', () => {
-  const link = document.createElement('a');
-  link.download = current.id + '-carpet.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
+document.getElementById('quiltConfirmBtn').addEventListener('click', async () => {
+  if(!quiltState.chosen) return;
+  const bounds = getWovenBounds();
+  if(!bounds){ cancelQuiltPlacement(); return; }
+  const sparse = [];
+  for(let r=bounds.minR;r<=bounds.maxR;r++){
+    for(let c=bounds.minC;c<=bounds.maxC;c++){
+      const k = grid[r][c];
+      if(k) sparse.push([r-bounds.minR, c-bounds.minC, k.hex]);
+    }
+  }
+  const nameInput = document.getElementById('quiltNameInput');
+  const body = {
+    name: nameInput.value.trim().slice(0,40) || null,
+    region_id: current.id,
+    palette: current.palette,
+    grid: sparse,
+    width: bounds.maxC-bounds.minC+1,
+    height: bounds.maxR-bounds.minR+1,
+    attached_to: quiltState.pendingAttachTo || null,
+  };
+  const confirmBtn = document.getElementById('quiltConfirmBtn');
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = 'Attaching…';
+  try{
+    await insertQuiltPiece(body);
+    nameInput.value = '';
+    confirmBtn.textContent = 'Attach here';
+    cancelQuiltPlacement();
+    await loadQuilt();
+  }catch(err){
+    confirmBtn.textContent = 'Attach here';
+    confirmBtn.disabled = false;
+    document.getElementById('quiltStatus').textContent = 'Could not save your piece — try again in a moment.';
+  }
+});
+document.getElementById('addToQuiltBtn').addEventListener('click', () => {
+  if(!getWovenBounds()){ flashWarning('Weave at least one knot before adding it to the quilt.'); return; }
+  showQuiltView();
+  quiltState.inPlacementMode = true;
+  quiltState.pendingAttachTo = undefined;
+  quiltState.chosen = false;
+  document.getElementById('quiltPlacementBanner').hidden = false;
+  document.getElementById('quiltPlacementText').textContent = 'Click a piece below to attach yours next to it, or place it as a new corner.';
+  document.getElementById('quiltConfirmBtn').disabled = true;
 });
 
 /* ---------- init ---------- */
@@ -985,6 +2644,7 @@ buildMotifs();
 buildSpec();
 setMode('knot');
 updateBeatUI();
+updateLoomCursor(activeColor);
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 </script>
