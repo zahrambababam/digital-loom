@@ -116,6 +116,10 @@
     border-radius:6px;
     padding:14px 16px;
     margin-bottom:0;
+    position:sticky;
+    top:8px;
+    z-index:20;
+    box-shadow:0 6px 14px rgba(0,0,0,0.35);
   }
   .tool-group{display:flex; align-items:center; gap:8px;}
   .tool-label{font-size:11px; color:var(--wool-dim); letter-spacing:.04em; margin-right:2px;}
@@ -187,6 +191,20 @@
   }
   .beat-btn:active{transform:scale(0.94);}
   .beat-status{font-size:12px; color:var(--wool-dim);}
+  .row-indicator{font-size:12.5px; color:var(--wool-dim); margin-right:2px;}
+  .beat-btn.secondary{
+    background:var(--panel);
+    color:var(--ink);
+    border:1px solid var(--gold);
+  }
+  .tension-warn{
+    font-size:12px;
+    color:#e0736b;
+    font-weight:700;
+    opacity:0;
+    transition:opacity .15s;
+  }
+  .tension-warn.show{opacity:1;}
 
   /* loom */
   .loom-frame{
@@ -206,7 +224,7 @@
     touch-action:none;
     cursor:crosshair;
   }
-  #loom{display:block; width:100%;}
+  #loom{display:block; margin:0 auto;}
 
   .caption{
     font-size:12px;
@@ -275,6 +293,7 @@
     margin:-6px 0 16px;
   }
   .chant-btn{
+    display:inline-block;
     background:none;
     border:1px solid var(--panel-line);
     color:var(--gold);
@@ -282,6 +301,7 @@
     border-radius:4px;
     font-family:'Karla',sans-serif;
     font-size:12.5px;
+    text-decoration:none;
     cursor:pointer;
   }
   .chant-btn:hover{border-color:var(--gold);}
@@ -355,15 +375,15 @@
         <div class="tool-group">
           <span class="tool-label">mode</span>
           <button class="mode-btn" data-mode="knot">Knot</button>
-          <button class="mode-btn" data-mode="stamp">Stamp</button>
           <button class="mode-btn" data-mode="erase">Erase</button>
         </div>
         <div class="tool-group" id="paletteGroup">
           <span class="tool-label">color</span>
         </div>
-        <div class="tool-group" id="motifGroup" style="display:none;">
-          <span class="tool-label">motif</span>
+        <div class="tool-group" id="motifGroup">
+          <span class="tool-label">motif guide</span>
         </div>
+        <button class="ghost-btn" id="clearGuideBtn" style="display:none;">Clear guide</button>
         <button class="ghost-btn" id="clearBtn">Clear</button>
         <button class="ghost-btn" id="saveBtn">Save PNG</button>
       </div>
@@ -375,13 +395,19 @@
       </div>
 
       <div class="beat-panel">
+        <span class="row-indicator" id="rowIndicator"></span>
+        <button class="beat-btn secondary" id="weftBtn">
+          <svg width="20" height="20" viewBox="0 0 20 20" style="color:var(--ink)"><polyline points="1,10 5,14 9,10 13,14 17,10" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+          <span>Pass weft</span>
+        </button>
         <button class="beat-btn" id="beatBtn">
           <svg width="20" height="20" viewBox="0 0 20 20"><path d="M4 2v16M8 2v16M12 2v16M16 2v16" stroke="#231a0e" stroke-width="1.6"/><rect x="2" y="1" width="16" height="4" rx="1" fill="#231a0e"/></svg>
           <span id="beatLabel">Beat with comb</span>
         </button>
         <span class="beat-status" id="beatStatus"></span>
+        <span class="tension-warn" id="tensionWarn"></span>
       </div>
-      <p class="caption">Drag in Knot mode to lay a run of knots; in Stamp mode, click to set a whole motif — a motif is still just a cluster of individually tied knots. The small mark on each knot (a bar vs. an offset tick) shows symmetric vs. asymmetric structure for whichever region was active when it was tied. The stamp set changes per region and per style family: curvilinear court regions get rounded, lobed shapes; geometric village and nomadic regions get hard-stepped ones built from the same knot grid at a coarser scale — that stepping is how real curves get approximated in a hand-knotted rug too, not a simplification unique to this tool. Newly tied knots sit loose with visible gaps until you beat that row — the Beat button uses whichever tool the selected region actually uses to pack a row tight before the next one starts.</p>
+      <p class="caption">Weaving here is locked to one active row at a time, bottom-up, the way a real vertical loom actually works — everything above the active row is bare, untouchable warp until you reach it. Hover a warp pair and click (or press <strong>A</strong> / <strong>S</strong>) to hand-tie one knot; there's no dragging a color across the board, every knot is its own discrete action. Once the active row has at least one knot, <strong>Pass weft</strong> (or press <strong>W</strong>) throws the horizontal thread loosely across it — only then can you <strong>Beat</strong> it down (or slam <strong>Spacebar</strong>) to lock the row tight and advance to the next one. Try to beat before wefting, or weft an empty row, and the loom refuses with a tension warning, same as skipping a step on a real one. Arm a motif thumbnail below to preview one documented shape's row-by-row slice on the active row only — it still never fills a cell for you, it just tells you which color that cell wants once you hand-tie it, background nodes included.</p>
       <div class="legend">
         <div class="legend-item">
           <svg width="34" height="22" viewBox="0 0 34 22"><g stroke="#e4d6b8" stroke-width="1.4" opacity="0.7"><line x1="7" y1="0" x2="7" y2="22"/><line x1="17" y1="0" x2="17" y2="22"/><line x1="27" y1="0" x2="27" y2="22"/></g></svg>
@@ -747,12 +773,27 @@ const COLS = 40, ROWS = 50;
 let current = REGIONS[0];
 let mode = 'knot';
 let activeColor = current.palette[0];
-let activeMotif = MOTIFS[0];
 let grid = makeGrid();
-let beatenRows = new Array(ROWS).fill(false);
-let beatAnim = null; // {row, start}
+let beatAnim = null;      // {row, start}
+let weftAnim = null;      // {row, start}
+let tieAnims = new Map(); // "r,c" -> tie start time, for the tactile tie-pop
+let hoverCell = null;
 let cell = 14;
-let painting = false;
+
+// Sequential, row-locked weaving: a real loom is worked strictly bottom-up,
+// one row at a time — you cannot jump to an arbitrary point on the canvas
+// the way the old free-form Stamp mode did. activeRow starts at the bottom
+// of the canvas (highest index) and decrements toward 0 as each row is
+// finished, mirroring how a rug grows upward on a vertical loom.
+let activeRow = ROWS - 1;
+let rowPhase = 'tying';   // 'tying' -> 'wefted' -> (beat locks it, activeRow--, back to 'tying')
+let loomComplete = false;
+
+// A motif guide previews one documented regional shape's row-by-row slice
+// on the active row only. It never fills a cell for you — it just tells you
+// which color a cell wants once you hand-tie it, background cells included.
+let pendingMotif = null;   // armed, waiting for an anchor click in the active row
+let motifGuide = null;     // {motif, baseRow, anchorCol} once anchored
 
 function makeGrid(){
   return Array.from({length:ROWS}, () => Array(COLS).fill(null));
@@ -764,6 +805,20 @@ function knotFlag(region){
   return 'sym';
 }
 
+function resetLoom(){
+  grid = makeGrid();
+  beatAnim = null;
+  weftAnim = null;
+  tieAnims.clear();
+  activeRow = ROWS - 1;
+  rowPhase = 'tying';
+  loomComplete = false;
+  pendingMotif = null;
+  motifGuide = null;
+  draw();
+  updateBeatUI();
+}
+
 /* ---------- canvas ---------- */
 const canvas = document.getElementById('loom');
 const ctx = canvas.getContext('2d');
@@ -773,6 +828,13 @@ function resizeCanvas(){
   cell = Math.max(7, Math.floor(w / COLS));
   canvas.width = cell * COLS;
   canvas.height = cell * ROWS;
+  // Pin the CSS box to the same pixel size as the drawing buffer. Flooring
+  // `cell` above almost never divides clientWidth evenly, so the old
+  // width:100% rule silently upscaled a slightly-too-small buffer to fill
+  // the container — a few percent of blur, and (more importantly) a
+  // click-to-cell mapping that could land one column off, which matters
+  // now that tying is a precise discrete click rather than a forgiving drag.
+  canvas.style.width = (cell*COLS) + 'px';
   canvas.style.height = (cell*ROWS) + 'px';
   draw();
 }
@@ -785,6 +847,33 @@ function roundRect(x,y,w,h,r){
   ctx.arcTo(x,y+h,x,y,r);
   ctx.arcTo(x,y,x+w,y,r);
   ctx.closePath();
+}
+
+function motifCharColor(ch, palette){
+  const colorIdx = ch==='1' ? 0 : ch==='2' ? 1 : 2;
+  return palette[colorIdx] || palette[1];
+}
+
+// The guide character for loom column `c` in the *active* row, or null if
+// there's no armed guide, the active row is past the guide's span, or `c`
+// falls outside the motif's horizontal footprint.
+function guideCharAt(c){
+  if(!motifGuide) return null;
+  const m = motifGuide.motif, n = m.rows.length, half = Math.floor(n/2);
+  const rowIdx = (n-1) - (motifGuide.baseRow - activeRow);
+  if(rowIdx < 0 || rowIdx >= n) return null;
+  const gc = c - motifGuide.anchorCol + half;
+  if(gc < 0 || gc >= n) return null;
+  const ch = m.rows[rowIdx][gc];
+  return ch === '.' ? null : ch;
+}
+
+function pulseFor(r,c,now){
+  const t = tieAnims.get(r+','+c);
+  if(t===undefined) return 0;
+  const el = now - t;
+  if(el > 160){ tieAnims.delete(r+','+c); return 0; }
+  return 1 - el/160;
 }
 
 function draw(){
@@ -804,19 +893,30 @@ function draw(){
     ctx.stroke();
   }
 
-  // weft: after every row that has at least one knot tied, a weft thread is
-  // passed over-under across the alternated warp. It starts pale and loose;
-  // beating it (with the region's actual tool — comb, saber or spike) is
-  // what locks it tight, which is why it darkens and thickens once beaten.
-  //
-  // Fine city-workshop regions (weftType 'depressed-double') pull a pair of
+  // rows above the active one haven't been reached yet on a real loom —
+  // bare warp only, dimmed to show they're not yet part of the working area.
+  if(activeRow > 0){
+    ctx.fillStyle = 'rgba(0,0,0,0.32)';
+    ctx.fillRect(0,0,canvas.width, activeRow*cell);
+  }
+
+  // a soft highlight band marks the one row currently being worked.
+  if(!loomComplete){
+    ctx.fillStyle = 'rgba(201,162,75,0.07)';
+    ctx.fillRect(0, activeRow*cell, canvas.width, cell);
+  }
+
+  // weft: passed once a row's knots are in, loose until beaten. Fine
+  // city-workshop regions (weftType 'depressed-double') pull a pair of
   // wefts tight enough to displace alternating warps onto two levels —
   // "depressed warp" — which is what lets them pack knots far denser than a
   // single-weft nomadic/village structure. Drawn here as two tighter,
   // closer-set passes instead of one looser single pass. See the sources
   // panel below for where that construction detail comes from.
   const isDepressed = current.weftType === 'depressed-double';
-  for(let r=0;r<ROWS;r++){
+  for(let r=activeRow;r<ROWS;r++){
+    const isActive = r === activeRow;
+    if(isActive && rowPhase==='tying') continue; // not thrown yet
     if(!grid[r].some(Boolean)) continue;
     const t = rowTightness(r, now);
     const y = (r+1)*cell;
@@ -840,14 +940,54 @@ function draw(){
     });
   }
 
-  // knots: each one hand-tied around a pair of warp threads. Unbeaten knots
-  // sit loose with visible gaps; once the row is beaten they pack edge to edge.
-  for(let r=0;r<ROWS;r++){
+  // the weft-pass sweep: a bright leading edge crossing the active row once
+  // Pass Weft is triggered, before it settles into the loose weft above.
+  if(weftAnim && weftAnim.row===activeRow){
+    const dur = 380;
+    const elapsed = now - weftAnim.start;
+    const p = Math.min(1, elapsed/dur);
+    const y = (activeRow+1)*cell;
+    ctx.strokeStyle = 'rgba(228,214,184,0.9)';
+    ctx.lineWidth = Math.max(2, cell*0.16);
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width*p, y);
+    ctx.stroke();
+  }
+
+  // motif guide: a translucent preview of the armed shape's slice through
+  // the active row only.
+  if(motifGuide && !loomComplete){
+    for(let c=0;c<COLS;c++){
+      if(grid[activeRow][c]) continue;
+      const ch = guideCharAt(c);
+      if(!ch) continue;
+      const hex = motifCharColor(ch, current.palette);
+      ctx.fillStyle = hex + '55';
+      const x = c*cell, y = activeRow*cell;
+      roundRect(x+cell*0.22, y+cell*0.22, cell*0.56, cell*0.56, 2);
+      ctx.fill();
+    }
+  }
+
+  // knots: each one hand-tied around a pair of warp threads. A freshly tied
+  // knot pops slightly larger for an instant then settles — standing in for
+  // the catch/wrap/pull gesture instead of an instant paint fill. Unbeaten
+  // knots sit loose with visible gaps; once the row is beaten they pack
+  // edge to edge.
+  for(let r=activeRow;r<ROWS;r++){
     const t = rowTightness(r, now);
     for(let c=0;c<COLS;c++){
       const k = grid[r][c];
-      if(k) drawKnot(c,r,k,t);
+      if(k) drawKnot(c,r,k,t,pulseFor(r,c,now));
     }
+  }
+
+  // hover cue: only the active row is workable, so only it ever shows one.
+  if(hoverCell && hoverCell.r===activeRow && !loomComplete){
+    ctx.strokeStyle = 'rgba(228,214,184,0.55)';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(hoverCell.c*cell+1, hoverCell.r*cell+1, cell-2, cell-2);
   }
 }
 
@@ -860,12 +1000,13 @@ function rowTightness(r, now){
     const overshoot = Math.sin(p*Math.PI) * 0.4 * (1-p);
     return p + overshoot;
   }
-  return beatenRows[r] ? 1 : 0;
+  return r > activeRow ? 1 : 0;
 }
 
-function drawKnot(c,r,k,t){
+function drawKnot(c,r,k,t,pulse){
   const tt = Math.max(0, Math.min(1.25, t));
-  const pad = cell * (0.22 - 0.17*Math.min(tt,1)) - (tt>1 ? cell*0.05*(tt-1) : 0);
+  let pad = cell * (0.22 - 0.17*Math.min(tt,1)) - (tt>1 ? cell*0.05*(tt-1) : 0);
+  pad -= cell*0.07*(pulse||0);
   const x=c*cell, y=r*cell;
   ctx.fillStyle = k.hex;
   roundRect(x+pad, y+pad, cell-2*pad, cell-2*pad, Math.min(3,cell*(0.3-0.15*Math.min(tt,1))));
@@ -878,16 +1019,39 @@ function drawKnot(c,r,k,t){
   }
 }
 
-function beatActiveRow(){
-  let target = -1;
-  for(let r=ROWS-1;r>=0;r--){
-    if(grid[r].some(Boolean) && !beatenRows[r]){ target = r; break; }
+function runTieAnimFrame(){
+  draw();
+  if(tieAnims.size>0) requestAnimationFrame(runTieAnimFrame);
+}
+
+function attemptPassWeft(){
+  if(loomComplete) return;
+  if(rowPhase !== 'tying'){ flashWarning('The weft is already thrown for this row.'); return; }
+  if(!grid[activeRow].some(Boolean)){ flashWarning('Tie at least one knot before you pass the weft.'); return; }
+  weftAnim = {row:activeRow, start:performance.now()};
+  requestAnimationFrame(animateWeft);
+}
+
+function animateWeft(){
+  draw();
+  if(!weftAnim) return;
+  const elapsed = performance.now() - weftAnim.start;
+  if(elapsed < 380){
+    requestAnimationFrame(animateWeft);
+  } else {
+    weftAnim = null;
+    rowPhase = 'wefted';
+    draw();
+    updateBeatUI();
   }
-  if(target===-1) return false;
-  beatAnim = {row:target, start:performance.now()};
+}
+
+function attemptBeat(){
+  if(loomComplete) return;
+  if(rowPhase !== 'wefted'){ flashWarning('Pass the weft before you beat — nothing to compact yet.'); return; }
+  beatAnim = {row:activeRow, start:performance.now()};
   playThump();
   requestAnimationFrame(animateBeat);
-  return true;
 }
 
 function animateBeat(){
@@ -897,11 +1061,31 @@ function animateBeat(){
   if(elapsed < 280){
     requestAnimationFrame(animateBeat);
   } else {
-    beatenRows[beatAnim.row] = true;
     beatAnim = null;
+    if(activeRow===0){
+      loomComplete = true;
+    } else {
+      activeRow -= 1;
+      rowPhase = 'tying';
+      if(motifGuide){
+        const n = motifGuide.motif.rows.length;
+        const rowIdx = (n-1) - (motifGuide.baseRow - activeRow);
+        if(rowIdx < 0 || rowIdx >= n) motifGuide = null;
+      }
+    }
     draw();
     updateBeatUI();
   }
+}
+
+let warnTimer = null;
+function flashWarning(msg){
+  const el = document.getElementById('tensionWarn');
+  if(!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(warnTimer);
+  warnTimer = setTimeout(() => el.classList.remove('show'), 1800);
 }
 
 function playThump(){
@@ -962,7 +1146,7 @@ function playNaqshKhani(){
   }catch(e){}
 }
 
-/* motif preview + stamping */
+/* motif preview */
 function renderMotifToCanvas(cnv, motif, palette){
   const size = motif.rows.length, px = size >= 11 ? 3 : 4;
   cnv.width = size*px; cnv.height = size*px;
@@ -973,25 +1157,8 @@ function renderMotifToCanvas(cnv, motif, palette){
     for(let cIdx=0;cIdx<size;cIdx++){
       const ch = motif.rows[r][cIdx];
       if(ch==='.') continue;
-      const colorIdx = ch==='1' ? 0 : ch==='2' ? 1 : 2;
-      c2.fillStyle = palette[colorIdx] || palette[1];
+      c2.fillStyle = motifCharColor(ch, palette);
       c2.fillRect(cIdx*px, r*px, px, px);
-    }
-  }
-}
-
-function stampMotif(rCenter, cCenter){
-  const size = activeMotif.rows.length, half = Math.floor(size/2);
-  const flag = knotFlag(current);
-  for(let r=0;r<size;r++){
-    for(let cIdx=0;cIdx<size;cIdx++){
-      const ch = activeMotif.rows[r][cIdx];
-      if(ch==='.') continue;
-      const gr = rCenter - half + r;
-      const gc = cCenter - half + cIdx;
-      if(gr<0||gr>=ROWS||gc<0||gc>=COLS) continue;
-      const colorIdx = ch==='1' ? 0 : ch==='2' ? 1 : 2;
-      grid[gr][gc] = { hex: current.palette[colorIdx] || current.palette[1], knot: flag };
     }
   }
 }
@@ -1006,24 +1173,62 @@ function getCell(e){
   return { r: Math.floor(y/cell), c: Math.floor(x/cell) };
 }
 
-function paintAt(e){
-  const {r,c} = getCell(e);
-  if(r<0||r>=ROWS||c<0||c>=COLS) return;
-  if(mode==='knot'){
-    grid[r][c] = { hex: activeColor, knot: knotFlag(current) };
-  } else if(mode==='erase'){
+function tieAt(r,c){
+  if(loomComplete || c<0 || c>=COLS) return;
+  if(r !== activeRow){
+    const rowNum = ROWS - activeRow;
+    flashWarning(r < activeRow ? 'Not reached yet — you’re weaving row '+rowNum+'.' : 'Already beaten in — that row is locked.');
+    return;
+  }
+  if(rowPhase !== 'tying'){
+    flashWarning('The weft’s already thrown — beat it down before starting fresh knots.');
+    return;
+  }
+
+  if(mode==='erase'){
     grid[r][c] = null;
   } else {
-    stampMotif(r,c);
+    if(pendingMotif && !motifGuide){
+      motifGuide = { motif: pendingMotif, baseRow: activeRow, anchorCol: c };
+      pendingMotif = null;
+      buildMotifs();
+    }
+    const guideCh = guideCharAt(c);
+    const hex = guideCh ? motifCharColor(guideCh, current.palette) : activeColor;
+    grid[r][c] = { hex, knot: knotFlag(current) };
   }
+  tieAnims.set(r+','+c, performance.now());
+  requestAnimationFrame(runTieAnimFrame);
   draw();
   updateBeatUI();
 }
 
-canvas.addEventListener('pointerdown', e => { painting = true; paintAt(e); });
-canvas.addEventListener('pointermove', e => { if(painting && mode!=='stamp') paintAt(e); });
-window.addEventListener('pointerup', () => painting = false);
-canvas.addEventListener('click', e => { if(mode==='stamp') paintAt(e); });
+canvas.addEventListener('click', e => {
+  const {r,c} = getCell(e);
+  if(r<0||r>=ROWS||c<0||c>=COLS) return;
+  tieAt(r,c);
+});
+canvas.addEventListener('pointermove', e => {
+  const {r,c} = getCell(e);
+  if(r<0||r>=ROWS||c<0||c>=COLS){ if(hoverCell){ hoverCell=null; draw(); } return; }
+  if(!hoverCell || hoverCell.r!==r || hoverCell.c!==c){
+    hoverCell = {r,c};
+    draw();
+  }
+});
+canvas.addEventListener('pointerleave', () => { hoverCell=null; draw(); });
+
+// Spacebar slams the beat lever; W throws the weft; A/S mimic catching the
+// loop with either hand — both tie (or erase) whatever's currently hovered,
+// so tying never strictly requires the mouse.
+window.addEventListener('keydown', e => {
+  const k = e.key;
+  if(k===' '){ e.preventDefault(); attemptBeat(); return; }
+  if(k==='w' || k==='W'){ e.preventDefault(); attemptPassWeft(); return; }
+  if(k==='a' || k==='A' || k==='s' || k==='S'){
+    if(hoverCell) tieAt(hoverCell.r, hoverCell.c);
+  }
+});
 
 /* ---------- UI build ---------- */
 const railEl = document.getElementById('rail');
@@ -1067,30 +1272,40 @@ function buildPalette(){
 function buildMotifs(){
   motifGroup.querySelectorAll('.motif-btn').forEach(n=>n.remove());
   const available = MOTIFS.filter(m => current.motifs.includes(m.id));
-  if(!available.find(m => m.id===activeMotif.id)) activeMotif = available[0];
+  const armedId = pendingMotif ? pendingMotif.id : (motifGuide ? motifGuide.motif.id : null);
   available.forEach(m => {
     const b = document.createElement('button');
-    b.className = 'motif-btn' + (m.id===activeMotif.id ? ' active' : '');
+    b.className = 'motif-btn' + (m.id===armedId ? ' active' : '');
     b.title = m.name;
     const cnv = document.createElement('canvas');
     renderMotifToCanvas(cnv, m, current.palette);
     b.appendChild(cnv);
     b.addEventListener('click', () => {
-      activeMotif = m;
-      setMode('stamp');
+      pendingMotif = m;
+      motifGuide = null;
+      setMode('knot');
       buildMotifs();
+      updateBeatUI();
     });
     motifGroup.appendChild(b);
   });
+  const clearGuideBtn = document.getElementById('clearGuideBtn');
+  if(clearGuideBtn) clearGuideBtn.style.display = (pendingMotif||motifGuide) ? 'inline-block' : 'none';
 }
 
 function setMode(m){
   mode = m;
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode===m));
   paletteGroup.style.display = m==='knot' ? 'flex' : 'none';
-  motifGroup.style.display = m==='stamp' ? 'flex' : 'none';
 }
 document.querySelectorAll('.mode-btn').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+
+document.getElementById('clearGuideBtn').addEventListener('click', () => {
+  pendingMotif = null;
+  motifGuide = null;
+  buildMotifs();
+  draw();
+});
 
 function buildSpec(){
   const s = document.getElementById('spec');
@@ -1107,6 +1322,10 @@ function buildSpec(){
     '<div class="chant-row">'+
       '<button class="chant-btn" type="button" onclick="playNaqshKhani()">▶ Play illustrative chant demo</button>'+
       '<span class="chant-note">synthesized call-and-response rhythm — not a real Naqshe-khani recording</span>'+
+    '</div>' +
+    '<div class="chant-row">'+
+      '<a class="chant-btn" href="https://www.youtube.com/watch?v=zeT5EaniYPM" target="_blank" rel="noopener">🎬 Watch real Naqshe-khani (video) ↗</a>'+
+      '<span class="chant-note">Mehdi Aminian’s "The Woven Sounds" documentary — real workshop footage, not staged for this tool</span>'+
     '</div>' +
     '<dl class="fields">' +
       field('origin_region', current.name+' ('+current.zone+')') +
@@ -1127,7 +1346,7 @@ function buildSpec(){
       '<li><a href="https://www.oeaw.ac.at/vlach/projects/phd-projects/persian-carpet-the-woven-sounds" target="_blank" rel="noopener">Hear real Naqshe-khani recordings — Mehdi Aminian’s "The Woven Sounds" project (Univ. of Vienna / OEAW) ↗</a></li>'+
       '<li><a href="https://dmd.uconn.edu/2025-mfa-exhibition-nooshin-farashaei" target="_blank" rel="noopener">Hear real Naqshe-khani recordings — "Woven Garden" (2025 MFA thesis project) ↗</a></li>'+
     '</ul></div>' +
-    '<p class="note">Density (Raj) figures are indicative bands, not per-region counts pulled from a dataset — swap in real numbers from the Kaggle Iranian-carpet dataset if this needs to be rigorous. Motif stamps are stylized pixel abstractions built from the sources above, not redrawn from specific archival pieces — use the Wikimedia link to check what you\u2019re weaving against actual rugs. The four family labels (curvilinear court / pictorial-narrative / bold geometric / monochrome red) are a common way rug literature groups these regions, not one citable taxonomy. Where sources disagree (Tabriz\u2019s knot type is the clearest case), both views are listed above rather than picked silently.</p>';
+    '<p class="note">Density (Raj) figures are indicative bands, not per-region counts pulled from a dataset — swap in real numbers from the Kaggle Iranian-carpet dataset if this needs to be rigorous. Motif stamps are stylized pixel abstractions built from the sources above, not redrawn from specific archival pieces — use the Wikimedia link to check what you’re weaving against actual rugs. The four family labels (curvilinear court / pictorial-narrative / bold geometric / monochrome red) are a common way rug literature groups these regions, not one citable taxonomy. Where sources disagree (Tabriz’s knot type is the clearest case), both views are listed above rather than picked silently.</p>';
 }
 function field(label, value){
   return '<div class="field"><dt>'+label+'</dt><dd>'+value+'</dd></div>';
@@ -1137,6 +1356,7 @@ function selectRegion(id){
   current = REGIONS.find(r => r.id===id);
   activeColor = current.palette[0];
   document.querySelectorAll('.region-btn').forEach(b => b.classList.toggle('active', b.dataset.id===id));
+  resetLoom();
   buildPalette();
   buildMotifs();
   buildSpec();
@@ -1151,25 +1371,27 @@ const BEAT_TOOL_NAMES = {
 function updateBeatUI(){
   const label = document.getElementById('beatLabel');
   const status = document.getElementById('beatStatus');
+  const rowIndicator = document.getElementById('rowIndicator');
   label.textContent = 'Beat with ' + (BEAT_TOOL_NAMES[current.beatTool] || 'comb');
-  const tiedCount = grid.reduce((n,row) => n + (row.some(Boolean) ? 1 : 0), 0);
-  if(tiedCount === 0){
-    status.textContent = 'Nothing tied yet';
-  } else {
-    const stillLoose = grid.reduce((n,row,r) => n + (row.some(Boolean) && !beatenRows[r] ? 1 : 0), 0);
-    status.textContent = stillLoose > 0 ? stillLoose + ' row' + (stillLoose===1?'':'s') + ' still loose' : 'All tied rows beaten tight';
+  if(loomComplete){
+    rowIndicator.textContent = 'All '+ROWS+' rows woven and beaten tight.';
+    status.textContent = 'Finished — Clear to start a new piece.';
+    return;
   }
+  const rowNum = ROWS - activeRow; // 1-indexed, bottom row = row 1
+  const tiedHere = grid[activeRow].filter(Boolean).length;
+  const phaseLabel = rowPhase==='tying'
+    ? (tiedHere+' knot'+(tiedHere===1?'':'s')+' tied — pass the weft when ready')
+    : 'weft thrown — beat it down to lock the row';
+  rowIndicator.textContent = 'Row '+rowNum+' of '+ROWS+' — '+phaseLabel;
+  const doneRows = ROWS-1-activeRow;
+  status.textContent = doneRows+' row'+(doneRows===1?'':'s')+' beaten tight so far';
 }
 
-document.getElementById('beatBtn').addEventListener('click', () => { beatActiveRow(); });
+document.getElementById('weftBtn').addEventListener('click', () => attemptPassWeft());
+document.getElementById('beatBtn').addEventListener('click', () => attemptBeat());
 
-document.getElementById('clearBtn').addEventListener('click', () => {
-  grid = makeGrid();
-  beatenRows = new Array(ROWS).fill(false);
-  beatAnim = null;
-  draw();
-  updateBeatUI();
-});
+document.getElementById('clearBtn').addEventListener('click', () => { resetLoom(); });
 document.getElementById('saveBtn').addEventListener('click', () => {
   const filename = current.id + '-carpet.png';
   canvas.toBlob(async (blob) => {
