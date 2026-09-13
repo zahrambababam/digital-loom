@@ -208,6 +208,185 @@
     overflow:hidden;
     text-overflow:ellipsis;
   }
+  /* ---------- modals (finish / gift wrap / gift done) ---------- */
+  .modal-overlay{
+    position:fixed; inset:0;
+    background:rgba(10,7,7,0.72);
+    display:flex; align-items:center; justify-content:center;
+    z-index:200;
+    padding:20px;
+  }
+  .modal-overlay[hidden]{display:none;}
+  .modal-card{
+    position:relative;
+    background:var(--panel);
+    border:1px solid var(--panel-line);
+    border-radius:10px;
+    padding:28px 26px;
+    max-width:480px;
+    width:100%;
+    max-height:90vh;
+    overflow:auto;
+    box-shadow:0 20px 50px rgba(0,0,0,0.5);
+  }
+  .modal-card h2{margin:0 0 6px; font-size:22px; color:var(--ink);}
+  .modal-sub{margin:0 0 20px; font-size:13px; color:var(--wool-dim); line-height:1.5;}
+  .modal-close{
+    position:absolute; top:14px; right:14px;
+    width:28px; height:28px;
+    border-radius:50%;
+    border:none;
+    background:transparent;
+    color:var(--wool-dim);
+    font-size:20px;
+    line-height:1;
+    cursor:pointer;
+  }
+  .modal-close:hover{color:var(--ink); background:rgba(255,255,255,0.08);}
+  .finish-options{display:flex; gap:14px; flex-wrap:wrap;}
+  .finish-option{
+    flex:1 1 200px;
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    gap:8px;
+    background:var(--bg-deep);
+    border:1px solid var(--panel-line);
+    border-radius:8px;
+    padding:22px 16px;
+    cursor:pointer;
+    color:var(--ink);
+    font-family:'Karla',sans-serif;
+    transition:border-color .15s, transform .15s;
+  }
+  .finish-option:hover{border-color:var(--gold); transform:translateY(-2px);}
+  .finish-option-icon{font-size:32px;}
+  .finish-option-title{font-weight:700; font-size:15px;}
+  .finish-option-desc{font-size:12px; color:var(--wool-dim); line-height:1.5;}
+  .gift-field{display:block; margin-bottom:14px; font-size:12.5px; color:var(--wool-dim);}
+  .gift-field span{display:block; margin-bottom:5px;}
+  .gift-field em{font-style:normal; opacity:0.75;}
+  .gift-field input, .gift-field textarea{
+    width:100%;
+    background:var(--bg-deep);
+    border:1px solid var(--panel-line);
+    color:var(--ink);
+    padding:9px 10px;
+    border-radius:5px;
+    font-family:'Karla',sans-serif;
+    font-size:13.5px;
+    resize:vertical;
+  }
+  .gift-field input:focus, .gift-field textarea:focus{outline:1px solid var(--gold); border-color:var(--gold);}
+  .gift-form-actions{display:flex; justify-content:space-between; align-items:center; margin-top:18px;}
+  .gift-link-row{display:flex; gap:8px; margin-bottom:14px;}
+  .gift-link-row input{
+    flex:1;
+    background:var(--bg-deep);
+    border:1px solid var(--panel-line);
+    color:var(--ink-dim);
+    padding:9px 10px;
+    border-radius:5px;
+    font-size:12.5px;
+    font-family:monospace;
+  }
+  .gift-mailto-btn{display:block; width:100%; text-align:center; text-decoration:none; box-sizing:border-box;}
+
+  /* A gift is a letter, not a form -- so its two modals get their own
+     warm, aged-paper skin instead of the app's usual dark panels. The
+     overrides below reuse every existing rule (.gift-field, .beat-btn,
+     .modal-close, ...) by redefining the same CSS variables locally, so
+     nothing has to be restyled twice. */
+  .letter-card{
+    --panel: #ece0c4;
+    --panel-line: #c3af7d;
+    --bg-deep: #e1d2a9;
+    --ink: #362a18;
+    --ink-dim: #5c4a30;
+    --wool-dim: #7d6844;
+    background-color: #ece0c4;
+    background-image:
+      radial-gradient(ellipse 75% 55% at 12% 8%, rgba(255,252,235,0.6), transparent 55%),
+      radial-gradient(ellipse 70% 60% at 90% 95%, rgba(110,85,45,0.14), transparent 55%),
+      radial-gradient(circle at 50% 40%, rgba(90,68,35,0.07), transparent 62%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch' result='t'/><feColorMatrix in='t' type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23p)'/></svg>"),
+      radial-gradient(ellipse 120% 100% at 50% 50%, transparent 55%, rgba(65,46,20,0.2) 100%);
+    background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat;
+    background-size: 100% 100%, 100% 100%, 100% 100%, 130px 130px, 100% 100%;
+    background-blend-mode: normal, normal, normal, overlay, normal;
+    border:1px solid #b6a173;
+    box-shadow:
+      0 1px 0 #d9cba3, 0 3px 0 #d0c093, 0 5px 0 #c6b485,
+      0 24px 48px rgba(20,14,6,0.5);
+  }
+  .letter-card h2{font-family:'Cormorant Garamond',serif; font-weight:600; font-size:26px;}
+  .letter-card .modal-close:hover{background:rgba(54,42,24,0.1); color:#1f160c;}
+  .gift-done-preview-wrap{
+    display:flex; justify-content:center;
+    margin:0 0 4px;
+    max-height:180px;
+    overflow:hidden;
+    border-radius:6px;
+  }
+  .gift-done-preview-wrap canvas{max-width:100%; max-height:180px; object-fit:contain;}
+
+  /* ---------- wax seal ---------- */
+  .wax-seal{
+    width:110px; height:110px;
+    margin:6px auto 18px;
+    border-radius:44% 56% 53% 47% / 47% 44% 56% 53%;
+    box-shadow:0 6px 14px rgba(0,0,0,0.45), inset 0 2px 4px rgba(255,255,255,0.08), inset 0 -6px 10px rgba(0,0,0,0.4);
+    position:relative;
+    background:radial-gradient(circle at 35% 30%, #9a2e28, #6e1a17 65%, #4a0f0d 100%);
+  }
+  .wax-seal canvas{
+    position:absolute; inset:0; width:100%; height:100%;
+    border-radius:inherit;
+  }
+  .gift-seal-break{cursor:pointer; transition:transform .2s;}
+  .gift-seal-break:hover{transform:scale(1.04);}
+  .gift-seal-break.breaking{animation:sealBreak .5s ease forwards;}
+  @keyframes sealBreak{
+    0%{transform:scale(1); opacity:1;}
+    40%{transform:scale(1.15); opacity:1;}
+    100%{transform:scale(1.6); opacity:0;}
+  }
+  .gift-seal-hint{font-size:12.5px; color:var(--wool-dim); text-align:center; margin:0 0 30px;}
+  .gift-seal-hint.hidden-hint{visibility:hidden;}
+
+  /* ---------- gift reveal ---------- */
+  #giftView{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:40px 20px;}
+  #giftView[hidden]{display:none;}
+  .gift-stage{max-width:640px; width:100%; text-align:center;}
+  .gift-rug-stage{
+    position:relative;
+    margin:0 auto 26px;
+    display:inline-block;
+  }
+  .gift-rug-stage[hidden]{display:none;}
+  .gift-rug-canvas-wrap{
+    overflow:hidden;
+    width:0;
+    height:1px;
+    background:var(--bg-deep);
+    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+    transition:width 1.8s cubic-bezier(.22,.61,.36,1);
+  }
+  .gift-rug-canvas-wrap canvas{display:block;}
+  .gift-rug-roll{
+    position:absolute;
+    top:0; bottom:0;
+    left:0;
+    width:24px;
+    border-radius:12px;
+    background:linear-gradient(90deg, #4a3520, #7a5a34 35%, #a3814f 55%, #7a5a34 75%, #4a3520);
+    box-shadow:2px 0 8px rgba(0,0,0,0.5);
+    transition:left 1.8s cubic-bezier(.22,.61,.36,1);
+  }
+  .gift-note{opacity:0; transition:opacity 1.2s ease; margin-top:10px;}
+  .gift-note.visible{opacity:1;}
+  .gift-note-text{font-size:19px; color:var(--ink); line-height:1.6; font-style:italic; margin:0 0 10px;}
+  .gift-note-sign{font-size:13px; color:var(--wool-dim); margin:0;}
+  .gift-error{color:#d98a7a; font-size:14px;}
+
   .layout{
     display:grid;
     grid-template-columns:220px 1fr;
@@ -649,8 +828,7 @@
         <button class="ghost-btn" id="rotateBtn" style="display:none;">⤾ Rotate</button>
         <button class="ghost-btn" id="clearGuideBtn" style="display:none;">Clear guides</button>
         <button class="ghost-btn" id="clearBtn">Clear</button>
-        <button class="ghost-btn" id="saveBtn">Save PNG</button>
-        <button class="ghost-btn" id="addToQuiltBtn" title="Attach your piece to the community quilt">🧵 Add to Quilt</button>
+        <button class="ghost-btn" id="saveBtn">✓ Finish Weaving</button>
       </div>
 
       <div class="loom-frame">
@@ -737,6 +915,92 @@
     </div>
   </section>
 </div>
+
+<div class="modal-overlay" id="finishModal" hidden>
+  <div class="modal-card finish-card">
+    <button class="modal-close" id="finishModalClose" title="Close">&times;</button>
+    <h2>Your rug is finished</h2>
+    <p class="modal-sub">What would you like to do with it?</p>
+    <div class="finish-options">
+      <button class="finish-option" id="finishQuiltBtn">
+        <span class="finish-option-icon">🧵</span>
+        <span class="finish-option-title">Sew into the Community Quilt</span>
+        <span class="finish-option-desc">Attach it next to a piece you like on the shared public board. Anyone can see it, forever — nobody can edit or remove it once it's placed.</span>
+      </button>
+      <button class="finish-option" id="finishGiftBtn">
+        <span class="finish-option-icon">🎁</span>
+        <span class="finish-option-title">Wrap &amp; Gift this Rug</span>
+        <span class="finish-option-desc">Seal it with a note and send it to someone — or to yourself. They'll unroll it on their own screen.</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="giftFormModal" hidden>
+  <div class="modal-card letter-card">
+    <button class="modal-close" id="giftFormClose" title="Close">&times;</button>
+    <h2>Wrap this rug</h2>
+    <form id="giftForm">
+      <label class="gift-field">
+        <span>Recipient's name <em>(optional)</em></span>
+        <input type="text" id="giftRecipientName" maxlength="60" placeholder="Who is this for?">
+      </label>
+      <label class="gift-field">
+        <span>Recipient's email</span>
+        <input type="email" id="giftRecipientEmail" maxlength="200" required placeholder="them@example.com">
+      </label>
+      <label class="gift-field">
+        <span>Your name <em>(optional)</em></span>
+        <input type="text" id="giftSenderName" maxlength="60" placeholder="Who's it from?">
+      </label>
+      <label class="gift-field">
+        <span>Your email <em>(so we know it's really you — never stored)</em></span>
+        <input type="email" id="giftSenderEmail" maxlength="200" required placeholder="you@example.com">
+      </label>
+      <label class="gift-field">
+        <span>Your message</span>
+        <textarea id="giftMessage" maxlength="500" rows="4" placeholder="Say something about it..."></textarea>
+      </label>
+      <div class="gift-form-actions">
+        <button type="button" class="ghost-btn" id="giftFormBack">← Back</button>
+        <button type="submit" class="beat-btn" id="giftWrapSubmitBtn">Wrap it 🎁</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay" id="giftDoneModal" hidden>
+  <div class="modal-card letter-card gift-done-card">
+    <button class="modal-close" id="giftDoneClose" title="Close">&times;</button>
+    <h2>Sealed and ready</h2>
+    <div class="gift-done-preview-wrap"><canvas id="giftDonePreview"></canvas></div>
+    <div class="wax-seal" id="giftDoneSeal"></div>
+    <p class="modal-sub">Send this link to <span id="giftDoneRecipient">them</span>, however you like.</p>
+    <div class="gift-link-row">
+      <input type="text" id="giftDoneLink" readonly>
+      <button class="ghost-btn" id="giftCopyLinkBtn">Copy</button>
+    </div>
+    <a class="beat-btn gift-mailto-btn" id="giftMailtoBtn" href="#">📧 Open in your email app</a>
+  </div>
+</div>
+
+<section id="giftView" hidden>
+  <div class="gift-stage">
+    <div class="wax-seal gift-seal-break" id="giftRevealSeal" title="Click to break the seal"></div>
+    <p class="gift-seal-hint" id="giftSealHint">Click the seal to open your gift</p>
+    <div class="gift-rug-stage" id="giftRugStage" hidden>
+      <div class="gift-rug-canvas-wrap" id="giftRugCanvasWrap">
+        <canvas id="giftRugCanvas"></canvas>
+      </div>
+      <div class="gift-rug-roll" id="giftRugRoll"></div>
+    </div>
+    <div class="gift-note" id="giftNote" hidden>
+      <p class="gift-note-text" id="giftNoteText"></p>
+      <p class="gift-note-sign" id="giftNoteSign"></p>
+    </div>
+    <p class="gift-error" id="giftError" hidden></p>
+  </div>
+</section>
 
 <script>
 /* ---------- data ---------- */
@@ -1537,9 +1801,9 @@ function draw(){
   drawCutAnim(now);
 }
 
-// The finishing flourish on Save PNG: a pair of scissors travels across the
-// canvas snipping the finished piece free of the loom, before the actual
-// file save happens. Purely decorative — doSavePNG() runs right after it.
+// The finishing flourish on "Finish Weaving": a pair of scissors travels
+// across the canvas snipping the finished piece free of the loom, before
+// the finish modal (quilt or gift) opens. Purely decorative.
 function drawCutAnim(now){
   if(!cutAnim) return;
   const dur = 900;
@@ -2388,40 +2652,10 @@ function buildWovenPieceCanvas(){
   return off;
 }
 
-function doSavePNG(){
-  const filename = current.id + '-carpet.png';
-  const sourceCanvas = buildWovenPieceCanvas() || canvas;
-  sourceCanvas.toBlob(async (blob) => {
-    if (!blob) return;
-    // Inside the Claude artifact host, a plain <a download> link is inert
-    // (the sandbox never grants that permission) — use the platform's own
-    // downloads capability there instead. Outside it (a plain file:// open,
-    // or any other browser), window.claude doesn't exist at all, so this
-    // falls straight through to the ordinary anchor-download path below.
-    if (window.claude && window.claude.use) {
-      try {
-        const downloads = await window.claude.use('downloads');
-        if (downloads) {
-          try {
-            await downloads.save({ filename, data: blob });
-          } catch (err) {
-            // viewer declined, rate-limited, etc. — no retry, no fallback prompt
-          }
-          return;
-        }
-      } catch (err) { /* fall through to the plain-browser path below */ }
-    }
-    const link = document.createElement('a');
-    link.download = filename;
-    link.href = URL.createObjectURL(blob);
-    link.click();
-    URL.revokeObjectURL(link.href);
-  }, 'image/png');
-}
 
 document.getElementById('saveBtn').addEventListener('click', () => {
   const hasAnything = grid.some(row => row.some(Boolean));
-  if(!hasAnything){ doSavePNG(); return; }
+  if(!hasAnything){ flashWarning('Weave at least one knot before finishing.'); return; }
   cutAnim = { start: performance.now() };
   playSnip(); setTimeout(playSnip, 300); setTimeout(playSnip, 600);
   requestAnimationFrame(runCutAnimFrame);
@@ -2435,8 +2669,242 @@ function runCutAnimFrame(){
   } else {
     cutAnim = null;
     draw();
-    doSavePNG();
+    openFinishModal();
   }
+}
+
+/* ---------- finish flow: quilt or gift ----------
+   "Finish Weaving" opens one modal offering two paths. Sewing into the
+   quilt reuses the existing placement flow; wrapping a gift branches into
+   its own small wizard, storing the piece in a second, equally public and
+   append-only Supabase table (see gifts_schema.sql). The self-gift easter
+   egg is decided from the two email addresses entirely in the browser --
+   only the resulting true/false ever reaches the (publicly readable)
+   database, never the addresses themselves. */
+function openFinishModal(){ document.getElementById('finishModal').hidden = false; }
+function closeFinishModal(){ document.getElementById('finishModal').hidden = true; }
+document.getElementById('finishModalClose').addEventListener('click', closeFinishModal);
+document.getElementById('finishModal').addEventListener('click', (e) => {
+  if(e.target.id === 'finishModal') closeFinishModal();
+});
+document.getElementById('finishQuiltBtn').addEventListener('click', () => {
+  closeFinishModal();
+  enterQuiltPlacementMode();
+});
+document.getElementById('finishGiftBtn').addEventListener('click', () => {
+  closeFinishModal();
+  openGiftForm();
+});
+
+function openGiftForm(){
+  document.getElementById('giftForm').reset();
+  document.getElementById('giftFormModal').hidden = false;
+}
+function closeGiftForm(){ document.getElementById('giftFormModal').hidden = true; }
+document.getElementById('giftFormClose').addEventListener('click', closeGiftForm);
+document.getElementById('giftFormModal').addEventListener('click', (e) => {
+  if(e.target.id === 'giftFormModal') closeGiftForm();
+});
+document.getElementById('giftFormBack').addEventListener('click', () => {
+  closeGiftForm();
+  openFinishModal();
+});
+
+async function insertGift(body){
+  const resp = await fetch(SUPABASE_URL+'gifts', {
+    method: 'POST',
+    headers: supabaseHeaders({ 'Content-Type':'application/json', Prefer:'return=representation' }),
+    body: JSON.stringify(body)
+  });
+  if(!resp.ok) throw new Error('gift insert failed: '+resp.status);
+  return await resp.json();
+}
+async function fetchGift(id){
+  const resp = await fetch(SUPABASE_URL+'gifts?select=*&id=eq.'+encodeURIComponent(id), { headers: supabaseHeaders() });
+  if(!resp.ok) throw new Error('gift fetch failed: '+resp.status);
+  const rows = await resp.json();
+  return rows[0] || null;
+}
+function giftLinkFor(id){
+  return location.origin + location.pathname + '?gift=' + id;
+}
+
+// Draws a region's first motif into a wax-seal element as a single-tone
+// "pressed" impression: a dark offset shadow plus a light offset highlight
+// around each filled cell fakes an engraved indentation, sitting on the
+// CSS radial-gradient wax color behind the (otherwise transparent) canvas.
+function renderWaxSeal(sealEl, regionId){
+  let cnv = sealEl.querySelector('canvas');
+  if(!cnv){ cnv = document.createElement('canvas'); sealEl.appendChild(cnv); }
+  const region = REGIONS.find(r => r.id === regionId) || REGIONS[0];
+  const motifId = region.motifs && region.motifs[0];
+  const motif = MOTIFS.find(m => m.id === motifId);
+  const size = 220;
+  cnv.width = size; cnv.height = size;
+  const ctx = cnv.getContext('2d');
+  ctx.clearRect(0,0,size,size);
+  if(!motif) return;
+  const rows = motif.rows;
+  const n = rows.length;
+  const inset = size*0.24;
+  const cellPx = (size - inset*2) / n;
+  for(let r=0;r<n;r++){
+    const row = rows[r];
+    for(let c=0;c<row.length;c++){
+      if(row[c]==='.') continue;
+      const x = inset + c*cellPx, y = inset + r*cellPx;
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.fillRect(x+1.2, y+1.2, cellPx+0.6, cellPx+0.6);
+      ctx.fillStyle = 'rgba(255,205,170,0.22)';
+      ctx.fillRect(x-0.8, y-0.8, cellPx+0.6, cellPx+0.6);
+      ctx.fillStyle = 'rgba(0,0,0,0.28)';
+      ctx.fillRect(x, y, cellPx, cellPx);
+    }
+  }
+}
+
+document.getElementById('giftForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const captured = captureWovenSparseGrid();
+  if(!captured){ closeGiftForm(); return; }
+  const recipientName = document.getElementById('giftRecipientName').value.trim().slice(0,60);
+  const recipientEmail = document.getElementById('giftRecipientEmail').value.trim();
+  const senderName = document.getElementById('giftSenderName').value.trim().slice(0,60);
+  const senderEmail = document.getElementById('giftSenderEmail').value.trim();
+  const message = document.getElementById('giftMessage').value.trim().slice(0,500);
+  const isSelfGift = recipientEmail.length>0 && recipientEmail.toLowerCase() === senderEmail.toLowerCase();
+  const body = {
+    recipient_name: recipientName || null,
+    sender_name: senderName || null,
+    message: message || null,
+    region_id: current.id,
+    palette: current.palette,
+    grid: captured.sparse,
+    width: captured.width,
+    height: captured.height,
+    is_self_gift: isSelfGift,
+  };
+  const submitBtn = document.getElementById('giftWrapSubmitBtn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Wrapping…';
+  try{
+    const [saved] = await insertGift(body);
+    closeGiftForm();
+    showGiftDone(saved, recipientName, recipientEmail, message);
+  }catch(err){
+    flashWarning('Could not wrap your gift — try again in a moment.');
+  }finally{
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Wrap it 🎁';
+  }
+});
+
+function showGiftDone(saved, recipientName, recipientEmail, message){
+  const link = giftLinkFor(saved.id);
+  document.getElementById('giftDoneRecipient').textContent = recipientName || 'them';
+  document.getElementById('giftDoneLink').value = link;
+  renderWaxSeal(document.getElementById('giftDoneSeal'), current.id);
+  const previewCanvas = document.getElementById('giftDonePreview');
+  const built = buildWovenPieceCanvas();
+  if(built){
+    previewCanvas.width = built.width; previewCanvas.height = built.height;
+    previewCanvas.getContext('2d').drawImage(built,0,0);
+  }
+  const subject = encodeURIComponent('A carpet, woven for you');
+  const bodyText = (message ? message+'\n\n' : '') + 'Unroll it here: ' + link;
+  document.getElementById('giftMailtoBtn').href =
+    'mailto:'+encodeURIComponent(recipientEmail)+'?subject='+subject+'&body='+encodeURIComponent(bodyText);
+  document.getElementById('giftDoneModal').hidden = false;
+}
+document.getElementById('giftDoneClose').addEventListener('click', () => {
+  document.getElementById('giftDoneModal').hidden = true;
+});
+document.getElementById('giftDoneModal').addEventListener('click', (e) => {
+  if(e.target.id === 'giftDoneModal') document.getElementById('giftDoneModal').hidden = true;
+});
+document.getElementById('giftCopyLinkBtn').addEventListener('click', async () => {
+  const input = document.getElementById('giftDoneLink');
+  const btn = document.getElementById('giftCopyLinkBtn');
+  try{
+    await navigator.clipboard.writeText(input.value);
+  }catch(err){
+    input.select();
+    document.execCommand('copy');
+  }
+  const original = btn.textContent;
+  btn.textContent = 'Copied!';
+  setTimeout(() => { btn.textContent = original; }, 1500);
+});
+
+/* ---------- gift reveal page (?gift=<id>) ---------- */
+async function initGiftReveal(giftId){
+  document.querySelector('.wrap').style.display = 'none';
+  document.getElementById('giftView').hidden = false;
+  const sealEl = document.getElementById('giftRevealSeal');
+  const hintEl = document.getElementById('giftSealHint');
+  const errorEl = document.getElementById('giftError');
+  let gift;
+  try{
+    gift = await fetchGift(giftId);
+  }catch(err){
+    sealEl.hidden = true; hintEl.hidden = true;
+    errorEl.hidden = false;
+    errorEl.textContent = 'This gift needs outside network access to open, which this preview doesn\'t have. Open it from the standalone hosted link instead.';
+    return;
+  }
+  if(!gift){
+    sealEl.hidden = true; hintEl.hidden = true;
+    errorEl.hidden = false;
+    errorEl.textContent = 'This gift link doesn\'t match anything — check that you copied the whole link.';
+    return;
+  }
+  renderWaxSeal(sealEl, gift.region_id);
+  sealEl.addEventListener('click', () => breakSeal(gift), { once:true });
+}
+function breakSeal(gift){
+  const sealEl = document.getElementById('giftRevealSeal');
+  const hintEl = document.getElementById('giftSealHint');
+  sealEl.classList.add('breaking');
+  setTimeout(() => {
+    sealEl.style.display = 'none';
+    hintEl.style.display = 'none';
+    unrollGift(gift);
+  }, 500);
+}
+function unrollGift(gift){
+  const stage = document.getElementById('giftRugStage');
+  const wrapEl = document.getElementById('giftRugCanvasWrap');
+  const roll = document.getElementById('giftRugRoll');
+  const cnv = document.getElementById('giftRugCanvas');
+  stage.hidden = false;
+  renderSparseGridCanvas(cnv, gift, 420, 60);
+  const targetWidth = cnv.width;
+  wrapEl.style.height = cnv.height + 'px';
+  wrapEl.style.width = '0px';
+  roll.style.left = '0px';
+  void wrapEl.offsetWidth; // force reflow so the transition below actually animates
+  requestAnimationFrame(() => {
+    wrapEl.style.width = targetWidth + 'px';
+    roll.style.left = targetWidth + 'px';
+  });
+  setTimeout(() => revealNote(gift), 1900);
+}
+function revealNote(gift){
+  const noteEl = document.getElementById('giftNote');
+  const textEl = document.getElementById('giftNoteText');
+  const signEl = document.getElementById('giftNoteSign');
+  if(gift.is_self_gift){
+    textEl.textContent = 'You have knotted the past into the future.';
+    signEl.textContent = '';
+  } else {
+    textEl.textContent = gift.message || 'A carpet, woven for you.';
+    const bits = [];
+    if(gift.recipient_name) bits.push('For '+gift.recipient_name);
+    if(gift.sender_name) bits.push('from '+gift.sender_name);
+    signEl.textContent = bits.join(', ');
+  }
+  noteEl.hidden = false;
+  requestAnimationFrame(() => noteEl.classList.add('visible'));
 }
 
 /* ---------- community quilt ----------
@@ -2491,6 +2959,22 @@ function getWovenBounds(){
   return maxR<0 ? null : {minR,maxR,minC,maxC};
 }
 
+// Crops the live loom down to just what's been tied, as a sparse
+// [row,col,hex] list -- the shared shape both a quilt piece and a gift
+// are stored and rendered from. Returns null if nothing's been woven yet.
+function captureWovenSparseGrid(){
+  const bounds = getWovenBounds();
+  if(!bounds) return null;
+  const sparse = [];
+  for(let r=bounds.minR;r<=bounds.maxR;r++){
+    for(let c=bounds.minC;c<=bounds.maxC;c++){
+      const k = grid[r][c];
+      if(k) sparse.push([r-bounds.minR, c-bounds.minC, k.hex]);
+    }
+  }
+  return { sparse, width: bounds.maxC-bounds.minC+1, height: bounds.maxR-bounds.minR+1 };
+}
+
 // A deterministic grid layout built from each piece's chosen neighbor:
 // root pieces (attached_to === null) fill row 0 left to right; every
 // other piece searches outward from its parent's cell for the closest
@@ -2536,11 +3020,13 @@ function layoutQuiltPositions(pieces){
   return positions;
 }
 
-function renderQuiltPieceCanvas(canvas, piece){
-  // Target roughly the same on-screen footprint whether a piece is a
-  // small test scrap or a full 40x50 weave, so nothing shrinks to an
-  // unclickable sliver -- only cap how large a single cell can get.
-  const px = Math.min(24, Math.max(1, Math.round(140/Math.max(piece.width,piece.height))));
+// Target roughly the same on-screen footprint whether a piece is a small
+// test scrap or a full 40x50 weave, so nothing shrinks to an unclickable
+// sliver -- only cap how large a single cell can get. `target`/`maxPx` let
+// a single full-page reveal (the gift) ask for a bigger footprint than a
+// many-at-once board (the quilt) without duplicating the fill logic.
+function renderSparseGridCanvas(canvas, piece, target, maxPx){
+  const px = Math.min(maxPx, Math.max(1, Math.round(target/Math.max(piece.width,piece.height))));
   canvas.width = piece.width*px;
   canvas.height = piece.height*px;
   const c2 = canvas.getContext('2d');
@@ -2551,6 +3037,9 @@ function renderQuiltPieceCanvas(canvas, piece){
     c2.fillStyle = hex;
     c2.fillRect(c*px, r*px, px, px);
   });
+}
+function renderQuiltPieceCanvas(canvas, piece){
+  renderSparseGridCanvas(canvas, piece, 140, 24);
 }
 
 function renderQuiltBoard(){
@@ -2792,23 +3281,16 @@ document.getElementById('quiltPlaceCornerBtn').addEventListener('click', () => {
 });
 document.getElementById('quiltConfirmBtn').addEventListener('click', async () => {
   if(!quiltState.chosen) return;
-  const bounds = getWovenBounds();
-  if(!bounds){ cancelQuiltPlacement(); return; }
-  const sparse = [];
-  for(let r=bounds.minR;r<=bounds.maxR;r++){
-    for(let c=bounds.minC;c<=bounds.maxC;c++){
-      const k = grid[r][c];
-      if(k) sparse.push([r-bounds.minR, c-bounds.minC, k.hex]);
-    }
-  }
+  const captured = captureWovenSparseGrid();
+  if(!captured){ cancelQuiltPlacement(); return; }
   const nameInput = document.getElementById('quiltNameInput');
   const body = {
     name: nameInput.value.trim().slice(0,40) || null,
     region_id: current.id,
     palette: current.palette,
-    grid: sparse,
-    width: bounds.maxC-bounds.minC+1,
-    height: bounds.maxR-bounds.minR+1,
+    grid: captured.sparse,
+    width: captured.width,
+    height: captured.height,
     attached_to: quiltState.pendingAttachTo || null,
   };
   const confirmBtn = document.getElementById('quiltConfirmBtn');
@@ -2826,8 +3308,7 @@ document.getElementById('quiltConfirmBtn').addEventListener('click', async () =>
     document.getElementById('quiltStatus').textContent = 'Could not save your piece — try again in a moment.';
   }
 });
-document.getElementById('addToQuiltBtn').addEventListener('click', () => {
-  if(!getWovenBounds()){ flashWarning('Weave at least one knot before adding it to the quilt.'); return; }
+function enterQuiltPlacementMode(){
   showQuiltView();
   quiltState.inPlacementMode = true;
   quiltState.pendingAttachTo = undefined;
@@ -2835,7 +3316,7 @@ document.getElementById('addToQuiltBtn').addEventListener('click', () => {
   document.getElementById('quiltPlacementBanner').hidden = false;
   document.getElementById('quiltPlacementText').textContent = 'Click a piece below to attach yours next to it, or place it as a new corner.';
   document.getElementById('quiltConfirmBtn').disabled = true;
-});
+}
 
 (() => {
   const wrap = document.getElementById('quiltBoardWrap');
@@ -2854,14 +3335,19 @@ document.getElementById('addToQuiltBtn').addEventListener('click', () => {
 })();
 
 /* ---------- init ---------- */
-buildPalette();
-buildMotifs();
-buildSpec();
-setMode('knot');
-updateBeatUI();
-updateLoomCursor(activeColor);
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
+const giftIdFromUrl = new URLSearchParams(location.search).get('gift');
+if(giftIdFromUrl){
+  initGiftReveal(giftIdFromUrl);
+} else {
+  buildPalette();
+  buildMotifs();
+  buildSpec();
+  setMode('knot');
+  updateBeatUI();
+  updateLoomCursor(activeColor);
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+}
 </script>
 </body>
 </html>
