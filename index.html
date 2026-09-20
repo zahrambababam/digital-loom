@@ -51,14 +51,21 @@
     background:var(--frame);
     border:1px solid var(--line);
     overflow:hidden;
+    display:flex; justify-content:center; align-items:center;
   }
-  .frame img{
-    width:100%; height:100%; object-fit:cover;
-    filter:grayscale(0.15) contrast(1.03);
-    opacity:0;
-    animation:fadeIn 1.4s ease 0.2s forwards;
+  .spotlight{
+    width:80%; height:85%;
+    background:linear-gradient(180deg,#232323,#161616);
+    position:relative;
+    display:flex; justify-content:center; align-items:flex-start;
   }
-  @keyframes fadeIn{ to{opacity:1;} }
+  .structural-mark{
+    width:35%; aspect-ratio:1/1;
+    background:var(--red);
+    border-radius:50% 50% 0 0;
+    margin-top:15%;
+    box-shadow:0 10px 30px rgba(163,36,28,0.35);
+  }
   .frame .frame-edge{
     position:absolute; inset:0; pointer-events:none;
     box-shadow:inset 0 0 0 1px rgba(245,245,245,0.06);
@@ -113,7 +120,9 @@
 
   <main class="gateway">
     <div class="frame">
-      <img src="flowers-assets/looks/02-caged.jpg" alt="A sculptural white garment from Flowers Are Blooming in Antarctica.">
+      <div class="spotlight">
+        <div class="structural-mark"></div>
+      </div>
       <div class="frame-edge"></div>
     </div>
 
@@ -125,7 +134,7 @@
       <p class="manifesto">"Things are changing, where we can't see them, yet they affect how we live our lives — who we've become subconsciously, through unconscious consumption."</p>
 
       <a href="flowers-are-blooming-in-antarctica.html" class="portal-btn">
-        Flowers Are Blooming in Antarctica <span class="arrow">→</span>
+        Vault: Flowers Are Blooming in Antarctica <span class="arrow">→</span>
       </a>
     </div>
   </main>
