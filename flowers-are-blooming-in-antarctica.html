@@ -186,6 +186,7 @@
     background:#000;
   }
   .film-frame video{width:100%; display:block; aspect-ratio:16/9; object-fit:cover; background:#000;}
+  .film-frame iframe{width:100%; display:block; aspect-ratio:16/9; border:0;}
   .film-frame .playbtn{
     position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
     background:rgba(8,20,19,0.28); cursor:pointer; border:none; width:100%;
@@ -453,7 +454,7 @@
 <!-- ================= FILM ================= -->
 <section id="film" data-nav-theme="dark">
   <div class="wrap film-grid">
-    <div class="reveal film-frame">
+    <div class="reveal film-frame" id="filmFrame">
       <video id="mainVideo" poster="flowers-assets/show.jpg" controls playsinline preload="none">
         <source src="flowers-assets/video/flowers-are-blooming-in-antarctica.mp4" type="video/mp4">
       </video>
@@ -465,7 +466,6 @@
       <span class="kicker" style="color:var(--coral);">watch</span>
       <h2>The presentation, in motion.</h2>
       <p>A short film of the collection as it moved through the room — the drape, the walk, the moment the audience first saw a rectangle become a gown.</p>
-      <p class="film-note">If the frame stays dark, the film hasn't been dropped into <code>flowers-assets/video/</code> yet.</p>
     </div>
   </div>
 </section>
@@ -668,6 +668,57 @@
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let W = 0, H = 0, DPR = 1;
 
+  // The whole screen is the lake: seeds are fracture points, and each
+  // one's Voronoi cell is one plate of ice. Plates always tile the full
+  // canvas with no gaps — the shared edges between neighboring cells
+  // ARE the cracks, meeting properly at vertices like real fractured ice.
+  let seeds = [];
+  let spacing = 90;
+  const pairBaseline = new Map();
+  const pairLastBump = new Map();
+
+  function addSeed(x,y,extra){
+    seeds.push({
+      x, y,
+      vx:(Math.random()-0.5)*0.5, vy:(Math.random()-0.5)*0.5,
+      hue: 178+Math.random()*20,
+      extra: !!extra, addedAt: extra ? performance.now() : 0, flowered: !extra
+    });
+  }
+
+  function initSeeds(){
+    seeds = [];
+    pairBaseline.clear(); pairLastBump.clear();
+    const isSmall = W<640;
+    const targetCount = isSmall ? 24 : Math.min(58, Math.max(30, Math.round((W*H)/26000)));
+    spacing = Math.sqrt((W*H)/targetCount);
+    const cols = Math.max(1, Math.round(W/spacing));
+    const rows = Math.max(1, Math.round(H/spacing));
+    const cw = W/cols, ch = H/rows;
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        if(Math.random() < 0.22) continue; // skip a few cells -> some larger plates
+        const x = c*cw + cw*(0.2+Math.random()*0.6);
+        const y = r*ch + ch*(0.2+Math.random()*0.6);
+        addSeed(x,y,false);
+        if(Math.random() < 0.16){
+          addSeed(x+(Math.random()-0.5)*cw*0.7, y+(Math.random()-0.5)*ch*0.7, false); // a small shard beside it
+        }
+      }
+    }
+  }
+
+  const MAX_EXTRA_SEEDS = 60;
+  function insertCrack(x,y){
+    const extras = seeds.filter(s=>s.extra);
+    while(extras.length >= MAX_EXTRA_SEEDS){
+      const oldest = extras.shift();
+      const idx = seeds.indexOf(oldest);
+      if(idx>=0) seeds.splice(idx,1);
+    }
+    addSeed(x,y,true);
+  }
+
   function resize(){
     DPR = Math.min(window.devicePixelRatio || 1, 2);
     W = hero.clientWidth; H = hero.clientHeight;
@@ -676,107 +727,54 @@
     canvas.style.width = W+'px';
     canvas.style.height = H+'px';
     ctx.setTransform(DPR,0,0,DPR,0,0);
-    if(floes.length){
-      floes.forEach(f=>{
-        f.x = Math.min(Math.max(f.x, f.r), Math.max(f.r, W-f.r));
-        f.y = Math.min(Math.max(f.y, f.r), Math.max(f.r, H-f.r));
-      });
-    }
+    initSeeds();
   }
 
-  function makeFloePoly(r){
-    const pts = [];
-    const n = 9 + Math.floor(Math.random()*5);
+  // ---- Voronoi cell via successive half-plane clipping (Sutherland-Hodgman) ----
+  // Every vertex is tagged with the neighbor whose bisector created it (or
+  // null for a canvas corner). A later clip can trim or drop an earlier
+  // neighbor's vertex, so ownership is only read off the FINAL polygon —
+  // two adjacent vertices sharing an owner are exactly that neighbor's
+  // real, un-trimmed shared edge.
+  function clipHalfPlane(poly, mid, dir, ownerId){
+    const n = poly.length;
+    if(n===0) return [];
+    const out = [];
+    const side = (p)=> (p.x-mid.x)*dir.x + (p.y-mid.y)*dir.y;
     for(let i=0;i<n;i++){
-      pts.push({ a:(i/n)*Math.PI*2, r: r*(0.72+Math.random()*0.5) });
+      const curr = poly[i], prev = poly[(i-1+n)%n];
+      const dCurr = side(curr), dPrev = side(prev);
+      const currIn = dCurr <= 0, prevIn = dPrev <= 0;
+      if(currIn !== prevIn){
+        const t = dPrev/(dPrev-dCurr);
+        out.push({ x: prev.x+(curr.x-prev.x)*t, y: prev.y+(curr.y-prev.y)*t, owner: ownerId });
+      }
+      if(currIn) out.push(curr);
     }
-    return pts;
+    return out;
   }
-
-  class Floe{
-    constructor(x,y,r){
-      this.x=x; this.y=y; this.r=r;
-      this.vx=(Math.random()-0.5)*0.5;
-      this.vy=(Math.random()-0.5)*0.5;
-      this.rot=Math.random()*Math.PI*2;
-      this.vr=(Math.random()-0.5)*0.004;
-      this.poly=makeFloePoly(r);
-      this.hue=178+Math.random()*20;
-      this.lastBump=0;
-      this.cracklets=[];
-      const cn=2+Math.floor(Math.random()*3);
-      for(let i=0;i<cn;i++){
-        this.cracklets.push({
-          a1:Math.random()*Math.PI*2, l1:r*(0.2+Math.random()*0.3),
-          a2:Math.random()*Math.PI*2, l2:r*(0.15+Math.random()*0.3)
-        });
-      }
+  function computeCell(i){
+    const si = seeds[i];
+    let poly = [
+      {x:0,y:0,owner:null}, {x:W,y:0,owner:null},
+      {x:W,y:H,owner:null}, {x:0,y:H,owner:null}
+    ];
+    for(let j=0;j<seeds.length;j++){
+      if(j===i) continue;
+      const sj = seeds[j];
+      const mid = {x:(si.x+sj.x)/2, y:(si.y+sj.y)/2};
+      const dir = {x:sj.x-si.x, y:sj.y-si.y};
+      if(Math.abs(dir.x)<1e-6 && Math.abs(dir.y)<1e-6) continue;
+      poly = clipHalfPlane(poly, mid, dir, j);
+      if(poly.length<3) break;
     }
-    path(ox,oy){
-      ctx.beginPath();
-      this.poly.forEach((p,i)=>{
-        const ang=p.a+this.rot;
-        const px=this.x+ox+Math.cos(ang)*p.r;
-        const py=this.y+oy+Math.sin(ang)*p.r;
-        if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
-      });
-      ctx.closePath();
+    const cuts = {};
+    const n = poly.length;
+    for(let k=0;k<n;k++){
+      const a = poly[k], b = poly[(k+1)%n];
+      if(a.owner!==null && a.owner===b.owner) cuts[a.owner] = [a,b];
     }
-    draw(){
-      this.path(0, this.r*0.06);
-      ctx.fillStyle='rgba(4,20,20,0.28)';
-      ctx.fill();
-
-      this.path(0,0);
-      const g = ctx.createRadialGradient(this.x-this.r*0.3, this.y-this.r*0.35, this.r*0.15, this.x, this.y, this.r*1.05);
-      g.addColorStop(0,'#f4fbf9');
-      g.addColorStop(0.55,`hsl(${this.hue} 38% 84%)`);
-      g.addColorStop(1,`hsl(${this.hue} 45% 66%)`);
-      ctx.fillStyle=g; ctx.fill();
-      ctx.lineWidth=1.4; ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.stroke();
-
-      ctx.save();
-      ctx.strokeStyle='rgba(70,100,100,0.28)'; ctx.lineWidth=1;
-      this.cracklets.forEach(c=>{
-        const a1=c.a1+this.rot, a2=c.a2+this.rot;
-        ctx.beginPath();
-        ctx.moveTo(this.x,this.y);
-        ctx.lineTo(this.x+Math.cos(a1)*c.l1, this.y+Math.sin(a1)*c.l1);
-        ctx.moveTo(this.x,this.y);
-        ctx.lineTo(this.x+Math.cos(a2)*c.l2, this.y+Math.sin(a2)*c.l2);
-        ctx.stroke();
-      });
-      ctx.restore();
-    }
-  }
-
-  let floes = [];
-  function initFloes(){
-    floes = [];
-    const isSmall = W<640;
-    const minR = isSmall ? 20 : 30;
-    const maxR = isSmall ? 90 : Math.min(200, Math.max(120, W*0.115));
-    const targetArea = W*H*1.4; // floes tolerate overlap at spawn, so pack past 1x
-    const maxFloes = isSmall ? 26 : 55;
-    let totalArea = 0, tries = 0;
-    while(totalArea < targetArea && floes.length < maxFloes && tries < 3000){
-      tries++;
-      const roll = Math.random();
-      let r;
-      if(roll < 0.5) r = minR + Math.random()*(maxR-minR)*0.32;
-      else if(roll < 0.85) r = minR + (maxR-minR)*0.28 + Math.random()*(maxR-minR)*0.4;
-      else r = minR + (maxR-minR)*0.62 + Math.random()*(maxR-minR)*0.38;
-      const x = r+Math.random()*Math.max(1,(W-2*r));
-      const y = r+Math.random()*Math.max(1,(H-2*r));
-      let ok = true;
-      for(const f of floes){
-        if(Math.hypot(f.x-x,f.y-y) < (f.r+r)*0.55){ ok=false; break; }
-      }
-      if(ok){
-        floes.push(new Floe(x,y,r));
-        totalArea += Math.PI*r*r;
-      }
-    }
+    return {poly, cuts};
   }
 
   // ---- flowers (also: the little character) ----
@@ -813,52 +811,18 @@
     return age<life;
   }
 
-  // ---- radial crack bursts (center press) ----
-  let bursts = [];
-  function crackBurst(cx,cy){
-    const n = 10+Math.floor(Math.random()*4);
-    const lines = [];
-    for(let i=0;i<n;i++){
-      const a=(i/n)*Math.PI*2 + (Math.random()-0.5)*0.35;
-      lines.push({a, len: 90+Math.random()*Math.min(140,Math.min(W,H)*0.32), jag:6+Math.random()*9});
-    }
-    bursts.push({cx,cy,lines,start:performance.now(),flowered:false});
-    floes.forEach(f=>{
-      const dx=f.x-cx, dy=f.y-cy;
-      const d=Math.max(30,Math.hypot(dx,dy));
-      const force=Math.min(2.8, 3600/(d*d));
-      f.vx += (dx/d)*force;
-      f.vy += (dy/d)*force;
-    });
-  }
-  function drawBurst(b,t){
-    const age=t-b.start, dur=650, p=Math.min(1,age/dur);
+  // ---- a bright flash along a seam the instant it cracks ----
+  let flashes = [];
+  function addFlash(p1,p2){ flashes.push({p1,p2,start:performance.now()}); }
+  function drawFlash(fl,t){
+    const age=t-fl.start, dur=520;
+    if(age>dur) return false;
     ctx.save();
-    ctx.strokeStyle='rgba(255,255,255,0.85)'; ctx.lineWidth=2;
-    b.lines.forEach(line=>{
-      const len=line.len*p;
-      ctx.beginPath(); ctx.moveTo(b.cx,b.cy);
-      const seg=4;
-      for(let i=1;i<=seg;i++){
-        const t2=i/seg, dist=len*t2;
-        const wob=Math.sin(t2*Math.PI*3+line.a*4)*line.jag*t2;
-        const nx=b.cx+Math.cos(line.a)*dist + Math.cos(line.a+Math.PI/2)*wob;
-        const ny=b.cy+Math.sin(line.a)*dist + Math.sin(line.a+Math.PI/2)*wob;
-        ctx.lineTo(nx,ny);
-      }
-      ctx.stroke();
-    });
+    ctx.strokeStyle=`rgba(255,255,255,${0.75*(1-age/dur)})`;
+    ctx.lineWidth=2.4;
+    ctx.beginPath(); ctx.moveTo(fl.p1.x,fl.p1.y); ctx.lineTo(fl.p2.x,fl.p2.y); ctx.stroke();
     ctx.restore();
-    if(p>=1 && !b.flowered){
-      b.flowered=true;
-      b.lines.forEach(line=>{
-        if(Math.random()<0.65){
-          const dist=line.len*(0.5+Math.random()*0.45);
-          spawnFlower(b.cx+Math.cos(line.a)*dist, b.cy+Math.sin(line.a)*dist, 0.85+Math.random()*0.5);
-        }
-      });
-    }
-    return age < dur+50;
+    return true;
   }
 
   function pointFromEvent(e){
@@ -871,19 +835,31 @@
     const dCenter = Math.hypot(x-cx,y-cy);
     const centerR = Math.max(70, Math.min(W,H)*0.11);
     if(dCenter < centerR){
-      crackBurst(cx,cy);
+      // press the center: shatter it into several new fracture points at once
+      const n = 5+Math.floor(Math.random()*3);
+      for(let i=0;i<n;i++){
+        const a = (i/n)*Math.PI*2 + Math.random()*0.6;
+        const d = spacing*(0.25+Math.random()*0.35);
+        insertCrack(cx+Math.cos(a)*d, cy+Math.sin(a)*d);
+      }
+      seeds.forEach(s=>{
+        const dx=s.x-cx, dy=s.y-cy;
+        const d=Math.max(30,Math.hypot(dx,dy));
+        const force=Math.min(2.4, 2600/(d*d));
+        s.vx += (dx/d)*force; s.vy += (dy/d)*force;
+      });
       hero.classList.add('cracked-once');
       return;
     }
-    let nearest=null, nd=Infinity;
-    floes.forEach(f=>{ const d=Math.hypot(f.x-x,f.y-y); if(d<nd){nd=d; nearest=f;} });
-    if(nearest && nd < nearest.r*1.35){
-      const dx=nearest.x-x, dy=nearest.y-y;
-      const d=Math.max(10,Math.hypot(dx,dy));
-      nearest.vx += (dx/d)*1.9;
-      nearest.vy += (dy/d)*1.9;
-    }
-    spawnFlower(x,y,0.75);
+    insertCrack(x,y);
+    seeds.forEach(s=>{
+      const dx=s.x-x, dy=s.y-y;
+      const d=Math.hypot(dx,dy);
+      if(d<spacing*1.4 && d>1){
+        const force = Math.min(1.2, (spacing*1.4-d)*0.02);
+        s.vx += (dx/d)*force; s.vy += (dy/d)*force;
+      }
+    });
   }, {passive:true});
 
   document.getElementById('scrollCue').addEventListener('click', ()=>{
@@ -896,52 +872,108 @@
     g.addColorStop(0,'#0c2b2a'); g.addColorStop(1,'#0a2321');
     ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
 
-    floes.forEach(f=>{
-      f.x+=f.vx; f.y+=f.vy; f.rot+=f.vr;
-      f.vx*=0.998; f.vy*=0.998;
-      if(f.x<f.r){f.x=f.r; f.vx*=-0.8;}
-      if(f.x>W-f.r){f.x=W-f.r; f.vx*=-0.8;}
-      if(f.y<f.r){f.y=f.r; f.vy*=-0.8;}
-      if(f.y>H-f.r){f.y=H-f.r; f.vy*=-0.8;}
+    // drift, bounce off the edges of the lake, and softly resist collapsing into a neighbor
+    seeds.forEach(s=>{
+      s.x+=s.vx; s.y+=s.vy;
+      s.vx*=0.996; s.vy*=0.996;
+      if(s.x<0){s.x=0; s.vx*=-0.8;}
+      if(s.x>W){s.x=W; s.vx*=-0.8;}
+      if(s.y<0){s.y=0; s.vy*=-0.8;}
+      if(s.y>H){s.y=H; s.vy*=-0.8;}
     });
-    for(let i=0;i<floes.length;i++){
-      for(let j=i+1;j<floes.length;j++){
-        const a=floes[i], b=floes[j];
+    const minDist = spacing*0.4;
+    for(let i=0;i<seeds.length;i++){
+      for(let j=i+1;j<seeds.length;j++){
+        const a=seeds[i], b=seeds[j];
         const dx=b.x-a.x, dy=b.y-a.y;
         const dist=Math.hypot(dx,dy)||0.01;
-        const minD=(a.r+b.r)*0.82;
-        if(dist<minD){
-          const nx=dx/dist, ny=dy/dist;
-          const overlap=(minD-dist)/2;
-          a.x-=nx*overlap; a.y-=ny*overlap;
-          b.x+=nx*overlap; b.y+=ny*overlap;
-          const avx=a.vx, avy=a.vy;
-          a.vx=b.vx*0.97; a.vy=b.vy*0.97;
-          b.vx=avx*0.97; b.vy=avy*0.97;
-          if(t-a.lastBump>320 && t-b.lastBump>320){
-            a.lastBump=t; b.lastBump=t;
-            spawnFlower(a.x+nx*a.r*0.8, a.y+ny*a.r*0.8, 0.7+Math.random()*0.5);
-          }
+        if(dist<minDist){
+          const nx=dx/dist, ny=dy/dist, push=(minDist-dist)*0.12;
+          a.x-=nx*push; a.y-=ny*push;
+          b.x+=nx*push; b.y+=ny*push;
         }
       }
     }
 
-    floes.forEach(f=>f.draw());
+    const cells = seeds.map((s,i)=>computeCell(i));
+
+    // fill every plate — together they cover the entire lake, edge to edge
+    cells.forEach((cell,i)=>{
+      const poly = cell.poly;
+      if(poly.length<3) return;
+      const s = seeds[i];
+      ctx.beginPath();
+      poly.forEach((p,k)=> k===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
+      ctx.closePath();
+      const cx = poly.reduce((a,p)=>a+p.x,0)/poly.length;
+      const cy = poly.reduce((a,p)=>a+p.y,0)/poly.length;
+      const rad = Math.max(20, Math.hypot(poly[0].x-cx, poly[0].y-cy));
+      const g2 = ctx.createRadialGradient(cx-rad*0.25,cy-rad*0.3,rad*0.1, cx,cy,rad*1.05);
+      g2.addColorStop(0,'#f4fbf9');
+      g2.addColorStop(0.55,`hsl(${s.hue} 36% 83%)`);
+      g2.addColorStop(1,`hsl(${s.hue} 42% 65%)`);
+      ctx.fillStyle=g2; ctx.fill();
+    });
+
+    // the crack network: exactly the true shared edges, meeting correctly at every vertex
+    ctx.strokeStyle='rgba(8,26,25,0.55)';
+    ctx.lineWidth=2;
+    const seen = new Set();
+    cells.forEach((cell,i)=>{
+      Object.keys(cell.cuts).forEach(jStr=>{
+        const j = parseInt(jStr,10);
+        const key = i<j ? i+'-'+j : j+'-'+i;
+        if(seen.has(key)) return;
+        seen.add(key);
+        const [p1,p2] = cell.cuts[jStr];
+        ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
+
+        // bump: this pair of plates has compressed past its natural resting gap
+        const dist = Math.hypot(seeds[i].x-seeds[j].x, seeds[i].y-seeds[j].y);
+        if(!pairBaseline.has(key)) pairBaseline.set(key, dist);
+        const baseline = pairBaseline.get(key);
+        const last = pairLastBump.get(key) || 0;
+        if(dist < baseline*0.86 && t-last>340){
+          pairLastBump.set(key, t);
+          spawnFlower((p1.x+p2.x)/2, (p1.y+p2.y)/2, 0.7+Math.random()*0.5);
+          addFlash(p1,p2);
+        }
+      });
+    });
+
+    // a freshly pressed crack blooms once, right along its brand-new seams
+    seeds.forEach((s,i)=>{
+      if(s.extra && !s.flowered && t-s.addedAt>40){
+        s.flowered = true;
+        Object.values(cells[i].cuts).forEach(([p1,p2])=>{
+          if(Math.random()<0.8){
+            spawnFlower((p1.x+p2.x)/2, (p1.y+p2.y)/2, 0.85+Math.random()*0.5);
+            addFlash(p1,p2);
+          }
+        });
+      }
+    });
+
     flowers = flowers.filter(f=>drawFlower(f,t));
-    bursts = bursts.filter(b=>drawBurst(b,t));
+    flashes = flashes.filter(fl=>drawFlash(fl,t));
 
     if(!reduceMotion) requestAnimationFrame(step);
   }
 
   resize();
-  initFloes();
   window.addEventListener('resize', resize);
 
   if(reduceMotion){
-    for(let i=0;i<5 && floes.length;i++){
-      const f = floes[Math.floor(Math.random()*floes.length)];
-      spawnFlower(f.x+(Math.random()-0.5)*f.r*0.6, f.y+(Math.random()-0.5)*f.r*0.6, 1);
-    }
+    const cells = seeds.map((s,i)=>computeCell(i));
+    let sparks=0;
+    cells.forEach(cell=>{
+      Object.values(cell.cuts).forEach(([p1,p2])=>{
+        if(sparks<6 && Math.random()<0.18){
+          sparks++;
+          spawnFlower((p1.x+p2.x)/2, (p1.y+p2.y)/2, 1);
+        }
+      });
+    });
     flowers.forEach(f=> f.born = performance.now()-400 );
     step(performance.now());
   } else {
@@ -987,10 +1019,31 @@
 })();
 
 /* =========================================================
-   FILM — play overlay
+   FILM — self-hosted video, or an unlisted YouTube/Vimeo embed
+   Set FILM_EMBED_URL to a YouTube or Vimeo share link and the
+   local player below is swapped for that platform's embed.
    ========================================================= */
 (function(){
+  const FILM_EMBED_URL = "https://youtu.be/YP1GaRcpvhA";
+  if(!FILM_EMBED_URL) return;
+
+  function toEmbedSrc(url){
+    let m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
+    if(m) return `https://www.youtube.com/embed/${m[1]}?rel=0`;
+    m = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+    if(m) return `https://player.vimeo.com/video/${m[1]}`;
+    return null;
+  }
+  const src = toEmbedSrc(FILM_EMBED_URL);
+  const frame = document.getElementById('filmFrame');
+  if(src && frame){
+    frame.innerHTML = `<iframe src="${src}" title="Flowers Are Blooming in Antarctica — the film" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>`;
+  }
+})();
+
+(function(){
   const video = document.getElementById('mainVideo');
+  if(!video) return;
   const overlay = document.getElementById('playOverlay');
   overlay.addEventListener('click', ()=>{
     video.play().catch(()=>{});
