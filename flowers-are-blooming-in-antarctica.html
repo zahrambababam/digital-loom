@@ -196,6 +196,54 @@
   #film p{font-size:16px; line-height:1.7; color:#cfe6df; margin:0 0 14px;}
   .film-note{font-family:'Space Grotesk',sans-serif; font-size:12px; color:#8fb3aa; letter-spacing:.02em; margin-top:18px;}
 
+  /* ---------------- deck (full pdf, swipeable) ---------------- */
+  #deck{padding:0 0 88px; background:var(--water-1); color:var(--ice-white);}
+  #deck .deck-head{max-width:760px; margin:0 auto 30px; text-align:center; padding:0 24px;}
+  #deck .deck-head h2{font-family:'Permanent Marker',cursive; font-weight:400; font-size:clamp(24px,3.6vw,34px); color:var(--ice-white); margin:0 0 10px;}
+  #deck .deck-head p{font-size:15px; line-height:1.6; color:#cfe6df; margin:0;}
+  .deck-viewer{position:relative; max-width:1180px; margin:0 auto; padding:0 24px;}
+  .deck-track{
+    display:flex; gap:18px; overflow-x:auto; scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch; padding:4px 0 18px; scrollbar-width:thin;
+  }
+  .deck-track::-webkit-scrollbar{height:6px;}
+  .deck-track::-webkit-scrollbar-thumb{background:rgba(244,251,249,0.25); border-radius:4px;}
+  .deck-page{
+    flex:0 0 auto; width:min(78vw, 640px); scroll-snap-align:center; cursor:zoom-in;
+    border-radius:8px; overflow:hidden; background:#0a1e1c; box-shadow:0 16px 40px rgba(0,0,0,0.4);
+  }
+  .deck-page img{width:100%; display:block;}
+  .deck-controls{
+    display:flex; align-items:center; justify-content:center; gap:18px; margin-top:6px;
+  }
+  .deck-arrow{
+    width:42px; height:42px; border-radius:50%; border:1px solid rgba(244,251,249,0.4);
+    background:rgba(244,251,249,0.06); color:var(--ice-white); font-size:18px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .deck-arrow:hover{background:rgba(244,251,249,0.16);}
+  .deck-arrow:disabled{opacity:.3; cursor:default;}
+  .deck-count{font-family:'Space Grotesk',sans-serif; font-size:13px; letter-spacing:.05em; color:#cfe6df; min-width:64px; text-align:center;}
+  .deck-hint{text-align:center; font-family:'Space Grotesk',sans-serif; font-size:11.5px; letter-spacing:.03em; color:#7ea69c; margin-top:12px;}
+
+  #deckLightbox{
+    position:fixed; inset:0; z-index:110; display:none; background:rgba(6,14,13,0.94);
+    align-items:center; justify-content:center; padding:30px;
+  }
+  #deckLightbox.open{display:flex;}
+  #deckLightbox img{max-width:100%; max-height:88vh; border-radius:6px; box-shadow:0 20px 60px rgba(0,0,0,0.6);}
+  #deckLightbox .lb-close{
+    position:absolute; top:20px; right:24px; width:40px; height:40px; border-radius:50%;
+    border:none; background:rgba(244,251,249,0.15); color:var(--ice-white); font-size:18px; cursor:pointer;
+  }
+  #deckLightbox .lb-arrow{
+    position:absolute; top:50%; transform:translateY(-50%); width:48px; height:48px; border-radius:50%;
+    border:1px solid rgba(244,251,249,0.4); background:rgba(244,251,249,0.08); color:var(--ice-white);
+    font-size:20px; cursor:pointer;
+  }
+  #deckLightbox .lb-prev{left:18px;} #deckLightbox .lb-next{right:18px;}
+  @media (max-width:640px){ #deckLightbox .lb-arrow{width:38px; height:38px; font-size:16px;} }
+
   /* ---------------- collection ---------------- */
   #collection{padding:96px 0 60px; background:var(--paper);}
   .companion-wrap{display:flex; flex-direction:column; align-items:center; margin-bottom:8px;}
@@ -348,6 +396,7 @@
   <span class="brand display" style="font-size:14px;">Flowers Are Blooming in Antarctica</span>
   <div class="links">
     <a href="#film">Watch</a>
+    <a href="#deck">The Deck</a>
     <a href="#collection">Collection</a>
     <a href="#process">Process</a>
     <a href="#credits">Credits</a>
@@ -420,6 +469,31 @@
     </div>
   </div>
 </section>
+
+<!-- ================= DECK (full presentation, swipeable) ================= -->
+<section id="deck" data-nav-theme="dark">
+  <div class="deck-head reveal">
+    <span class="kicker" style="color:var(--coral);">the full deck</span>
+    <h2>Swipe through the presentation, page by page.</h2>
+    <p>All twenty-four pages of the original deck — the sketches, the notebook, the process. Drag, swipe, or use the arrows.</p>
+  </div>
+  <div class="deck-viewer reveal">
+    <div class="deck-track" id="deckTrack"></div>
+    <div class="deck-controls">
+      <button class="deck-arrow" id="deckPrev" aria-label="Previous page">‹</button>
+      <span class="deck-count" id="deckCount">1 / 24</span>
+      <button class="deck-arrow" id="deckNext" aria-label="Next page">›</button>
+    </div>
+    <p class="deck-hint">tap a page to view it full-size</p>
+  </div>
+</section>
+
+<div id="deckLightbox" aria-hidden="true">
+  <button class="lb-close" id="lbClose" aria-label="Close">✕</button>
+  <button class="lb-arrow lb-prev" id="lbPrev" aria-label="Previous page">‹</button>
+  <img id="lbImg" src="" alt="">
+  <button class="lb-arrow lb-next" id="lbNext" aria-label="Next page">›</button>
+</div>
 
 <!-- ================= COLLECTION ================= -->
 <section id="collection" data-nav-theme="light">
@@ -622,10 +696,10 @@
   class Floe{
     constructor(x,y,r){
       this.x=x; this.y=y; this.r=r;
-      this.vx=(Math.random()-0.5)*0.3;
-      this.vy=(Math.random()-0.5)*0.3;
+      this.vx=(Math.random()-0.5)*0.5;
+      this.vy=(Math.random()-0.5)*0.5;
       this.rot=Math.random()*Math.PI*2;
-      this.vr=(Math.random()-0.5)*0.003;
+      this.vr=(Math.random()-0.5)*0.004;
       this.poly=makeFloePoly(r);
       this.hue=178+Math.random()*20;
       this.lastBump=0;
@@ -679,25 +753,36 @@
   let floes = [];
   function initFloes(){
     floes = [];
-    const count = W<640 ? 8 : (W<1100 ? 11 : 15);
-    let tries=0;
-    while(floes.length<count && tries<700){
+    const isSmall = W<640;
+    const minR = isSmall ? 20 : 30;
+    const maxR = isSmall ? 90 : Math.min(200, Math.max(120, W*0.115));
+    const targetArea = W*H*1.4; // floes tolerate overlap at spawn, so pack past 1x
+    const maxFloes = isSmall ? 26 : 55;
+    let totalArea = 0, tries = 0;
+    while(totalArea < targetArea && floes.length < maxFloes && tries < 3000){
       tries++;
-      const r = (W<640?42:56) + Math.random()*(W<640?42:70);
+      const roll = Math.random();
+      let r;
+      if(roll < 0.5) r = minR + Math.random()*(maxR-minR)*0.32;
+      else if(roll < 0.85) r = minR + (maxR-minR)*0.28 + Math.random()*(maxR-minR)*0.4;
+      else r = minR + (maxR-minR)*0.62 + Math.random()*(maxR-minR)*0.38;
       const x = r+Math.random()*Math.max(1,(W-2*r));
       const y = r+Math.random()*Math.max(1,(H-2*r));
-      let ok=true;
+      let ok = true;
       for(const f of floes){
-        if(Math.hypot(f.x-x,f.y-y) < (f.r+r)*0.72){ ok=false; break; }
+        if(Math.hypot(f.x-x,f.y-y) < (f.r+r)*0.55){ ok=false; break; }
       }
-      if(ok) floes.push(new Floe(x,y,r));
+      if(ok){
+        floes.push(new Floe(x,y,r));
+        totalArea += Math.PI*r*r;
+      }
     }
   }
 
   // ---- flowers (also: the little character) ----
   let flowers = [];
   function spawnFlower(x,y,scale){
-    if(flowers.length>32) flowers.shift();
+    if(flowers.length>55) flowers.shift();
     flowers.push({x,y,born:performance.now(), scale: scale||1, hue: 8+Math.random()*24});
   }
   function drawFlower(f,t){
@@ -813,7 +898,7 @@
 
     floes.forEach(f=>{
       f.x+=f.vx; f.y+=f.vy; f.rot+=f.vr;
-      f.vx*=0.995; f.vy*=0.995;
+      f.vx*=0.998; f.vy*=0.998;
       if(f.x<f.r){f.x=f.r; f.vx*=-0.8;}
       if(f.x>W-f.r){f.x=W-f.r; f.vx*=-0.8;}
       if(f.y<f.r){f.y=f.r; f.vy*=-0.8;}
@@ -831,9 +916,9 @@
           a.x-=nx*overlap; a.y-=ny*overlap;
           b.x+=nx*overlap; b.y+=ny*overlap;
           const avx=a.vx, avy=a.vy;
-          a.vx=b.vx*0.9; a.vy=b.vy*0.9;
-          b.vx=avx*0.9; b.vy=avy*0.9;
-          if(t-a.lastBump>500 && t-b.lastBump>500){
+          a.vx=b.vx*0.97; a.vy=b.vy*0.97;
+          b.vx=avx*0.97; b.vy=avy*0.97;
+          if(t-a.lastBump>320 && t-b.lastBump>320){
             a.lastBump=t; b.lastBump=t;
             spawnFlower(a.x+nx*a.r*0.8, a.y+ny*a.r*0.8, 0.7+Math.random()*0.5);
           }
@@ -913,6 +998,83 @@
   });
   video.addEventListener('play', ()=> overlay.classList.add('hidden'));
   video.addEventListener('pause', ()=> overlay.classList.remove('hidden'));
+})();
+
+/* =========================================================
+   DECK — swipeable full presentation + lightbox
+   ========================================================= */
+(function(){
+  const TOTAL = 24;
+  const track = document.getElementById('deckTrack');
+  track.innerHTML = Array.from({length:TOTAL}, (_,i)=>{
+    const n = String(i+1).padStart(2,'0');
+    return `<div class="deck-page" data-i="${i}"><img src="flowers-assets/deck/page-${n}.jpg" alt="Presentation page ${i+1} of ${TOTAL}" loading="${i<2?'eager':'lazy'}"></div>`;
+  }).join('');
+  const pages = Array.from(track.querySelectorAll('.deck-page'));
+  const countEl = document.getElementById('deckCount');
+  const prevBtn = document.getElementById('deckPrev');
+  const nextBtn = document.getElementById('deckNext');
+  let current = 0;
+
+  function updateCount(i){
+    current = i;
+    countEl.textContent = (i+1) + ' / ' + TOTAL;
+    prevBtn.disabled = i<=0;
+    nextBtn.disabled = i>=TOTAL-1;
+  }
+  function goTo(i, smooth){
+    i = Math.max(0, Math.min(TOTAL-1, i));
+    pages[i].scrollIntoView({behavior: smooth===false?'auto':'smooth', inline:'center', block:'nearest'});
+    updateCount(i);
+  }
+  prevBtn.addEventListener('click', ()=> goTo(current-1));
+  nextBtn.addEventListener('click', ()=> goTo(current+1));
+
+  if('IntersectionObserver' in window){
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(en=>{
+        if(en.isIntersecting && en.intersectionRatio>0.6){
+          updateCount(parseInt(en.target.dataset.i,10));
+        }
+      });
+    }, {root:track, threshold:[0.6]});
+    pages.forEach(p=>io.observe(p));
+  }
+  updateCount(0);
+
+  // lightbox
+  const lb = document.getElementById('deckLightbox');
+  const lbImg = document.getElementById('lbImg');
+  function openLb(i){
+    current = i;
+    const n = String(i+1).padStart(2,'0');
+    lbImg.src = 'flowers-assets/deck/page-' + n + '.jpg';
+    lbImg.alt = 'Presentation page ' + (i+1) + ' of ' + TOTAL;
+    lb.classList.add('open');
+    lb.setAttribute('aria-hidden','false');
+    document.body.style.overflow='hidden';
+  }
+  function closeLb(){
+    lb.classList.remove('open');
+    lb.setAttribute('aria-hidden','true');
+    document.body.style.overflow='';
+    goTo(current, false);
+  }
+  track.addEventListener('click', (e)=>{
+    const p = e.target.closest('.deck-page');
+    if(p) openLb(parseInt(p.dataset.i,10));
+  });
+  document.getElementById('lbClose').addEventListener('click', closeLb);
+  document.getElementById('lbPrev').addEventListener('click', ()=> openLb(Math.max(0,current-1)));
+  document.getElementById('lbNext').addEventListener('click', ()=> openLb(Math.min(TOTAL-1,current+1)));
+  lb.addEventListener('click', (e)=>{ if(e.target===lb) closeLb(); });
+  document.addEventListener('keydown', (e)=>{
+    if(lb.classList.contains('open')){
+      if(e.key==='Escape') closeLb();
+      if(e.key==='ArrowLeft') openLb(Math.max(0,current-1));
+      if(e.key==='ArrowRight') openLb(Math.min(TOTAL-1,current+1));
+    }
+  });
 })();
 
 /* =========================================================
