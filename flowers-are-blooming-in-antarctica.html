@@ -75,7 +75,10 @@
     position:absolute; inset:0; width:100%; height:100%;
     touch-action:none; cursor:pointer;
   }
-  .ice-overlay{position:absolute; inset:0; pointer-events:none;}
+  .ice-overlay{
+    position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(ellipse 65% 60% at 50% 32%, rgba(3,12,11,0.4), transparent 68%);
+  }
   .hero-top{
     position:absolute; top:7%; left:50%; transform:translateX(-50%);
     text-align:center; width:100%; padding:0 20px; color:var(--ice-white);
@@ -88,7 +91,7 @@
     font-family:'Permanent Marker', cursive; font-weight:400;
     font-size:clamp(30px,6.4vw,74px);
     line-height:1.04; margin:0; color:var(--ice-white);
-    text-shadow:0 2px 18px rgba(0,0,0,0.35);
+    text-shadow:0 2px 6px rgba(0,0,0,0.5), 0 10px 32px rgba(0,0,0,0.4);
   }
   .hero-top .byline{
     font-family:'Caveat', cursive; font-size:clamp(18px,2.4vw,26px);
@@ -199,7 +202,7 @@
   /* ---------------- deck (full pdf, swipeable) ---------------- */
   #presentation{padding:90px 0 100px; background:var(--water-1); color:var(--ice-white);}
   .presentation-case{
-    max-width:1220px; margin:0 auto; padding:52px 40px 56px;
+    max-width:1320px; margin:0 auto; padding:52px 40px 56px;
     border:1px solid rgba(244,251,249,0.14); border-radius:24px;
     background:radial-gradient(ellipse 90% 55% at 50% 0%, rgba(244,251,249,0.05), transparent 62%);
   }
@@ -207,8 +210,7 @@
   .presentation-head{max-width:640px; margin:0 auto 44px; text-align:center;}
   .presentation-head h2{font-family:'Permanent Marker',cursive; font-weight:400; font-size:clamp(24px,3.6vw,34px); color:var(--ice-white); margin:0 0 12px;}
   .presentation-head p{font-size:15px; line-height:1.6; color:#cfe6df; margin:0;}
-  .presentation-case .film-frame{margin-bottom:56px;}
-  .deck-viewer{position:relative;}
+  .deck-viewer{position:relative; margin-bottom:56px;}
   .deck-track{
     display:flex; gap:18px; overflow-x:auto; scroll-snap-type:x mandatory;
     -webkit-overflow-scrolling:touch; padding:4px 0 18px; scrollbar-width:thin;
@@ -216,7 +218,7 @@
   .deck-track::-webkit-scrollbar{height:6px;}
   .deck-track::-webkit-scrollbar-thumb{background:rgba(244,251,249,0.25); border-radius:4px;}
   .deck-page{
-    flex:0 0 auto; width:min(78vw, 640px); scroll-snap-align:center; cursor:zoom-in;
+    flex:0 0 auto; width:min(88vw, 820px); scroll-snap-align:center; cursor:zoom-in;
     border-radius:8px; overflow:hidden; background:#0a1e1c; box-shadow:0 16px 40px rgba(0,0,0,0.4);
   }
   .deck-page img{width:100%; display:block;}
@@ -333,17 +335,8 @@
   <div class="presentation-case">
     <div class="presentation-head reveal">
       <span class="kicker" style="color:var(--coral);">the presentation</span>
-      <h2>Watch it. Then walk through every page of it.</h2>
-      <p>The film first — the drape, the walk, the room. Then all twenty-four pages of the original deck: the sketches, the notebook, the process. Drag, swipe, or use the arrows.</p>
-    </div>
-
-    <div class="reveal film-frame" id="filmFrame">
-      <video id="mainVideo" poster="flowers-assets/show.jpg" controls playsinline preload="none">
-        <source src="flowers-assets/video/flowers-are-blooming-in-antarctica.mp4" type="video/mp4">
-      </video>
-      <button class="playbtn" id="playOverlay" aria-label="Play film">
-        <svg width="72" height="72" viewBox="0 0 72 72"><circle cx="36" cy="36" r="35" fill="rgba(244,251,249,0.16)" stroke="#f4fbf9" stroke-width="1.5"/><path d="M29 23 L50 36 L29 49 Z" fill="#f4fbf9"/></svg>
-      </button>
+      <h2>Every page of it. Then watch it move.</h2>
+      <p>All twenty-four pages of the original deck — the sketches, the notebook, the process. Drag, swipe, or use the arrows. Then the film: the drape, the walk, the room.</p>
     </div>
 
     <div class="deck-viewer reveal">
@@ -354,6 +347,15 @@
         <button class="deck-arrow" id="deckNext" aria-label="Next page">›</button>
       </div>
       <p class="deck-hint">tap a page to view it full-size</p>
+    </div>
+
+    <div class="reveal film-frame" id="filmFrame">
+      <video id="mainVideo" poster="flowers-assets/show.jpg" controls playsinline preload="none">
+        <source src="flowers-assets/video/flowers-are-blooming-in-antarctica.mp4" type="video/mp4">
+      </video>
+      <button class="playbtn" id="playOverlay" aria-label="Play film">
+        <svg width="72" height="72" viewBox="0 0 72 72"><circle cx="36" cy="36" r="35" fill="rgba(244,251,249,0.16)" stroke="#f4fbf9" stroke-width="1.5"/><path d="M29 23 L50 36 L29 49 Z" fill="#f4fbf9"/></svg>
+      </button>
     </div>
   </div>
 </section>
@@ -637,7 +639,10 @@
 
     const cells = seeds.map((s,i)=>computeCell(i));
 
-    // fill every plate — together they cover the entire lake, edge to edge
+    // fill every plate — a fixed light direction across the whole sheet gives
+    // it one coherent crystalline mosaic instead of each plate looking like
+    // its own soft bubble
+    const LIGHT_A = -0.78;
     cells.forEach((cell,i)=>{
       const poly = cell.poly;
       if(poly.length<3) return;
@@ -648,16 +653,18 @@
       const cx = poly.reduce((a,p)=>a+p.x,0)/poly.length;
       const cy = poly.reduce((a,p)=>a+p.y,0)/poly.length;
       const rad = Math.max(20, Math.hypot(poly[0].x-cx, poly[0].y-cy));
-      const g2 = ctx.createRadialGradient(cx-rad*0.25,cy-rad*0.3,rad*0.1, cx,cy,rad*1.05);
-      g2.addColorStop(0,'#f4fbf9');
-      g2.addColorStop(0.55,`hsl(${s.hue} 36% 83%)`);
-      g2.addColorStop(1,`hsl(${s.hue} 42% 65%)`);
+      const lx = cx+Math.cos(LIGHT_A)*rad, ly = cy+Math.sin(LIGHT_A)*rad;
+      const dxp = cx-Math.cos(LIGHT_A)*rad, dyp = cy-Math.sin(LIGHT_A)*rad;
+      const g2 = ctx.createLinearGradient(lx,ly,dxp,dyp);
+      g2.addColorStop(0,'#ffffff');
+      g2.addColorStop(0.4,`hsl(${s.hue} 48% 89%)`);
+      g2.addColorStop(1,`hsl(${s.hue} 58% 60%)`);
       ctx.fillStyle=g2; ctx.fill();
     });
 
-    // the crack network: exactly the true shared edges, meeting correctly at every vertex
-    ctx.strokeStyle='rgba(8,26,25,0.55)';
-    ctx.lineWidth=2;
+    // the crack network: exactly the true shared edges, meeting correctly at
+    // every vertex — a bright hairline plus a dark line just under it reads
+    // as a carved, beveled seam rather than a flat drawn line
     const seen = new Set();
     cells.forEach((cell,i)=>{
       Object.keys(cell.cuts).forEach(jStr=>{
@@ -666,6 +673,9 @@
         if(seen.has(key)) return;
         seen.add(key);
         const [p1,p2] = cell.cuts[jStr];
+        ctx.strokeStyle='rgba(255,255,255,0.5)'; ctx.lineWidth=2.4;
+        ctx.beginPath(); ctx.moveTo(p1.x,p1.y+1.1); ctx.lineTo(p2.x,p2.y+1.1); ctx.stroke();
+        ctx.strokeStyle='rgba(4,18,18,0.65)'; ctx.lineWidth=1.4;
         ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
 
         // bump: this pair of plates has compressed past its natural resting gap
